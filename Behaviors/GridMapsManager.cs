@@ -3,13 +3,20 @@ using UnityEngine;
 
 public class GridMapsManager : MonoBehaviour
 {
-    public GameObject gridMaproot;
-    public GridNodeMap gridNodeMap;
+    public MapManager mapManager;
+
+    public GridNodeMap<GridNode> gridNodeMap;
 
     
     void Start()
     {
-        this.gridNodeMap =  new GridNodeMap(1, new Vector2Int(10,10), gridMaproot);
+
+
+        
+        this.gridNodeMap =  new GridNodeMap<GridNode>(
+            1, 
+            mapManager.mapsize, mapManager.gridMaproot, 
+            (int v, GridNodeMap<GridNode> gnm ,Vector2Int c) => new GridNode(v,gnm,c));
         
     }
 
