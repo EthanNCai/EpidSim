@@ -7,8 +7,11 @@ using Unity.VisualScripting;
 using System;
 
 
+
 public interface IGridNode{
     void HandelClicked();
+    public List<Vector2Int> neighbors { get; set;}
+    string ToString();
 }
 
 public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
@@ -77,6 +80,27 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
     {
         return new Vector2(cellPosition.x,cellPosition.y) + new Vector2(cellSize/2f,cellSize/2f);
     }
+    public List<Vector2Int> GetNeiBorsCellPosition(Vector2Int cellPosition)
+    {
+        int r = cellPosition.x;
+        int c = cellPosition.y;
+        
+        List<Vector2Int> neighbors = new List<Vector2Int>();
+        if (r - 1 >= 0) {
+            neighbors.Add(new Vector2Int(r-1,c));
+        }
+        if (c - 1 >= 0) {
+            neighbors.Add(new Vector2Int(r,c-1));
+        }
+        if (r + 1 < this.mapSize.x) {
+            neighbors.Add(new Vector2Int(r+1,c));
+        }
+        if (c + 1 < this.mapSize.y) {
+            neighbors.Add(new Vector2Int(r,c+1));
+        }
+        return neighbors;
+    }
+
     public void TurnOffDisplay(){}
     public void TurnOnDisplay(){}
 }
