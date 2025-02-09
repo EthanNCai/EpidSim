@@ -9,13 +9,18 @@ public class GridNode: IGridNode {
 
     public GridNodeMap<GridNode> gridMap;
     private List<Vector2Int> _neighbors = new List<Vector2Int>();
+    private int _raw_value;
     public List<Vector2Int> neighbors
     {
         get { return _neighbors; }  
         set { _neighbors = value; } 
     }
+    public int raw_value{
+        get { return _raw_value; }
+        set { _raw_value = value; }
+    }
     public Vector2Int cellPosition;
-    int value;
+    public int value;
 
     public GridNode(int v, GridNodeMap<GridNode> map, Vector2Int cellPosition) {
         this.gridMap = map;
@@ -26,7 +31,7 @@ public class GridNode: IGridNode {
 
     public void HandelClicked()  
     {
-        this.value = 0;
+        this._raw_value = 0;
     }
 
     public void ToggleWalkable(){
@@ -35,7 +40,7 @@ public class GridNode: IGridNode {
 
     public override string ToString()
     {
-        return value.ToString();
+        return _raw_value.ToString();
     }
     
 }

@@ -5,35 +5,38 @@ using CodeMonkey.Utils;
 using System.Linq;
 using Unity.VisualScripting;
 using System;
+using TMPro;
 
 
 
 public interface IGridNode{
     void HandelClicked();
     public List<Vector2Int> neighbors { get; set;}
+    public int raw_value {get; set;}
+ 
     string ToString();
 }
 
 public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
 
 {
+    public string tag;
     private TGridNodeObject[,] gridNodes;
     private TextMesh[,] debugTexts;
-    private GameObject debugTextRoot;
-
+    private GameObject gridMapRoot;
     private int cellSize;
     private Vector2Int mapSize;
-    private Vector2Int rootPosition;
-
     private int n_rows;
     private int n_cols;
 
 
-    public GridNodeMap(int cellSize, Vector2Int mapSize, GameObject gridMapRoot, Func<int,GridNodeMap<TGridNodeObject>, Vector2Int, TGridNodeObject> createGridNode){
+    public GridNodeMap(string tag,int cellSize, Vector2Int mapSize, GameObject gridMapRoot, Func<int,GridNodeMap<TGridNodeObject>, Vector2Int, TGridNodeObject> createGridNode){
         Debug.Assert(mapSize.x % cellSize == 0 && mapSize.y % cellSize == 0, "Map size must be divisible by cell size");
         n_rows = mapSize.y / cellSize;  
         n_cols = mapSize.x / cellSize;  
 
+        this.tag = tag;
+        this.gridMapRoot = gridMapRoot;
         this.cellSize = cellSize;
         this.mapSize = mapSize;
         this.gridNodes = new TGridNodeObject[n_rows, n_cols];
@@ -46,6 +49,8 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
             for (int c = 0; c < n_cols; c++)
             {
                 gridNodes[r, c] = createGridNode(i,this, new Vector2Int(r,c));
+                gridNodes[r, c].neighbors = this.GetNeiBors(new Vector2Int(r, c));
+                gridNodes[r, c].raw_value = i;
                 i++;
             }
         }
@@ -56,7 +61,7 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
         {
             for (int c = 0; c < n_cols; c++)
             {
-                debugTexts[r, c] = Utils.SpawnTextAtRelativePosition(gridMapRoot, GetNodeCenterPosition(new Vector2Int(r, c)), "Grid Node Map");
+                debugTexts[r, c] = Utils.SpawnTextAtRelativePosition(this.gridMapRoot, GetNodeCenterPosition(new Vector2Int(r, c)), "Grid Node Map");
                 debugTexts[r, c].text = gridNodes[r, c].ToString();
                 j++;
             }
@@ -80,7 +85,7 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
     {
         return new Vector2(cellPosition.x,cellPosition.y) + new Vector2(cellSize/2f,cellSize/2f);
     }
-    public List<Vector2Int> GetNeiBorsCellPosition(Vector2Int cellPosition)
+    private List<Vector2Int> GetNeiBors(Vector2Int cellPosition)
     {
         int r = cellPosition.x;
         int c = cellPosition.y;

@@ -14,6 +14,7 @@ public class GridMapsManager : MonoBehaviour
 
         
         this.gridNodeMap =  new GridNodeMap<GridNode>(
+            "tset",
             1, 
             mapManager.mapsize, mapManager.gridMaproot, 
             (int v, GridNodeMap<GridNode> gnm ,Vector2Int c) => new GridNode(v,gnm,c));
