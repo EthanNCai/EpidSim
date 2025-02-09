@@ -5,7 +5,14 @@ using CodeMonkey.Utils;
 using System.Linq;
 using Unity.VisualScripting;
 using System;
-public class GridNodeMap<TGridNodeObject>
+
+
+public interface IGridNode{
+    void HandelClicked();
+}
+
+public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
+
 {
     private TGridNodeObject[,] gridNodes;
     private TextMesh[,] debugTexts;
@@ -19,16 +26,13 @@ public class GridNodeMap<TGridNodeObject>
     private int n_cols;
 
 
-
-    public GridNodeMap(int cellSize, Vector2Int mapSize, GameObject gridMapRoot, Func<int, TGridNodeObject> createGridNode){
+    public GridNodeMap(int cellSize, Vector2Int mapSize, GameObject gridMapRoot, Func<int,GridNodeMap<TGridNodeObject>, Vector2Int, TGridNodeObject> createGridNode){
         Debug.Assert(mapSize.x % cellSize == 0 && mapSize.y % cellSize == 0, "Map size must be divisible by cell size");
-        n_rows = mapSize.y / cellSize;  // Rows should be based on the y dimension
-        n_cols = mapSize.x / cellSize;  // Columns should be based on the x dimension
+        n_rows = mapSize.y / cellSize;  
+        n_cols = mapSize.x / cellSize;  
 
         this.cellSize = cellSize;
         this.mapSize = mapSize;
-
-        // Initialize gridNodes and debugTexts with n_rows and n_cols
         this.gridNodes = new TGridNodeObject[n_rows, n_cols];
         this.debugTexts = new TextMesh[n_rows, n_cols];
         
@@ -38,7 +42,7 @@ public class GridNodeMap<TGridNodeObject>
         {
             for (int c = 0; c < n_cols; c++)
             {
-                gridNodes[r, c] = createGridNode(i);
+                gridNodes[r, c] = createGridNode(i,this, new Vector2Int(r,c));
                 i++;
             }
         }
@@ -55,7 +59,18 @@ public class GridNodeMap<TGridNodeObject>
             }
         }
 
-        // print debug
+        // handle click
+        ClickManager.OnCellClicked += (Vector2Int cellPosition) => {
+
+            int r = cellPosition.x;
+            int c = cellPosition.y;
+
+            // update value
+            this.gridNodes[r,c].HandelClicked();
+
+            // update text
+            debugTexts[r,c].text = gridNodes[r, c].ToString();
+        };
     }
 
     public Vector2 GetNodeCenterPosition(Vector2Int cellPosition)

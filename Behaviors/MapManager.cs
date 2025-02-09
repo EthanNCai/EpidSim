@@ -13,8 +13,6 @@ public class MapManager : MonoBehaviour
             if (!_mapCenter.HasValue)
             {
                 _mapCenter = gridMaproot.transform.position + new Vector3(mapsize.x / 2f, mapsize.y / 2f, -1);
-                // Debug.Log("Lazy-loaded mapsize: " + mapsize);
-                // Debug.Log("Lazy-loaded mapCenter: " + _mapCenter);
             }
             return _mapCenter.Value;
         }
