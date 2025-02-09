@@ -5,12 +5,12 @@ public class GridMapsManager : MonoBehaviour
 {
     public MapManager mapManager;
 
-    public GridNodeMap gridNodeMap;
+    public GridNodeMap<GridNode> gridNodeMap;
 
     
     void Start()
     {
-        this.gridNodeMap =  new GridNodeMap(1, mapManager.mapsize, mapManager.gridMaproot);
+        this.gridNodeMap =  new GridNodeMap<GridNode>(1, mapManager.mapsize, mapManager.gridMaproot, (int v) => new GridNode(v));
         
     }
 
