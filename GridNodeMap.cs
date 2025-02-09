@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -40,12 +41,18 @@ public class GridNodeMap
         {
             for(int c = 0; c < n_cols; c++)
             {
-                debugTexts[r,c] = Utils.SpawnTextAtRelativePosition(gridMapRoot,new Vector2Int(r, c), i.ToString());
+                debugTexts[r,c] = Utils.SpawnTextAtRelativePosition(gridMapRoot,GetNodeCenterPosition(new Vector2Int(r,c)), "Grid Node Map");
+                gridNodes[r,c] = i;
+                debugTexts[r,c].text = r.ToString() + "," + c.ToString();
+
                 i ++ ;
             }
         }
     }
-
+    public Vector2 GetNodeCenterPosition(Vector2Int cellPosition)
+    {
+        return new Vector2(cellPosition.x,cellPosition.y) + new Vector2(cellSize/2f,cellSize/2f);
+    }
     public void TurnOffDisplay(){}
     public void TurnOnDisplay(){}
 
