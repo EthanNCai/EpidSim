@@ -9,15 +9,40 @@ using TMPro;
 
 
 
-public interface IGridNode{
+public interface IGridNode<TGridNodeObject>{
     void HandelClicked();
-    public List<Vector2Int> neighbors { get; set;}
+    public DirectionalNeighbors<TGridNodeObject> neighbors { get; set;}
     public int raw_value {get; set;}
  
     string ToString();
 }
 
-public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
+public class DirectionalNeighbors<TGridNodeObject>
+{
+    public TGridNodeObject up;
+    public TGridNodeObject down;
+    public TGridNodeObject left;
+    public TGridNodeObject right;
+
+    public DirectionalNeighbors(TGridNodeObject up = default, TGridNodeObject down = default, 
+                                TGridNodeObject left = default, TGridNodeObject right = default)
+    {
+        this.up = up;
+        this.down = down;
+        this.left = left;
+        this.right = right;
+    }
+    public DirectionalNeighbors()
+    {
+        
+    }
+
+}
+
+
+
+
+public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGridNodeObject>
 
 {
     public string tag;
@@ -54,7 +79,7 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
             for (int c = 0; c < n_cols; c++)
             {
                 gridNodes[r, c] = createGridNode(i,this, new Vector2Int(r,c));
-                gridNodes[r, c].neighbors = this.GetNeiBors(new Vector2Int(r, c));
+                gridNodes[r, c].neighbors = this.GetNeighbors(new Vector2Int(r, c));
                 gridNodes[r, c].raw_value = i;
                 i++;
             }
@@ -90,26 +115,32 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
     {
         return new Vector2(cellPosition.x,cellPosition.y) + new Vector2(cellSize/2f,cellSize/2f);
     }
-    private List<Vector2Int> GetNeiBors(Vector2Int cellPosition)
+   private DirectionalNeighbors<TGridNodeObject> GetNeighbors(Vector2Int cellPosition)
     {
         int r = cellPosition.x;
         int c = cellPosition.y;
-        
-        List<Vector2Int> neighbors = new List<Vector2Int>();
+
+        TGridNodeObject up = default(TGridNodeObject),
+                        down = default(TGridNodeObject),
+                        left = default(TGridNodeObject),
+                        right = default(TGridNodeObject); 
+
         if (r - 1 >= 0) {
-            neighbors.Add(new Vector2Int(r-1,c));
+            up = this.gridNodes[r - 1, c];
+        }
+        if (r + 1 < this.gridNodes.GetLength(0)) {
+            down = this.gridNodes[r + 1, c];
         }
         if (c - 1 >= 0) {
-            neighbors.Add(new Vector2Int(r,c-1));
+            left = this.gridNodes[r, c - 1];
         }
-        if (r + 1 < this.mapSize.x) {
-            neighbors.Add(new Vector2Int(r+1,c));
+        if (c + 1 < this.gridNodes.GetLength(1)) {
+            right = this.gridNodes[r, c + 1];
         }
-        if (c + 1 < this.mapSize.y) {
-            neighbors.Add(new Vector2Int(r,c+1));
-        }
-        return neighbors;
+
+        return new DirectionalNeighbors<TGridNodeObject>(up, down, left, right);
     }
+
 
     public void TurnOffDisplay(){}
     public void TurnOnDisplay(){}
