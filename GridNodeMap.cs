@@ -30,7 +30,12 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode
     private int n_cols;
 
 
-    public GridNodeMap(string tag,int cellSize, Vector2Int mapSize, GameObject gridMapRoot, Func<int,GridNodeMap<TGridNodeObject>, Vector2Int, TGridNodeObject> createGridNode){
+    public GridNodeMap(
+        string tag,
+        int cellSize,
+        Vector2Int mapSize,
+        GameObject gridMapRoot,
+        Func<int,GridNodeMap<TGridNodeObject>,Vector2Int, TGridNodeObject> createGridNode){
         Debug.Assert(mapSize.x % cellSize == 0 && mapSize.y % cellSize == 0, "Map size must be divisible by cell size");
         n_rows = mapSize.y / cellSize;  
         n_cols = mapSize.x / cellSize;  
