@@ -39,10 +39,8 @@ public class DirectionalNeighbors<TGridNodeObject>
     }
 }
 
-
-
-
 public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGridNodeObject>{
+
     public string tag;
     public TGridNodeObject[,] gridNodes;
     public TextMesh[,] debugTexts;
@@ -58,7 +56,8 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
         int cellSize,
         Vector2Int mapSize,
         GameObject gridMapRoot,
-        Func<int,GridNodeMap<TGridNodeObject>,Vector2Int, TGridNodeObject> createGridNode){
+        Func<int,GridNodeMap<TGridNodeObject>,Vector2Int, TGridNodeObject> createGridNode)
+    {
         Debug.Assert(mapSize.x % cellSize == 0 && mapSize.y % cellSize == 0, "Map size must be divisible by cell size");
         n_rows = mapSize.x / cellSize;  
         n_cols = mapSize.y / cellSize;  
@@ -77,9 +76,7 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
             for (int c = 0; c < n_cols; c++)
             {
                 gridNodes[r, c] = createGridNode(i,this, new Vector2Int(r,c));
-                
                 gridNodes[r, c].raw_value = i;
-                gridNodes[r, c].cellPosition = new Vector2Int(r, c);
                 i++;
             }
         }
@@ -110,13 +107,23 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
             int r = cellPosition.x;
             int c = cellPosition.y;
 
-            // update value
             this.gridNodes[r,c].HandelClicked();
+            InvokeValueUpdateByCell(cellPosition);
+            
 
-            // update text
-            debugTexts[r,c].text = gridNodes[r, c].ToString();
         };
     }
+    public void InvokeValueUpdateByCell(Vector2Int cellPosition)
+    {
+        int r = cellPosition.x;
+        int c = cellPosition.y;
+        if (debugTexts[r, c] != null){
+            debugTexts[r,c].text = gridNodes[r, c].ToString();
+        }else{
+            Debug.LogError("wtf");
+        }
+    }
+
     public TGridNodeObject GetNodeByCellPosition(Vector2Int cellPosition)
     {
         return gridNodes[cellPosition.x,cellPosition.y];
@@ -125,6 +132,7 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
     {
         return new Vector2(cellPosition.x,cellPosition.y) + new Vector2(cellSize/2f,cellSize/2f);
     }
+
     private DirectionalNeighbors<TGridNodeObject> GetNeighbors(Vector2Int cellPosition)
     {
 
@@ -138,8 +146,6 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
         TGridNodeObject right = (x + 1 < xBoundary) ? this.gridNodes[x + 1, y] : default;
         return new DirectionalNeighbors<TGridNodeObject>(up, down, left, right);
     }
-
-
 
     public void TurnOffDisplay(){}
     public void TurnOnDisplay(){}
