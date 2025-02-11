@@ -13,7 +13,7 @@ public interface IGridNode<TGridNodeObject>{
     void HandelClicked();
     public DirectionalNeighbors<TGridNodeObject> neighbors { get; set;}
     public int raw_value {get; set;}
- 
+    public Vector2Int cellPosition { get; set; }
     string ToString();
 }
 
@@ -32,22 +32,20 @@ public class DirectionalNeighbors<TGridNodeObject>
         this.left = left;
         this.right = right;
     }
-    public DirectionalNeighbors()
+    public DirectionalNeighbors(){}
+    public override string ToString()
     {
-        
+        return $"up: {up}, down: {down}, left: {left}, right: {right}";
     }
-
 }
 
 
 
 
-public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGridNodeObject>
-
-{
+public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGridNodeObject>{
     public string tag;
-    private TGridNodeObject[,] gridNodes;
-    private TextMesh[,] debugTexts;
+    public TGridNodeObject[,] gridNodes;
+    public TextMesh[,] debugTexts;
     private GameObject gridMapRoot;
     private int cellSize;
     private Vector2Int mapSize;
@@ -62,8 +60,8 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
         GameObject gridMapRoot,
         Func<int,GridNodeMap<TGridNodeObject>,Vector2Int, TGridNodeObject> createGridNode){
         Debug.Assert(mapSize.x % cellSize == 0 && mapSize.y % cellSize == 0, "Map size must be divisible by cell size");
-        n_rows = mapSize.y / cellSize;  
-        n_cols = mapSize.x / cellSize;  
+        n_rows = mapSize.x / cellSize;  
+        n_cols = mapSize.y / cellSize;  
 
         this.tag = tag;
         this.gridMapRoot = gridMapRoot;
@@ -79,9 +77,17 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
             for (int c = 0; c < n_cols; c++)
             {
                 gridNodes[r, c] = createGridNode(i,this, new Vector2Int(r,c));
-                gridNodes[r, c].neighbors = this.GetNeighbors(new Vector2Int(r, c));
+                
                 gridNodes[r, c].raw_value = i;
+                gridNodes[r, c].cellPosition = new Vector2Int(r, c);
                 i++;
+            }
+        }
+        for (int r = 0; r < n_rows; r++)
+        {
+            for (int c = 0; c < n_cols; c++)
+            {
+                gridNodes[r, c].neighbors = this.GetNeighbors(new Vector2Int(r, c));
             }
         }
 
@@ -92,6 +98,7 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
             for (int c = 0; c < n_cols; c++)
             {
                 debugTexts[r, c] = Utils.SpawnTextAtRelativePosition(this.gridMapRoot, GetNodeCenterPosition(new Vector2Int(r, c)), "Grid Node Map");
+                // debugTexts[r, c].text = r.ToString() + "," + c.ToString();
                 debugTexts[r, c].text = gridNodes[r, c].ToString();
                 j++;
             }
@@ -110,36 +117,28 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
             debugTexts[r,c].text = gridNodes[r, c].ToString();
         };
     }
-
+    public TGridNodeObject GetNodeByCellPosition(Vector2Int cellPosition)
+    {
+        return gridNodes[cellPosition.x,cellPosition.y];
+    }
     public Vector2 GetNodeCenterPosition(Vector2Int cellPosition)
     {
         return new Vector2(cellPosition.x,cellPosition.y) + new Vector2(cellSize/2f,cellSize/2f);
     }
-   private DirectionalNeighbors<TGridNodeObject> GetNeighbors(Vector2Int cellPosition)
+    private DirectionalNeighbors<TGridNodeObject> GetNeighbors(Vector2Int cellPosition)
     {
-        int r = cellPosition.x;
-        int c = cellPosition.y;
 
-        TGridNodeObject up = default(TGridNodeObject),
-                        down = default(TGridNodeObject),
-                        left = default(TGridNodeObject),
-                        right = default(TGridNodeObject); 
-
-        if (r - 1 >= 0) {
-            up = this.gridNodes[r - 1, c];
-        }
-        if (r + 1 < this.gridNodes.GetLength(0)) {
-            down = this.gridNodes[r + 1, c];
-        }
-        if (c - 1 >= 0) {
-            left = this.gridNodes[r, c - 1];
-        }
-        if (c + 1 < this.gridNodes.GetLength(1)) {
-            right = this.gridNodes[r, c + 1];
-        }
-
+        int xBoundary = mapSize.x;
+        int yBoundary = mapSize.y;
+        int x = cellPosition.x;
+        int y = cellPosition.y;
+        TGridNodeObject up = (y + 1 < yBoundary) ? this.gridNodes[x, y + 1] : default;
+        TGridNodeObject down = (y - 1 >= 0) ? this.gridNodes[x, y - 1] : default;
+        TGridNodeObject left = (x - 1 >= 0) ? this.gridNodes[x - 1, y] : default;
+        TGridNodeObject right = (x + 1 < xBoundary) ? this.gridNodes[x + 1, y] : default;
         return new DirectionalNeighbors<TGridNodeObject>(up, down, left, right);
     }
+
 
 
     public void TurnOffDisplay(){}
