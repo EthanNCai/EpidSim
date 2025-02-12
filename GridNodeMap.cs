@@ -23,21 +23,35 @@ public class DirectionalNeighbors<TGridNodeObject>
     public TGridNodeObject down;
     public TGridNodeObject left;
     public TGridNodeObject right;
+    public TGridNodeObject upLeft;
+    public TGridNodeObject upRight;
+    public TGridNodeObject downLeft;
+    public TGridNodeObject downRight;
 
-    public DirectionalNeighbors(TGridNodeObject up = default, TGridNodeObject down = default, 
-                                TGridNodeObject left = default, TGridNodeObject right = default)
+    public DirectionalNeighbors(TGridNodeObject up = default, TGridNodeObject down = default,
+                                TGridNodeObject left = default, TGridNodeObject right = default,
+                                TGridNodeObject upLeft = default, TGridNodeObject upRight = default,
+                                TGridNodeObject downLeft = default, TGridNodeObject downRight = default)
     {
         this.up = up;
         this.down = down;
         this.left = left;
         this.right = right;
+        this.upLeft = upLeft;
+        this.upRight = upRight;
+        this.downLeft = downLeft;
+        this.downRight = downRight;
     }
-    public DirectionalNeighbors(){}
+
+    public DirectionalNeighbors() { }
+
     public override string ToString()
     {
-        return $"up: {up}, down: {down}, left: {left}, right: {right}";
+        return $"Up: {up}, Down: {down}, Left: {left}, Right: {right}, " +
+               $"UpLeft: {upLeft}, UpRight: {upRight}, DownLeft: {downLeft}, DownRight: {downRight}";
     }
 }
+
 
 public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGridNodeObject>{
 
@@ -50,6 +64,7 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
     private int n_rows;
     private int n_cols;
 
+    
 
     public GridNodeMap(
         string tag,
@@ -123,6 +138,7 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
             Debug.LogError("wtf");
         }
     }
+    
 
     public TGridNodeObject GetNodeByCellPosition(Vector2Int cellPosition)
     {
@@ -133,19 +149,37 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
         return new Vector2(cellPosition.x,cellPosition.y) + new Vector2(cellSize/2f,cellSize/2f);
     }
 
+    public IEnumerable<TGridNodeObject> nodeIterator()
+    {
+        for (int r = 0; r < n_rows; r++)
+        {
+            for (int c = 0; c < n_cols; c++)
+            {
+                yield return gridNodes[r,c];
+            }
+        }
+    }
+
     private DirectionalNeighbors<TGridNodeObject> GetNeighbors(Vector2Int cellPosition)
     {
-
         int xBoundary = mapSize.x;
         int yBoundary = mapSize.y;
         int x = cellPosition.x;
         int y = cellPosition.y;
+
         TGridNodeObject up = (y + 1 < yBoundary) ? this.gridNodes[x, y + 1] : default;
         TGridNodeObject down = (y - 1 >= 0) ? this.gridNodes[x, y - 1] : default;
         TGridNodeObject left = (x - 1 >= 0) ? this.gridNodes[x - 1, y] : default;
         TGridNodeObject right = (x + 1 < xBoundary) ? this.gridNodes[x + 1, y] : default;
-        return new DirectionalNeighbors<TGridNodeObject>(up, down, left, right);
+
+        TGridNodeObject upLeft = (x - 1 >= 0 && y + 1 < yBoundary) ? this.gridNodes[x - 1, y + 1] : default;
+        TGridNodeObject upRight = (x + 1 < xBoundary && y + 1 < yBoundary) ? this.gridNodes[x + 1, y + 1] : default;
+        TGridNodeObject downLeft = (x - 1 >= 0 && y - 1 >= 0) ? this.gridNodes[x - 1, y - 1] : default;
+        TGridNodeObject downRight = (x + 1 < xBoundary && y - 1 >= 0) ? this.gridNodes[x + 1, y - 1] : default;
+
+        return new DirectionalNeighbors<TGridNodeObject>(up, down, left, right, upLeft, upRight, downLeft, downRight);
     }
+
 
     public void TurnOffDisplay(){}
     public void TurnOnDisplay(){}
