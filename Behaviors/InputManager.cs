@@ -5,8 +5,11 @@ using UnityEngine;
 public class ClickManager : MonoBehaviour
 {
     public static event Action<Vector2Int> OnCellClicked;
+    public static event Action<Vector2Int> OnAfterCellClicked;
     public GameObject gridMapRoot;  
-
+    public GameObject geoMapTextAttachedObject;
+    public GameObject flowFieldMapTextAttachedObject;
+    
     void Update()
     {
         if (Input.GetMouseButtonDown(1)) 
@@ -19,6 +22,15 @@ public class ClickManager : MonoBehaviour
                     Mathf.FloorToInt(mouseLocalPosition.y)
                 );
                 OnCellClicked?.Invoke(cellPosition);
+                OnAfterCellClicked?.Invoke(cellPosition);
         }
+
+        if (Input.GetKeyDown(KeyCode.O)){
+            geoMapTextAttachedObject.SetActive(!geoMapTextAttachedObject.activeSelf);
+        }
+        if (Input.GetKeyDown(KeyCode.P)){
+            flowFieldMapTextAttachedObject.SetActive(!flowFieldMapTextAttachedObject.activeSelf);
+        }
+
     }
 }
