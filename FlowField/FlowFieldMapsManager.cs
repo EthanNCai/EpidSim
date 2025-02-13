@@ -39,89 +39,89 @@ public class FlowFieldMapManager : MonoBehaviour
 
 
     public void UpdateFlowField()
-{
-    Debug.Log("Flow field update started.");
+    {
+        Debug.Log("Flow field update started.");
 
-    // STEP1: BFS
-    if (destination == null)
-    {
-        Debug.LogError("Destination is not set.");
-        return;
-    }
-    foreach (FlowFieldNode node in this.flowFieldMaps[0].nodeIterator())
-    {
-        node.stepsToDestination = int.MaxValue;
-    }
-
-    Queue<FlowFieldNode> queue = new Queue<FlowFieldNode>();
-    destination.stepsToDestination = 0;  
-    queue.Enqueue(destination);  
-    while (queue.Count > 0)
-    {
-        FlowFieldNode currentNode = queue.Dequeue();  
-        DirectionalNeighbors<FlowFieldNode> neighbors = currentNode.neighbors;
-        foreach (var neighbor in new FlowFieldNode[] { neighbors.up, neighbors.down, neighbors.left, neighbors.right })
+        // STEP1: BFS
+        if (destination == null)
         {
-            if (neighbor != null && neighbor.stepsToDestination == int.MaxValue)
-            {
-                GeoMapsManager geoMapManager = GeoMapManagerObj.GetComponent<GeoMapsManager>();
-                GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
-                if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
-                {
-                    neighbor.stepsToDestination = currentNode.stepsToDestination + 1;
-                    queue.Enqueue(neighbor);
-                }
-            }
+            Debug.LogError("Destination is not set.");
+            return;
         }
-    }
-
-    // STEP2: Generate FlowField
-    Debug.Log("start generating flowField");
-    foreach (FlowFieldNode node in this.flowFieldMaps[0].nodeIterator())
-    {
-        FlowFieldNode currentNode = node;  
-        if(this.destination == currentNode) { currentNode.flowFieldDirection = new Vector2Int(0,0); continue; }
-
-        DirectionalNeighbors<FlowFieldNode> neighbors = currentNode.neighbors;
-        FlowFieldNode minStepsToDestinationNeighbor = null;
-        int minStepsToDestination = int.MaxValue;  // Correct initialization value
-
-        foreach (var neighbor in new FlowFieldNode[] { 
-            neighbors.up,
-            neighbors.down,
-            neighbors.left,
-            neighbors.right,
-            neighbors.upLeft,
-            neighbors.upRight,
-            neighbors.downLeft,
-            neighbors.downRight
-        })
+        foreach (FlowFieldNode node in this.flowFieldMaps[0].nodeIterator())
         {
-            if (neighbor != null && neighbor.stepsToDestination != int.MaxValue)
+            node.stepsToDestination = int.MaxValue;
+        }
+
+        Queue<FlowFieldNode> queue = new Queue<FlowFieldNode>();
+        destination.stepsToDestination = 0;  
+        queue.Enqueue(destination);  
+        while (queue.Count > 0)
+        {
+            FlowFieldNode currentNode = queue.Dequeue();  
+            DirectionalNeighbors<FlowFieldNode> neighbors = currentNode.neighbors;
+            foreach (var neighbor in new FlowFieldNode[] { neighbors.up, neighbors.down, neighbors.left, neighbors.right })
             {
-                GeoMapsManager geoMapManager = GeoMapManagerObj.GetComponent<GeoMapsManager>();
-                GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
-                if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
+                if (neighbor != null && neighbor.stepsToDestination == int.MaxValue)
                 {
-                    if (neighbor.stepsToDestination < minStepsToDestination)
+                    GeoMapsManager geoMapManager = GeoMapManagerObj.GetComponent<GeoMapsManager>();
+                    GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
+                    if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
                     {
-                        minStepsToDestination = neighbor.stepsToDestination;
-                        minStepsToDestinationNeighbor = neighbor;
+                        neighbor.stepsToDestination = currentNode.stepsToDestination + 1;
+                        queue.Enqueue(neighbor);
                     }
                 }
             }
         }
 
-        if (minStepsToDestinationNeighbor != null)
+        // STEP2: Generate FlowField
+        Debug.Log("start generating flowField");
+        foreach (FlowFieldNode node in this.flowFieldMaps[0].nodeIterator())
         {
-            currentNode.flowFieldDirection = minStepsToDestinationNeighbor.cellPosition - currentNode.cellPosition;
-            Debug.Log(currentNode.flowFieldDirection);
-        }
-        else
-        {
-            currentNode.flowFieldDirection = Vector2Int.zero;
+            FlowFieldNode currentNode = node;  
+            if(this.destination == currentNode) { currentNode.flowFieldDirection = new Vector2Int(0,0); continue; }
+
+            DirectionalNeighbors<FlowFieldNode> neighbors = currentNode.neighbors;
+            FlowFieldNode minStepsToDestinationNeighbor = null;
+            int minStepsToDestination = int.MaxValue;  // Correct initialization value
+
+            foreach (var neighbor in new FlowFieldNode[] { 
+                neighbors.up,
+                neighbors.down,
+                neighbors.left,
+                neighbors.right,
+                neighbors.upLeft,
+                neighbors.upRight,
+                neighbors.downLeft,
+                neighbors.downRight
+            })
+            {
+                if (neighbor != null && neighbor.stepsToDestination != int.MaxValue)
+                {
+                    GeoMapsManager geoMapManager = GeoMapManagerObj.GetComponent<GeoMapsManager>();
+                    GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
+                    if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
+                    {
+                        if (neighbor.stepsToDestination < minStepsToDestination)
+                        {
+                            minStepsToDestination = neighbor.stepsToDestination;
+                            minStepsToDestinationNeighbor = neighbor;
+                        }
+                    }
+                }
+            }
+
+            if (minStepsToDestinationNeighbor != null)
+            {
+                currentNode.flowFieldDirection = minStepsToDestinationNeighbor.cellPosition - currentNode.cellPosition;
+                // Debug.Log(currentNode.flowFieldDirection);
+            }
+            else
+            {
+                currentNode.flowFieldDirection = Vector2Int.zero;
+            }
         }
     }
-}
 
 }
