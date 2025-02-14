@@ -9,28 +9,28 @@ public class FlowFieldMapManager : MonoBehaviour
 {
     public MapManager mapManager;
     public FlowFieldNode destination;
-    // FlowField Collections
     public List<GridNodeMap<FlowFieldNode>> flowFieldMaps = new List<GridNodeMap<FlowFieldNode>>();
 
     public GameObject flowFieldRootObject;
-    // itemMapManager (for the determination of walkables)
-    public GameObject GeoMapManagerObj;
+    public GameObject geoMapManagerObj;
 
-    void Awake()
-    {
+    public void FlowFieldMapsManagerInit(
+        Vector2Int destination, 
+        string uid,
+        MapManager mapManager,
+        GameObject flowFieldRootObject,
+        GameObject geoMapManagerObj){
+        this.geoMapManagerObj = geoMapManagerObj;
+        this.mapManager = mapManager;
+        this.flowFieldRootObject = flowFieldRootObject;
         this.flowFieldMaps.Add(new GridNodeMap<FlowFieldNode>(
-            "test",
+            uid,
             1, 
-            mapManager.mapsize,
-            flowFieldRootObject, 
+            this.mapManager.mapsize,
+            this.flowFieldRootObject, 
+            
             (int v, GridNodeMap<FlowFieldNode> gnm ,Vector2Int c) => new FlowFieldNode(v,gnm,c)));
-        destination = this.flowFieldMaps[0].GetNodeByCellPosition(new Vector2Int(1, 4));
-        // Debug.Log(flowFieldMaps[0].GetNodeByCellPosition(new Vector2Int(1, 4)).neighbors.ToString());
-        
-        
-    }
-    void Start()
-    {
+        this.destination = this.flowFieldMaps[0].GetNodeByCellPosition(destination);
         ClickManager.OnAfterCellClicked += (Vector2Int cellPosition) => {
             this.UpdateFlowField();
         };
@@ -64,7 +64,7 @@ public class FlowFieldMapManager : MonoBehaviour
             {
                 if (neighbor != null && neighbor.stepsToDestination == int.MaxValue)
                 {
-                    GeoMapsManager geoMapManager = GeoMapManagerObj.GetComponent<GeoMapsManager>();
+                    GeoMapsManager geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
                     GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
                     if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
                     {
@@ -99,7 +99,7 @@ public class FlowFieldMapManager : MonoBehaviour
             {
                 if (neighbor != null && neighbor.stepsToDestination != int.MaxValue)
                 {
-                    GeoMapsManager geoMapManager = GeoMapManagerObj.GetComponent<GeoMapsManager>();
+                    GeoMapsManager geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
                     GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
                     if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
                     {
