@@ -22,10 +22,10 @@ public class Sims : MonoBehaviour
     public Place destination;
     public ResidentialPlace home;
     public OfficePlace office;
-    public float speed = 3.0f;
+    public float speed = 10.0f;
     public int counter = 0;
 
-    public static float temperature = 0.1f;
+    public static float temperature = 0.6f;
     // infection properties
 
     public void SimsInit(
@@ -57,7 +57,7 @@ public class Sims : MonoBehaviour
         }
         if (IsInDestination(currentCellPosition)){
             // **freshly** reached destination
-            Debug.Log("Reached destination");
+            Debug.Log("Reached destination" + currentCellPosition.ToString() + destination.placeLLAnchor + destination.placeURAnchor);
             destination = null;
             return;
         }

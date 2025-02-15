@@ -25,7 +25,7 @@ public class Place : MonoBehaviour
         this.palaceName = placeName;
         this.placeShape = placeShape;
         this.placeLLAnchor = basePosition;
-        this.placeURAnchor = basePosition + placeShape ; // 确保边界正确
+        this.placeURAnchor = basePosition + placeShape - Vector2Int.one; // 确保边界正确
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
         {
