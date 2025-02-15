@@ -3,6 +3,9 @@ using UnityEngine;
 public class PlaceFactory : MonoBehaviour
 {
     public GameObject residentialPrefab; // 住宅类的 Prefab
+    public GameObject publicPrefab;
+    public GameObject officePrefab;
+    public GameObject medicalPrefab;
 
     public ResidentialPlace CreateResidentialPlace(
         Vector2Int placeShape, Vector2Int position, 
