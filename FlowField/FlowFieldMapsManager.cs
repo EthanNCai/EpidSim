@@ -9,10 +9,10 @@ public class FlowFieldMapManager : MonoBehaviour
 {
     public MapManager mapManager;
     public FlowFieldNode destination;
-    public List<GridNodeMap<FlowFieldNode>> flowFieldMaps = new List<GridNodeMap<FlowFieldNode>>();
+    public GridNodeMap<FlowFieldNode> flowFieldMap = null;
 
-    public GameObject flowFieldRootObject;
-    public GameObject geoMapManagerObj;
+    private GameObject flowFieldRootObject;
+    private GameObject geoMapManagerObj;
 
     public void FlowFieldMapsManagerInit(
         Vector2Int destination, 
@@ -23,14 +23,14 @@ public class FlowFieldMapManager : MonoBehaviour
         this.geoMapManagerObj = geoMapManagerObj;
         this.mapManager = mapManager;
         this.flowFieldRootObject = flowFieldRootObject;
-        this.flowFieldMaps.Add(new GridNodeMap<FlowFieldNode>(
+        this.flowFieldMap = new GridNodeMap<FlowFieldNode>(
             uid,
             1, 
             this.mapManager.mapsize,
             this.flowFieldRootObject, 
             
-            (int v, GridNodeMap<FlowFieldNode> gnm ,Vector2Int c) => new FlowFieldNode(v,gnm,c)));
-        this.destination = this.flowFieldMaps[0].GetNodeByCellPosition(destination);
+            (int v, GridNodeMap<FlowFieldNode> gnm ,Vector2Int c) => new FlowFieldNode(v,gnm,c));
+        this.destination = this.flowFieldMap.GetNodeByCellPosition(destination);
         ClickManager.OnAfterCellClicked += (Vector2Int cellPosition) => {
             this.UpdateFlowField();
         };
@@ -48,7 +48,7 @@ public class FlowFieldMapManager : MonoBehaviour
             Debug.LogError("Destination is not set.");
             return;
         }
-        foreach (FlowFieldNode node in this.flowFieldMaps[0].nodeIterator())
+        foreach (FlowFieldNode node in this.flowFieldMap.nodeIterator())
         {
             node.stepsToDestination = int.MaxValue;
         }
@@ -77,7 +77,7 @@ public class FlowFieldMapManager : MonoBehaviour
 
         // STEP2: Generate FlowField
         Debug.Log("start generating flowField");
-        foreach (FlowFieldNode node in this.flowFieldMaps[0].nodeIterator())
+        foreach (FlowFieldNode node in this.flowFieldMap.nodeIterator())
         {
             FlowFieldNode currentNode = node;  
             if(this.destination == currentNode) { currentNode.flowFieldDirection = new Vector2Int(0,0); continue; }

@@ -10,9 +10,10 @@ public class PlaceManager : MonoBehaviour
     public GameObject flowFieldRootObject;
     public GameObject geoMapManagerObj;
     private PlaceFactory placeFactory;
-    private ResidentialPlace residentialPlace;
+    public ResidentialPlace residentialPlace;
+    public OfficePlace officePlace;
 
-    public void Start()
+    public void Awake()
     {
         this.placeFactory = placeFactoryObj.GetComponent<PlaceFactory>();
         this.residentialPlace = this.placeFactory.CreateResidentialPlace(
@@ -24,5 +25,15 @@ public class PlaceManager : MonoBehaviour
             geoMapManagerObj
             );
         this.residentialPlace.SayHi();
+
+        this.officePlace = this.placeFactory.CreateOfficePlace(
+            new Vector2Int(2, 2),
+            new Vector2Int(7, 7),
+            mapManager,
+            flowFieldRootObject,
+            geoMapManagerObj
+            );
+        this.officePlace.SayHi();
+        
     }
 }
