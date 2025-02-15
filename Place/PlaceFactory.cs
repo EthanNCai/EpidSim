@@ -1,37 +1,57 @@
+using System.ComponentModel;
 using UnityEngine;
 
 public class PlaceFactory : MonoBehaviour
 {
+    public GameObject mapRoot;
     public GameObject residentialPrefab; // 住宅类的 Prefab
     public GameObject publicPrefab;
     public GameObject officePrefab;
     public GameObject medicalPrefab;
 
     public ResidentialPlace CreateResidentialPlace(
-        Vector2Int placeShape, Vector2Int position, 
+        Vector2Int placeShape, Vector2Int position,
         int population,
-        MapManager mapManager, 
+        MapManager mapManager,
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj)
     {
         ResidentialPlace residentialPlace = CreatePlaceInstance<ResidentialPlace>(residentialPrefab, placeShape, position);
         residentialPlace.ResPlaceInit(
-            placeShape, 
-            position, 
-            population, 
-            mapManager, 
+            placeShape,
+            position,
+            population,
+            mapManager,
             flowFieldRootObject,
             geoMapManagerObj);
         return residentialPlace;
     }
 
-    private T CreatePlaceInstance<T>(GameObject prefab, Vector2Int placeShape, Vector2Int position) where T : Place
+    public OfficePlace CreateOfficePlace(
+        Vector2Int placeShape, Vector2Int position,
+        MapManager mapManager,
+        GameObject flowFieldRootObject,
+        GameObject geoMapManagerObj)
     {
-        GameObject obj = Instantiate(prefab, new Vector3(position.x, position.y, 0), Quaternion.identity);
-        obj.transform.SetParent(transform);
-        obj.transform.localScale = new Vector3(placeShape.x, placeShape.y, 1);
-        T place = obj.GetComponent<T>();
-        return place;
+        OfficePlace officePlace = CreatePlaceInstance<OfficePlace>(officePrefab, placeShape, position);
+        officePlace.OfficePlaceInit(
+            placeShape,
+            position,
+            mapManager,
+            flowFieldRootObject,
+            geoMapManagerObj);
+        return officePlace;
     }
 
+
+
+    private T CreatePlaceInstance<T>(GameObject prefab, Vector2Int placeShape, Vector2Int position) where T : Place
+    {
+        GameObject obj = Instantiate(prefab, mapRoot.transform);
+        obj.transform.localPosition = new Vector3(position.x, position.y, 0);
+        obj.transform.localScale = new Vector3(placeShape.x, placeShape.y, 1);
+        T place = obj.GetComponent<T>();
+        Debug.Assert(place != null, "Prefab object cannot be null");
+        return place;
+    }
 }

@@ -1,17 +1,16 @@
+using System.ComponentModel;
 using UnityEngine;
 
 public class OfficePlace : Place
 {
-    public int populationCapacity;
     public void OfficePlaceInit(
         Vector2Int placeShape, 
         Vector2Int basePosition, 
-        int population,
         MapManager mapManager, 
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj)
     {
-        string officeName = PlaceNameGenerator.GetResidentialName();
+        string officeName = PlaceNameGenerator.GetOfficeName();
         base.PlaceInit(
             placeShape, 
             basePosition,
@@ -19,9 +18,9 @@ public class OfficePlace : Place
             mapManager,
             flowFieldRootObject,
             geoMapManagerObj);
-        this.populationCapacity = population;
     }
     public void SayHi(){
         Debug.Log(base.ToString());
     }
+    
 }
