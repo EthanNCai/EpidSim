@@ -1,86 +1,113 @@
 using System;
-using System.ComponentModel;
-using System.Diagnostics.Tracing;
-using System.Drawing;
-using JetBrains.Annotations;
-using Unity.Mathematics;
-using Unity.PlasticSCM.Editor.WebApi;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 /*
 规则：
     destination 只能由 scheduler 设置， 只能由 navigator 取消
-
 */
 
 public class Sims : MonoBehaviour
 {
     public string simsName;
-    public Place destination;
+    public Place destination = null;
     public ResidentialPlace home;
     public OfficePlace office;
-    public float speed = 10.0f;
+    private float speed = 8.0f;
     public int counter = 0;
+    public Rigidbody2D simsRigidbody;
+    private Vector2? finalApproachPosition = null; // 使用 nullable 变量
+    private static float temperature = 0.5f;
 
-    public static float temperature = 0.6f;
-    // infection properties
-
-    public void SimsInit(
-        ResidentialPlace home, 
-        OfficePlace office,
-        bool infected = false
-        // float speed = 1.0f
-        ){
+    public void SimsInit(ResidentialPlace home, OfficePlace office, bool infected = false)
+    {
         this.simsName = SimsNameGenerator.GetSimsName();
         this.office = office;
         this.home = home;
         this.destination = home;
+        this.simsRigidbody = GetComponent<Rigidbody2D>();
     }
 
     public bool IsInDestination(Vector2 currentPosition)
     {
-        return Utils.IsPointInsideArea( currentPosition,destination.placeLLAnchor,destination.placeURAnchor);
+        if (destination == null) return false;
+        return Utils.IsPointInsideArea(currentPosition, destination.placeLLAnchor, destination.placeURAnchor);
     }
 
-    public void Navigate(){
+    public void Navigate()
+    {
+        if (destination == null)
+        {
+            Debug.Log("Standing by....");
+            return; // 没有目标地，直接返回
+        }
 
-        Vector3 currentPositionVctor3 = this.transform.position;
-        Vector2 currentPosition = new Vector2(currentPositionVctor3.x, currentPositionVctor3.y);
-        Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
+        Vector2 currentPosition = transform.position;
 
-        if(destination == null){
-            // stand by
+        if (IsInDestination(currentPosition))
+        {
+            simsRigidbody.velocity = Vector2.zero;
+            if (finalApproachPosition == null)
+            {
+                Debug.Log("Newly created final approach position");
+                finalApproachPosition = destination.GetRandomPositionInside();
+            }
+
+            if (Vector2.Distance(finalApproachPosition.Value, currentPosition) < 0.1f)
+            {
+                Debug.Log("Finishing up Final Approaching");
+                FinishUpMoving();
+            }
+            else
+            {
+                Debug.Log("Approaching Final Position...");
+                NaturallyFinalApproach();
+            }
             return;
         }
-        if (IsInDestination(currentCellPosition)){
-            // **freshly** reached destination
-            Debug.Log("Reached destination" + currentCellPosition.ToString() + destination.placeLLAnchor + destination.placeURAnchor);
-            destination = null;
-            return;
+
+        // 确保 destination 仍然存在
+        
+        Debug.Log("Long term moving...");
+        if (destination != null)
+        {
+            FlowFieldNode flowFieldNode = destination.flowFieldMapsManager.flowFieldMap.GetNodeByCellPosition(
+                new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y))
+            );
+            NaturallyMove(flowFieldNode.flowFieldDirection);
         }
-            
-        Debug.Log("on the road" + currentCellPosition.ToString());
-        // navigate
-        FlowFieldNode flowFieldNode = destination.flowFieldMapsManager.flowFieldMap.GetNodeByCellPosition(currentCellPosition);
-        Vector2Int flowFieldDirection = flowFieldNode.flowFieldDirection;
-        this.MoveNaturally(speed, temperature, flowFieldDirection);
-        return;
     }
 
-    public void MoveNaturally(float speed, float temperature, Vector2Int direction){
+    public void NaturallyMove(Vector2Int direction)
+    {
         Vector2 natureDirection = Utils.GetRandomizedDirection(direction, temperature);
-        transform.localPosition += new Vector3(natureDirection.x, natureDirection.y, 0) * speed * Time.deltaTime;
+        Vector2 newVelocity = natureDirection.normalized * speed;
+        simsRigidbody.velocity = simsRigidbody.velocity * 0.99f + newVelocity * 0.01f;
     }
 
-    private void ScheduleUpdate(){
-        counter ++;
-        if (counter >= 10000){
+    public void NaturallyFinalApproach()
+    {
+        if (finalApproachPosition == null) return;
+
+        transform.position = Vector2.Lerp(transform.position, finalApproachPosition.Value, speed * Time.deltaTime);
+    }
+
+    public void FinishUpMoving()
+    {
+        finalApproachPosition = null; // 设为 null，表示无效
+        destination = null;
+    }
+
+    private void ScheduleUpdate()
+    {
+        counter++;
+        
+        if (counter == 5000)
+        {
             destination = office;
         }
-        if (counter >= 20000){
+        if (counter == 10000)
+        {
             destination = home;
             counter = 0;
         }
@@ -88,10 +115,7 @@ public class Sims : MonoBehaviour
 
     public void Update()
     {
-        // navigate around
-        this.Navigate();
-        this.ScheduleUpdate();
-        // update its infection
+        Navigate();
+        ScheduleUpdate();
     }
-
 }

@@ -25,7 +25,7 @@ public class Place : MonoBehaviour
         this.palaceName = placeName;
         this.placeShape = placeShape;
         this.placeLLAnchor = basePosition;
-        this.placeURAnchor = basePosition + placeShape - Vector2Int.one; // 确保边界正确
+        this.placeURAnchor = basePosition + placeShape; // 确保边界正确
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null)
         {
@@ -42,6 +42,15 @@ public class Place : MonoBehaviour
             geoMapManagerObj
             );
     }
+
+    public Vector2 GetRandomPositionInside()
+    {
+        return new Vector2(
+            Random.Range(placeLLAnchor.x + 0.1f, placeURAnchor.x - 0.1f), 
+            Random.Range(placeLLAnchor.y + 0.1f, placeURAnchor.y - 0.1f)
+        );
+    }
+
 
     public override string ToString()
     {

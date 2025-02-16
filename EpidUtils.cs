@@ -10,12 +10,18 @@ public class Utils
     }
     public static bool IsPointInsideArea(Vector2 point, Vector2Int bottomLeft, Vector2Int topRight)
     {
-        return point.x >= bottomLeft.x && point.x <= topRight.x &&
-               point.y >= bottomLeft.y && point.y <= topRight.y;
+        int minX = Mathf.Min(bottomLeft.x, topRight.x);
+        int maxX = Mathf.Max(bottomLeft.x, topRight.x);
+        int minY = Mathf.Min(bottomLeft.y, topRight.y);
+        int maxY = Mathf.Max(bottomLeft.y, topRight.y);
+
+        return point.x >= minX && point.x <= maxX &&
+            point.y >= minY && point.y <= maxY;
     }
+
     public static Vector2 GetRandomizedDirection(Vector2Int originalDirection, float temperature)
     {
-        Vector2 direction = originalDirection;
+        Vector2 direction = originalDirection; 
         float randomX = Random.Range(-temperature, temperature);
         float randomY = Random.Range(-temperature, temperature);
         Vector2 noise = new Vector2(randomX, randomY);
