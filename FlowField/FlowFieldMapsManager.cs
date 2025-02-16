@@ -14,6 +14,7 @@ public class FlowFieldMapManager : MonoBehaviour
     private GameObject flowFieldRootObject;
     private GameObject geoMapManagerObj;
 
+    private GeoMapsManager geoMapManager;
     public void FlowFieldMapsManagerInit(
         Vector2Int destination, 
         string uid,
@@ -31,7 +32,11 @@ public class FlowFieldMapManager : MonoBehaviour
             
             (int v, GridNodeMap<FlowFieldNode> gnm ,Vector2Int c) => new FlowFieldNode(v,gnm,c));
         this.destination = this.flowFieldMap.GetNodeByCellPosition(destination);
+        this.geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
         ClickManager.OnAfterCellClicked += (Vector2Int cellPosition) => {
+            this.UpdateFlowField();
+        };
+        GeoMapsManager.OnMapChanged += () => {
             this.UpdateFlowField();
         };
         this.UpdateFlowField();

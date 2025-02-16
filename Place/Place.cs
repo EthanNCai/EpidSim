@@ -1,17 +1,23 @@
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 
 public class Place : MonoBehaviour
 {
+    public int uid;
+    public int volumePerTile = 10;
     public string palaceName = "default";
     public Vector2Int placeShape;
     public Vector2Int placeLLAnchor;
     public Vector2Int placeURAnchor;
+    public Vector2Int basePosition;
     public FlowFieldMapManager flowFieldMapsManager;
+    public List<Sims> relevantSims = new List<Sims>();
 
     public void PlaceInit(
         Vector2Int placeShape, 
@@ -22,6 +28,7 @@ public class Place : MonoBehaviour
         GameObject geoMapManagerObj
         )
     {
+        this.uid = UniqueIDGenerator.GetUniqueID();
         this.palaceName = placeName;
         this.placeShape = placeShape;
         this.placeLLAnchor = basePosition;
@@ -32,7 +39,10 @@ public class Place : MonoBehaviour
             spriteRenderer.size = placeShape;
         }
         transform.position = new Vector3(basePosition.x, basePosition.y, 0);
-        // flow field map Manager
+        // adjust geomap before generating FlowFieldMap
+        GeoMapsManager geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
+        this.SetUpGeoMapBlocked(geoMapManager);
+        geoMapManager.InvokeMapChangedEvent();
         this.flowFieldMapsManager = gameObject.AddComponent<FlowFieldMapManager>();
         this.flowFieldMapsManager.FlowFieldMapsManagerInit(
             basePosition, 
@@ -51,6 +61,40 @@ public class Place : MonoBehaviour
         );
     }
 
+    private bool CheckIsAvailable(){
+        int tiles = this.placeShape.x * this.placeShape.y;
+        int volume = tiles * volumePerTile;
+        if (this.relevantSims.Count < volume){
+            return true;   
+        }else{
+            return false;
+        }
+    }
+
+    public bool InsertRelevantSimsWithAvailabilityCheck(Sims incomingSim){
+        if (CheckIsAvailable()){
+            this.relevantSims.Add(incomingSim);   
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public void InsertRelevantSims(Sims incomingSim){
+        this.relevantSims.Add(incomingSim);   
+    }
+
+    public void SetUpGeoMapBlocked(GeoMapsManager geoMapManager){
+        for ( int x = placeLLAnchor.x; x < placeURAnchor.x; x++){
+            for (int y = placeLLAnchor.y; y < placeURAnchor.y; y++){
+                if (x == basePosition.x && y == basePosition.y){
+                    continue;
+                }else{
+                    geoMapManager.geoMap.GetNodeByCellPosition(new Vector2Int(x, y)).SetBlocked(true);
+                }
+            }
+        }
+    }
 
     public override string ToString()
     {

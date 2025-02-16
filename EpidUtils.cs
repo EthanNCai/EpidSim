@@ -41,3 +41,14 @@ public static class Directions
     public static readonly Vector2Int upLeft = new Vector2Int(-1, 1);
     public static readonly Vector2Int downLeft = new Vector2Int(-1, -1);
 }
+
+public static class UniqueIDGenerator
+{
+    private static int currentId = 0;
+    public static int GetUniqueID(){
+        return ++currentId;
+    }
+    public static void Reset(){
+        currentId = 0;
+    }
+}

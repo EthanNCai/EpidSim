@@ -45,8 +45,12 @@ public class GeoNode: IGridNode<GeoNode> {
     }
 
     public void ToggleWalkable(){
-
     }
+
+    public void SetBlocked(bool b){
+        this.blocked = b;
+    }
+
 
     public override string ToString()
     {

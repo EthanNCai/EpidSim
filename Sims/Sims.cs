@@ -9,6 +9,7 @@ using UnityEngine.UIElements;
 
 public class Sims : MonoBehaviour
 {
+    public int uid;
     public string simsName;
     public Place destination = null;
     public ResidentialPlace home;
@@ -21,6 +22,7 @@ public class Sims : MonoBehaviour
 
     public void SimsInit(ResidentialPlace home, OfficePlace office, bool infected = false)
     {
+        this.uid = UniqueIDGenerator.GetUniqueID();
         this.simsName = SimsNameGenerator.GetSimsName();
         this.office = office;
         this.home = home;
@@ -43,31 +45,22 @@ public class Sims : MonoBehaviour
         }
 
         Vector2 currentPosition = transform.position;
-
         if (IsInDestination(currentPosition))
         {
             simsRigidbody.velocity = Vector2.zero;
-            if (finalApproachPosition == null)
-            {
-                Debug.Log("Newly created final approach position");
+            if (finalApproachPosition == null){
                 finalApproachPosition = destination.GetRandomPositionInside();
             }
 
-            if (Vector2.Distance(finalApproachPosition.Value, currentPosition) < 0.1f)
-            {
-                Debug.Log("Finishing up Final Approaching");
+            if (Vector2.Distance(finalApproachPosition.Value, currentPosition) < 0.1f){
                 FinishUpMoving();
-            }
-            else
-            {
-                Debug.Log("Approaching Final Position...");
+            }else{
                 NaturallyFinalApproach();
             }
             return;
         }
 
         // 确保 destination 仍然存在
-        
         Debug.Log("Long term moving...");
         if (destination != null)
         {

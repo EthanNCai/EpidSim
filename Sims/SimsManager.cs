@@ -9,7 +9,6 @@ public class SimsManager: MonoBehaviour{
     private SimsFactory simsFactory;
     public void Start()
     {
-        
         this.simsFactory = this.simsFacotryObj.GetComponent<SimsFactory>();
         this.simsFactory.CreateSims(new Vector2Int(7,1));
     }
