@@ -127,18 +127,6 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
             
 
         };
-        GeoMapsManager.OnMapChanged += () =>
-        {   
-            for (int r = 0; r < n_rows; r++){
-                for (int c = 0; c < n_cols; c++){
-                    if (debugTexts[r, c] != null){
-                        debugTexts[r,c].text = gridNodes[r, c].ToString();
-                    }else{
-                        Debug.LogError("wtf");
-                    }
-                }
-            }
-        };
     }
     public void InvokeValueUpdateByCell(Vector2Int cellPosition)
     {

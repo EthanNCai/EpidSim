@@ -82,7 +82,7 @@ public class Sims : MonoBehaviour
     {
         if (finalApproachPosition == null) return;
 
-        transform.position = Vector2.Lerp(transform.position, finalApproachPosition.Value, speed * Time.deltaTime);
+        transform.position = Vector2.Lerp(transform.position, finalApproachPosition.Value, speed * 0.5f * Time.deltaTime);
     }
 
     public void FinishUpMoving()
