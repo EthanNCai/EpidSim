@@ -14,7 +14,12 @@ public class GeoNode: IGridNode<GeoNode> {
     private Vector2Int _cellPosition;
 
 
-    public bool blocked = false;
+    private bool _blocked = false;
+    public bool blocked {
+        get { return _blocked; }
+        set { _blocked = value; this.gridMap.InvokeValueUpdateByCell(this.cellPosition); } 
+    }
+
 
     public GeoNode next = null;
     public DirectionalNeighbors<GeoNode> neighbors
@@ -45,8 +50,12 @@ public class GeoNode: IGridNode<GeoNode> {
     }
 
     public void ToggleWalkable(){
-
     }
+
+    public void SetBlocked(bool b){
+        this.blocked = b;
+    }
+
 
     public override string ToString()
     {

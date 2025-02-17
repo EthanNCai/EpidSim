@@ -1,7 +1,5 @@
-using System.ComponentModel;
-using System.Drawing;
-using JetBrains.Annotations;
-using Unity.VisualScripting;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 public class PlaceManager : MonoBehaviour
 {
@@ -10,30 +8,51 @@ public class PlaceManager : MonoBehaviour
     public GameObject flowFieldRootObject;
     public GameObject geoMapManagerObj;
     private PlaceFactory placeFactory;
-    public ResidentialPlace residentialPlace;
-    public OfficePlace officePlace;
 
-    public void Awake()
+    public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
+    public List<OfficePlace> officePlaces = new List<OfficePlace>();
+
+    // public ResidentialPlace residentialPlace;
+    // public OfficePlace officePlace;
+    public static event Action OnPlaceSpwaned;
+    public void Start()
     {
+        //temporary use
+        List<Vector2Int> homes = new List<Vector2Int>{new Vector2Int(1,3),new Vector2Int(1,1),new Vector2Int(7,2), new Vector2Int(11,3),new Vector2Int(11,1) };
+        List<Vector2Int> offices = new List<Vector2Int>{new Vector2Int(2,7), new Vector2Int(5,7), new Vector2Int(8,7), new Vector2Int(4,1) , new Vector2Int(14,7), new Vector2Int(17,7)};
         this.placeFactory = placeFactoryObj.GetComponent<PlaceFactory>();
-        this.residentialPlace = this.placeFactory.CreateResidentialPlace(
+
+        foreach (var homePosition in homes){
+            ResidentialPlace newResidential = this.placeFactory.CreateResidentialPlace(
             new Vector2Int(2, 1), 
-            new Vector2Int(1, 3), 
+            homePosition, 
             100, 
             mapManager, 
             flowFieldRootObject,
             geoMapManagerObj
             );
-        this.residentialPlace.SayHi();
+            newResidential.SayHi();
+            residentialPlaces.Add(newResidential);
+        }
 
-        this.officePlace = this.placeFactory.CreateOfficePlace(
+        foreach (var officePosition in offices){
+            OfficePlace newOffice = this.placeFactory.CreateOfficePlace(
             new Vector2Int(2, 2),
-            new Vector2Int(7, 7),
+            officePosition,
             mapManager,
             flowFieldRootObject,
             geoMapManagerObj
             );
-        this.officePlace.SayHi();
-        
+            newOffice.SayHi();
+            this.officePlaces.Add(newOffice);   
+        }
+        OnPlaceSpwaned?.Invoke();
+    }
+    public OfficePlace GetRandomOffice(){
+        return officePlaces[UnityEngine.Random.Range(0,officePlaces.Count)];
+    }
+    public ResidentialPlace GetRandomResidential()
+    {
+        return residentialPlaces[UnityEngine.Random.Range(0,residentialPlaces.Count)];
     }
 }
