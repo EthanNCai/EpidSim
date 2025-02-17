@@ -114,6 +114,7 @@ public class FlowFieldMapManager : MonoBehaviour
                             minStepsToDestinationNeighbor = neighbor;
                         }
                     }
+                    else{}
                 }
             }
 

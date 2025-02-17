@@ -20,14 +20,17 @@ public class Sims : MonoBehaviour
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
     private static float temperature = 0.5f;
 
-    public void SimsInit(ResidentialPlace home, OfficePlace office, bool infected = false)
+    public void SimsInit(bool infected = false)
     {
         this.uid = UniqueIDGenerator.GetUniqueID();
         this.simsName = SimsNameGenerator.GetSimsName();
-        this.office = office;
-        this.home = home;
         this.destination = home;
         this.simsRigidbody = GetComponent<Rigidbody2D>();
+    }
+    public void AllocateHomeOffice(ResidentialPlace home, OfficePlace office){
+        this.home = home;
+        this.office = office;
+        this.destination = home;
     }
 
     public bool IsInDestination(Vector2 currentPosition)
@@ -40,7 +43,7 @@ public class Sims : MonoBehaviour
     {
         if (destination == null)
         {
-            Debug.Log("Standing by....");
+            // Debug.Log("Standing by....");
             return; // 没有目标地，直接返回
         }
 
@@ -61,7 +64,7 @@ public class Sims : MonoBehaviour
         }
 
         // 确保 destination 仍然存在
-        Debug.Log("Long term moving...");
+        // Debug.Log("Long term moving...");
         if (destination != null)
         {
             FlowFieldNode flowFieldNode = destination.flowFieldMapsManager.flowFieldMap.GetNodeByCellPosition(
