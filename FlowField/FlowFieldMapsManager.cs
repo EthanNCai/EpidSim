@@ -85,13 +85,37 @@ public class FlowFieldMapManager : MonoBehaviour
         foreach (FlowFieldNode node in this.flowFieldMap.nodeIterator())
         {
             FlowFieldNode currentNode = node;  
+
+
             if(this.destination == currentNode) { currentNode.flowFieldDirection = new Vector2Int(0,0); continue; }
 
             DirectionalNeighbors<FlowFieldNode> neighbors = currentNode.neighbors;
             FlowFieldNode minStepsToDestinationNeighbor = null;
             int minStepsToDestination = int.MaxValue;  // Correct initialization value
+            GeoMapsManager geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
+            GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
 
-            foreach (var neighbor in new FlowFieldNode[] { 
+            if(geoMap.GetNodeByCellPosition(currentNode.cellPosition).blocked){
+                
+                foreach (var neighbor in new FlowFieldNode[] { 
+                neighbors.left,
+                neighbors.right,
+                }){
+
+                    if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
+                    {
+                        minStepsToDestinationNeighbor = neighbor;
+                        break;
+                    }
+                }
+                if(minStepsToDestinationNeighbor != null){
+                    currentNode.flowFieldDirection =  minStepsToDestinationNeighbor.cellPosition - currentNode.cellPosition;
+                }else{
+                    currentNode.flowFieldDirection = Vector2Int.left;
+                }
+                
+            }else{
+                foreach (var neighbor in new FlowFieldNode[] { 
                 neighbors.up,
                 neighbors.down,
                 neighbors.left,
@@ -100,34 +124,23 @@ public class FlowFieldMapManager : MonoBehaviour
                 neighbors.upRight,
                 neighbors.downLeft,
                 neighbors.downRight
-            })
-            {
-                if (neighbor != null && neighbor.stepsToDestination != int.MaxValue)
+                })
                 {
-                    GeoMapsManager geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
-                    GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
-                    if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
+                    if (neighbor != null && neighbor.stepsToDestination != int.MaxValue)
                     {
-                        if (neighbor.stepsToDestination < minStepsToDestination)
+                        if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
                         {
-                            minStepsToDestination = neighbor.stepsToDestination;
-                            minStepsToDestinationNeighbor = neighbor;
+                            if (neighbor.stepsToDestination < minStepsToDestination)
+                            {
+                                minStepsToDestination = neighbor.stepsToDestination;
+                                minStepsToDestinationNeighbor = neighbor;
+                            }
                         }
+                        
                     }
-                    else{}
                 }
-            }
-
-            if (minStepsToDestinationNeighbor != null)
-            {
                 currentNode.flowFieldDirection = minStepsToDestinationNeighbor.cellPosition - currentNode.cellPosition;
-                // Debug.Log(currentNode.flowFieldDirection);
-            }
-            else
-            {
-                currentNode.flowFieldDirection = Vector2Int.zero;
             }
         }
     }
-
 }

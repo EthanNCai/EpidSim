@@ -14,11 +14,11 @@ public class Sims : MonoBehaviour
     public Place destination = null;
     public ResidentialPlace home;
     public OfficePlace office;
-    private float speed = 8.0f;
+    private float speed = 2.8f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
-    private static float temperature = 0.5f;
+    private static float temperature = 0.3f;
 
     public void SimsInit(bool infected = false)
     {
@@ -43,8 +43,7 @@ public class Sims : MonoBehaviour
     {
         if (destination == null)
         {
-            // Debug.Log("Standing by....");
-            return; // 没有目标地，直接返回
+            return; // 没有目标地，直接返回. Standby 状态
         }
 
         Vector2 currentPosition = transform.position;
@@ -66,10 +65,12 @@ public class Sims : MonoBehaviour
         // 确保 destination 仍然存在
         // Debug.Log("Long term moving...");
         if (destination != null)
-        {
-            FlowFieldNode flowFieldNode = destination.flowFieldMapsManager.flowFieldMap.GetNodeByCellPosition(
-                new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y))
-            );
+        {   
+            Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
+            // 如果没有出界
+            FlowFieldNode flowFieldNode = destination.flowFieldMapsManager.flowFieldMap.GetNodeByCellPosition(currentCellPosition);
+            
+            //如果出界了
             NaturallyMove(flowFieldNode.flowFieldDirection);
         }
     }
@@ -98,11 +99,11 @@ public class Sims : MonoBehaviour
     {
         counter++;
         
-        if (counter == 5000)
+        if (counter == 7000)
         {
             destination = office;
         }
-        if (counter == 10000)
+        if (counter == 14000)
         {
             destination = home;
             counter = 0;
