@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class SimsManager: MonoBehaviour{
 
+    public MapManager mapManager;
     public static event Action OnSimsSpawned;
     public GameObject simsFacotryObj;
     private SimsFactory simsFactory;
@@ -14,6 +15,8 @@ public class SimsManager: MonoBehaviour{
 
     public void Start()
     {
+
+        Vector2Int mapSize = mapManager.mapsize;
         int numSims = 1000;
         for(int i =0; i < numSims; i++)
         {

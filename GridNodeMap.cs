@@ -180,6 +180,22 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
         return new DirectionalNeighbors<TGridNodeObject>(up, down, left, right, upLeft, upRight, downLeft, downRight);
     }
 
+    public static Vector2Int GetReturnDirection(Vector2Int position, Vector2Int mapSize)
+    {
+        int dirX = 0;
+        int dirY = 0;
+
+        if (position.x < 0) dirX = 1;
+        else if (position.x >= mapSize.x) dirX = -1;
+        
+        if (position.y < 0) dirY = 1;
+        else if (position.y >= mapSize.y) dirY = -1;
+        
+        return new Vector2Int(dirX, dirY);
+    }
+    public static bool CheckIfOutside(Vector2Int position, Vector2Int mapSize){
+        return (position.x < 0 || position.x >= mapSize.x || position.y < 0 || position.y >= mapSize.y);
+    }
 
     public void TurnOffDisplay(){}
     public void TurnOnDisplay(){}

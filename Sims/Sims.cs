@@ -14,11 +14,12 @@ public class Sims : MonoBehaviour
     public Place destination = null;
     public ResidentialPlace home;
     public OfficePlace office;
-    private float speed = 2.8f;
+    private float speed = 8f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
     private static float temperature = 0.3f;
+    // public float forceAmount = 0.000f; // 施加的力度
 
     public void SimsInit(bool infected = false)
     {
@@ -27,6 +28,18 @@ public class Sims : MonoBehaviour
         this.destination = home;
         this.simsRigidbody = GetComponent<Rigidbody2D>();
     }
+
+    // private void OnCollisionEnter2D(Collision2D collision)
+    // {
+    //     Rigidbody2D rb = this.simsRigidbody;
+    //     if (rb != null)
+    //     {
+    //         // 计算碰撞点到自身的方向
+    //         Debug.Log("bumped");
+    //         Vector2 awayDirection = (rb.position - (Vector2)collision.transform.position).normalized;
+    //         rb.AddForce(awayDirection * forceAmount, ForceMode2D.Impulse);
+    //     }
+    // }
     public void AllocateHomeOffice(ResidentialPlace home, OfficePlace office){
         this.home = home;
         this.office = office;
@@ -67,11 +80,15 @@ public class Sims : MonoBehaviour
         if (destination != null)
         {   
             Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
-            // 如果没有出界
-            FlowFieldNode flowFieldNode = destination.flowFieldMapsManager.flowFieldMap.GetNodeByCellPosition(currentCellPosition);
-            
-            //如果出界了
-            NaturallyMove(flowFieldNode.flowFieldDirection);
+            Vector2Int mapSize = destination.flowFieldMapsManager.mapManager.mapsize;
+            Vector2Int targetDirection;
+            if(GridNodeMap<FlowFieldNode>.CheckIfOutside(currentCellPosition,mapSize)){
+                targetDirection = GridNodeMap<FlowFieldNode>.GetReturnDirection(currentCellPosition,mapSize);
+            }else{
+                FlowFieldNode flowFieldNode = destination.flowFieldMapsManager.flowFieldMap.GetNodeByCellPosition(currentCellPosition);
+                targetDirection = flowFieldNode.flowFieldDirection;
+            }
+            NaturallyMove(targetDirection);
         }
     }
 
@@ -93,6 +110,18 @@ public class Sims : MonoBehaviour
     {
         finalApproachPosition = null; // 设为 null，表示无效
         destination = null;
+    }
+    public static Vector2Int GetReturnDirection(Vector2Int position, Vector2Int mapSize)
+    {
+        int dirX = 0;
+        int dirY = 0;
+        if (position.x < 0) dirX = 1;
+        else if (position.x >= mapSize.x) dirX = -1;
+        
+        if (position.y < 0) dirY = 1;
+        else if (position.y >= mapSize.y) dirY = -1;
+        
+        return new Vector2Int(dirX, dirY);
     }
 
     private void ScheduleUpdate()
