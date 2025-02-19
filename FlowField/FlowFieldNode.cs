@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class FlowFieldNode: IGridNode<FlowFieldNode> {
 
     public GridNodeMap<FlowFieldNode> flowFieldMap;
-    private Vector2Int _flowFieldDirection;
+    private Vector2Int _flowFieldDirection = Vector2Int.zero;
     public DirectionalNeighbors<FlowFieldNode> _neighbors = new DirectionalNeighbors<FlowFieldNode>();
     private int _stepsToDestination;
     public int stepsToDestination {
@@ -21,7 +21,7 @@ public class FlowFieldNode: IGridNode<FlowFieldNode> {
 
     public Vector2Int flowFieldDirection{
         get { return _flowFieldDirection; }
-        set { _flowFieldDirection = value; this.flowFieldMap.InvokeValueUpdateByCell(this.cellPosition); }
+        set { _flowFieldDirection = value; Debug.Log(value);this.flowFieldMap.InvokeValueUpdateByCell(this.cellPosition); }
     }
     // getters and setters
     public DirectionalNeighbors<FlowFieldNode> neighbors

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using CodeMonkey.Utils;
+using System;
 public class Utils
 {
     public static TextMesh SpawnTextAtRelativePosition(GameObject parent, Vector2 relativePosition, string text)
@@ -22,8 +23,8 @@ public class Utils
     public static Vector2 GetRandomizedDirection(Vector2Int originalDirection, float temperature)
     {
         Vector2 direction = originalDirection; 
-        float randomX = Random.Range(-temperature, temperature);
-        float randomY = Random.Range(-temperature, temperature);
+        float randomX = UnityEngine.Random.Range(-temperature, temperature);
+        float randomY = UnityEngine.Random.Range(-temperature, temperature);
         Vector2 noise = new Vector2(randomX, randomY);
         direction += noise;
         direction.Normalize();
@@ -52,3 +53,23 @@ public static class UniqueIDGenerator
         currentId = 0;
     }
 }
+
+
+public static class RandomManager
+{
+    private static readonly System.Random random = new System.Random();
+
+    public static int NextInt(int min, int max)
+    {
+        return random.Next(min, max);
+    }
+    public static int NextGaussianInt(int mean, int stdDev, int min, int max)
+    {
+        double u1 = 1.0 - random.NextDouble();
+        double u2 = 1.0 - random.NextDouble();
+        double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+        int result = (int)Math.Round(mean + stdDev * randStdNormal);
+        return Math.Clamp(result, min, max);
+    }
+}
+

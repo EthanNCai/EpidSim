@@ -87,11 +87,11 @@ public class Place : MonoBehaviour
     public void SetUpGeoMapBlocked(GeoMapsManager geoMapManager){
         for ( int x = placeLLAnchor.x; x < placeURAnchor.x; x++){
             for (int y = placeLLAnchor.y; y < placeURAnchor.y; y++){
-                if (x == placeLLAnchor.x && y == placeLLAnchor.y){
-                    continue;
-                }else{
+                // if (x == placeLLAnchor.x && y == placeLLAnchor.y){
+                //     continue;
+                // }else{
                     geoMapManager.geoMap.GetNodeByCellPosition(new Vector2Int(x, y)).SetBlocked(true);
-                }
+                // }
             }
         }
     }

@@ -9,8 +9,8 @@ class PlaceNameGenerator
 {
     private static List<string> homePrefixes = new List<string>{"麻吉","喵喵","小游","巨型","烟民","丁真"};
     private static List<string> homeSuffixes = new List<string>{"之家","家","公寓","住宅"};
-    private static List<string> officePrefixes = new List<string>{"安克创新","戴尔","美亚亿安","苹果","微软","佳芯","字节跳动","吉比特"};
-    private static List<string> officeSuffixes = new List<string>{"产业","集团","科技","电子","资本"};
+    private static List<string> officePrefixes = new List<string>{"安克创新","戴尔","美亚亿安","苹果","多益","佳芯","字节跳动","吉比特"};
+    private static List<string> officeSuffixes = new List<string>{"产业","集团","科技","电子","网络"};
     private static List<string> medicalPrefixes = new List<string>{"厦门市医学院","奥梅","厦门市","孙厝"};
     private static List<string> medicalSuffixes = new List<string>{"附属第二医院","诊所","中医院","第一人民医院"};
     private static List<string> publicPrefixes = new List<string>{"九龙","敬贤","深圳湾","万象城","万达","中央"};
