@@ -9,6 +9,7 @@ using UnityEngine.UIElements;
 
 public class Sims : MonoBehaviour
 {
+    
     public int uid;
     public string simsName;
     public Place destination = null;
@@ -18,8 +19,18 @@ public class Sims : MonoBehaviour
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
-    private static float temperature = 0.3f;
-    // public float forceAmount = 0.000f; // 施加的力度
+    private static float temperature = 0.2f;
+
+    public static (int,int) timeToWotkZone = (5,14);
+    public static (int,int) timeToHomeZone = (12,22);
+    public static int minWorkHours = 7; 
+    [SerializeField]
+    public (int,int) timeToWork;
+    public (int,int) timeToHome;
+    public int toWork = 0;
+    public int toWorkQ = 0;
+
+
 
     public void SimsInit(bool infected = false)
     {
@@ -27,19 +38,49 @@ public class Sims : MonoBehaviour
         this.simsName = SimsNameGenerator.GetSimsName();
         this.destination = home;
         this.simsRigidbody = GetComponent<Rigidbody2D>();
+        this.GenerateWorkHours();
+        TimeManager.OnQuarterChanged += HandleQuaterChange;
+        this.toWork = timeToWork.Item1;
+        this.toWorkQ = timeToWork.Item2;
+
+    }
+    private void HandleQuaterChange((int,int) timeNow){
+        if(timeNow == timeToWork){
+            this.destination = this.office;
+        }else if(timeNow == timeToHome){
+            this.destination = this.home;
+        }else{
+            return;   
+        }
+    }
+    private void GenerateWorkHours()
+    {
+        int workStart, workEnd;
+        int workStartQuarter, workEndQuarter;
+        
+        int workZoneMid = (timeToWotkZone.Item1 + timeToWotkZone.Item2) / 2;  // 上班时间中位数
+
+        // 让上班时间尽量集中在 7-9 点，但仍然可能有早晚一点的情况
+        workStart = RandomManager.NextGaussianInt(workZoneMid, 1, timeToWotkZone.Item1, timeToWotkZone.Item2);
+
+        // 计算下班时间，保证固定工作时长
+        workEnd = workStart + minWorkHours;
+        
+        // 随机增加或减少一些下班时间（模拟一些员工拖延下班）
+        // workEnd += RandomManager.NextInt(-30, 31);  // 允许上下班时间有30分钟的误差（分钟）
+
+        // 防止下班时间超过24点
+        // if (workEnd > 23 * 60 + 59) workEnd = 23 * 60 + 59;
+
+        // 随机 quarter（0, 1, 2, 3），对应 0、15、30、45 分钟
+        workStartQuarter = RandomManager.NextInt(0, 4);
+        workEndQuarter = RandomManager.NextInt(0, 4);
+
+        this.timeToWork = (workStart, workStartQuarter);
+        this.timeToHome = (workEnd, workEndQuarter);
     }
 
-    // private void OnCollisionEnter2D(Collision2D collision)
-    // {
-    //     Rigidbody2D rb = this.simsRigidbody;
-    //     if (rb != null)
-    //     {
-    //         // 计算碰撞点到自身的方向
-    //         Debug.Log("bumped");
-    //         Vector2 awayDirection = (rb.position - (Vector2)collision.transform.position).normalized;
-    //         rb.AddForce(awayDirection * forceAmount, ForceMode2D.Impulse);
-    //     }
-    // }
+
     public void AllocateHomeOffice(ResidentialPlace home, OfficePlace office){
         this.home = home;
         this.office = office;
@@ -124,24 +165,24 @@ public class Sims : MonoBehaviour
         return new Vector2Int(dirX, dirY);
     }
 
-    private void ScheduleUpdate()
-    {
-        counter++;
+    // private void ScheduleUpdate()
+    // {
+    //     counter++;
         
-        if (counter == 7000)
-        {
-            destination = office;
-        }
-        if (counter == 14000)
-        {
-            destination = home;
-            counter = 0;
-        }
-    }
+    //     if (counter == 7000)
+    //     {
+    //         destination = office;
+    //     }
+    //     if (counter == 14000)
+    //     {
+    //         destination = home;
+    //         counter = 0;
+    //     }
+    // }
 
     public void Update()
     {
         Navigate();
-        ScheduleUpdate();
+        // ScheduleUpdate();
     }
 }
