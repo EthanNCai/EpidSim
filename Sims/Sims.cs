@@ -5,32 +5,38 @@ using UnityEngine.UIElements;
 /*
 规则：
     destination 只能由 scheduler 设置， 只能由 navigator 取消
+    
 */
 
 public class Sims : MonoBehaviour
 {
-    
+    // BASIC INFOs
+
     public int uid;
     public string simsName;
     public Place destination = null;
     public ResidentialPlace home;
     public OfficePlace office;
-    private float speed = 8f;
+    private float speed = 0f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
-    private static float temperature = 0.2f;
+    private static float temperature = 0.5f;
 
-    public static (int,int) timeToWotkZone = (5,14);
-    public static (int,int) timeToHomeZone = (12,22);
+    public static (int,int) keyTimeMorningRanges = (0,16);
     public static int minWorkHours = 7; 
-    [SerializeField]
-    public (int,int) timeToWork;
-    public (int,int) timeToHome;
+    public (int,int) keyTimeMorning;
+    public (int,int) keyTimeDusk;
     public int toWork = 0;
     public int toWorkQ = 0;
 
 
+    // INFECTION RELATED
+
+    Infection infection = null;
+    InfectionStatus infectionStatus = InfectionStatus.Suscptible;
+
+    public string infectionRepr = "";
 
     public void SimsInit(bool infected = false)
     {
@@ -39,29 +45,48 @@ public class Sims : MonoBehaviour
         this.destination = home;
         this.simsRigidbody = GetComponent<Rigidbody2D>();
         this.GenerateWorkHours();
-        TimeManager.OnQuarterChanged += HandleQuaterChange;
-        this.toWork = timeToWork.Item1;
-        this.toWorkQ = timeToWork.Item2;
-
+        TimeManager.OnQuarterChanged += HandleTimeChange;
+        this.toWork = keyTimeMorning.Item1;
+        this.toWorkQ = keyTimeMorning.Item2;
+        this.speed = UnityEngine.Random.Range(4f,11f);
     }
-    private void HandleQuaterChange((int,int) timeNow){
-        if(timeNow == timeToWork){
-            this.destination = this.office;
-        }else if(timeNow == timeToHome){
+    private void HandleTimeChange((int,int) timeNow){
+        if(timeNow == keyTimeMorning){
+            HandleMorningKeyTime(timeNow);
+        }else if(timeNow == keyTimeDusk){
             this.destination = this.home;
-        }else{
-            return;   
         }
+    }
+    private void HandleMorningKeyTime((int,int) timeNow){
+        if (infection != null){
+                // infection related
+                this.infectionStatus = infection.Progress();
+                this.infectionRepr = this.infection.ToString();
+        }
+        else{
+            // infect related
+            bool isInfected = InfectionParams.RollTheInfectionDice(100, InfectionStatus.Suscptible);
+            if(isInfected){
+                this.infectionStatus = InfectionStatus.Infected;
+                this.infection = new Infection(InfectionParams.GetInfectionPeriod());
+                this.infectionRepr = this.infection.ToString();
+            } 
+        }
+        // schedule related
+        this.destination = this.office;
+    }
+    private void HandleDuskKeyTime((int,int) timeNow){
+
     }
     private void GenerateWorkHours()
     {
         int workStart, workEnd;
         int workStartQuarter, workEndQuarter;
         
-        int workZoneMid = (timeToWotkZone.Item1 + timeToWotkZone.Item2) / 2;  // 上班时间中位数
+        int workZoneMid = (keyTimeMorningRanges.Item1 + keyTimeMorningRanges.Item2) / 2;  // 上班时间中位数
 
         // 让上班时间尽量集中在 7-9 点，但仍然可能有早晚一点的情况
-        workStart = RandomManager.NextGaussianInt(workZoneMid, 1, timeToWotkZone.Item1, timeToWotkZone.Item2);
+        workStart = RandomManager.NextGaussianInt(workZoneMid, 1, keyTimeMorningRanges.Item1, keyTimeMorningRanges.Item2);
 
         // 计算下班时间，保证固定工作时长
         workEnd = workStart + minWorkHours;
@@ -76,8 +101,8 @@ public class Sims : MonoBehaviour
         workStartQuarter = RandomManager.NextInt(0, 4);
         workEndQuarter = RandomManager.NextInt(0, 4);
 
-        this.timeToWork = (workStart, workStartQuarter);
-        this.timeToHome = (workEnd, workEndQuarter);
+        this.keyTimeMorning = (workStart, workStartQuarter);
+        this.keyTimeDusk = (workEnd, workEndQuarter);
     }
 
 
@@ -164,21 +189,6 @@ public class Sims : MonoBehaviour
         
         return new Vector2Int(dirX, dirY);
     }
-
-    // private void ScheduleUpdate()
-    // {
-    //     counter++;
-        
-    //     if (counter == 7000)
-    //     {
-    //         destination = office;
-    //     }
-    //     if (counter == 14000)
-    //     {
-    //         destination = home;
-    //         counter = 0;
-    //     }
-    // }
 
     public void Update()
     {

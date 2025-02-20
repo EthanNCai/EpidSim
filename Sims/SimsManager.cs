@@ -17,7 +17,7 @@ public class SimsManager: MonoBehaviour{
     {
 
         Vector2Int mapSize = mapManager.mapsize;
-        int numSims = 1000;
+        int numSims = 2;
         for(int i =0; i < numSims; i++)
         {
             this.simsFactory = this.simsFacotryObj.GetComponent<SimsFactory>();
