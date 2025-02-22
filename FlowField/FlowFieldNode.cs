@@ -21,7 +21,7 @@ public class FlowFieldNode: IGridNode<FlowFieldNode> {
 
     public Vector2Int flowFieldDirection{
         get { return _flowFieldDirection; }
-        set { _flowFieldDirection = value; Debug.Log(value);this.flowFieldMap.InvokeValueUpdateByCell(this.cellPosition); }
+        set { _flowFieldDirection = value; this.flowFieldMap.InvokeValueUpdateByCell(this.cellPosition); }
     }
     // getters and setters
     public DirectionalNeighbors<FlowFieldNode> neighbors

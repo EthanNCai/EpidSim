@@ -6,27 +6,22 @@ using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class VirusVolumeMapManager : MonoBehaviour
+public class VirusVolumeGridMapManager : MonoBehaviour
 {
     public MapManager mapManager;
     public GridNodeMap<VirusVolumeNode> virusVolumeMap = null;
     public static float selfSanitizeIndex = 0.2f;
-    private GameObject flowFieldRootObject;
-    private GameObject geoMapManagerObj;
-
+    public GridDebugManager gridDebuggerManager;
+    public GameObject geoMapManagerObj;
     private GeoMapsManager geoMapManager;
-    public void VirusVolumeMapManagerInit(
-        string uid,
-        MapManager mapManager,
-        GameObject geoMapManagerObj){
-        this.geoMapManagerObj = geoMapManagerObj;
-        this.mapManager = mapManager;
 
+    public void Awake(){
+        // Debug.LogError("Start called on instance ID: " + GetInstanceID());
         this.virusVolumeMap = new GridNodeMap<VirusVolumeNode>(
-            uid,
+            "",
             1, 
             this.mapManager.mapsize,
-            this.flowFieldRootObject, 
+            gridDebuggerManager.GetListedRoot("virusVolumeMap"), 
             (int v, GridNodeMap<VirusVolumeNode> gnm ,Vector2Int c) => new VirusVolumeNode(v,gnm,c));
     }
 

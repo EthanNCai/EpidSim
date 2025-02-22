@@ -22,7 +22,7 @@ public enum InfectionStatus{
 public static class InfectionParams{
 
     public static float infectionProbSuscptible = 1f;
-    public static float infectionProbRecoverd = 0.05f;
+    public static float infectionProbRecoverd = 0f;
     public static int maxVirusVolume = 100;
     public static int minVirusVolume = 0;
     public static float deathProb = 0.01f;
@@ -67,7 +67,7 @@ class Infection{
     public int virusVolume = 0;
     public bool endWithDead;
 
-    public Infection((int,int,int) infectionPeriod){
+    public Infection((int,int,int) infectionPeriod, Sims infectedBy){
         int periodA = infectionPeriod.Item1;
         int periodB = infectionPeriod.Item2;
         int periodC =  infectionPeriod.Item3;
@@ -128,14 +128,14 @@ class Infection{
             default:
                 break;
         }
-        return InfectionStatus.Recovered;
+        return InfectionStatus.Infected;
         
     }
     public override string ToString()
     {
         var builder = new StringBuilder();
         builder.Append("status ").Append(this.currentInfectionPeriod)
-            .Append(", days left: ").Append(this.currentPeriodDaysLeft);
+            .Append(", days left: ").Append(this.currentPeriodDaysLeft).Append("vol: ").Append(this.virusVolume);
         return builder.ToString();
     }
 }

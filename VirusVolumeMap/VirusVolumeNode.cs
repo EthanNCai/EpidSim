@@ -42,7 +42,10 @@ public class VirusVolumeNode : IGridNode<VirusVolumeNode>
 
     public override string ToString()
     {
-        return virusVolumeAndSims.ToString();
+        string simName = virusVolumeAndSims.Item2?.simsName ?? ".";
+        int volume = virusVolumeAndSims.Item1;
+        return $"{simName}\n{volume}";
     }
+
 
 }

@@ -26,6 +26,9 @@ public class SimsManager: MonoBehaviour{
             this.simsDictionary[uid] = newSims;
             this.simsList.Add(newSims);
         }
+        // initial infect
+        simsList[0].ManuallyInfect();
+
         OnSimsSpawned?.Invoke();
         
     }

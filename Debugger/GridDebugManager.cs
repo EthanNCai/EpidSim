@@ -8,6 +8,9 @@ public class GridDebugManager : MonoBehaviour
     GameObject nowSelected = null;
     public int nowSelectedRoot = -1;
 
+    private int uidCounter = 0;
+
+
     void Update()
     {
         // if (Input.GetKeyDown(KeyCode.J))
@@ -26,10 +29,11 @@ public class GridDebugManager : MonoBehaviour
 
     public GameObject GetListedRoot(string debugName)
     {
-        GameObject newRoot = new GameObject(debugName + "_DEBUG");
+        GameObject newRoot = new GameObject(debugName + "_DEBUG" + $"_DBGID_{uidCounter.ToString()}");
         newRoot.SetActive(false);
         newRoot.transform.parent = rootOfTheAll.transform;
         gridDebugRoots.Add(newRoot);
+        uidCounter ++;
         return newRoot;
     }
 

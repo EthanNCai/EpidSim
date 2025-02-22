@@ -36,12 +36,12 @@ public class Sims : MonoBehaviour
 
     Infection infection = null;
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
-    
-    VirusVolumeMapManager virusVolumeMapManager;
+    VirusVolumeGridMapManager virusVolumeMapManager;
+
 
     public string infectionRepr = "";
 
-    public void SimsInit(VirusVolumeMapManager virusVolumeMapManager, bool infected = false)
+    public void SimsInit(VirusVolumeGridMapManager virusVolumeMapManager, bool infected = false)
     {
         this.virusVolumeMapManager = virusVolumeMapManager;
         this.uid = UniqueIDGenerator.GetUniqueID();
@@ -54,6 +54,12 @@ public class Sims : MonoBehaviour
         this.toWorkQ = keyTimeMorning.Item2;
         this.speed = UnityEngine.Random.Range(4f,11f);
     }
+
+    public void ManuallyInfect(){
+        this.infectionStatus = InfectionStatus.Infected;
+        this.infection = new Infection(InfectionParams.GetInfectionPeriod(),this);
+        this.infectionRepr = this.infection.ToString();
+    }
     private void HandleTimeChange((int,int) timeNow){
         if(timeNow == keyTimeMorning){
             HandleMorningKeyTime(timeNow);
@@ -61,32 +67,38 @@ public class Sims : MonoBehaviour
             HandleDuskKeyTime(timeNow);
         }else if(timeNow == keyTimeNoon){
             HandleNoonKeyTime(timeNow);
+        }else if(this.destination != null){
+            HandleOnTheRoad(timeNow);
+        }
+    }
+    private void HandleOnTheRoad((int,int) timeNow){
+        if (infection != null){
+            PolluteThePosition();
         }
     }
     private void HandleMorningKeyTime((int,int) timeNow){
         if (infection != null){
-                // infection related
             this.infectionStatus = infection.Progress();
             this.infectionRepr = this.infection.ToString();
-                // pollute the tile
-            
+            PolluteThePosition();
+            if(this.infectionStatus == InfectionStatus.Recovered){
+                Debug.Log("Recoverd");
+                this.infection = null;
+            }else if(this.infectionStatus == InfectionStatus.Dead){
+                Debug.Log("we currently don't handle dead situation");
+                this.infectionStatus = InfectionStatus.Recovered;
+                this.infection = null;
+            }
+
         }
         else{
-            // infect related
-            bool isInfected = InfectionParams.RollTheInfectionDice(100, InfectionStatus.Suscptible);
-            if(isInfected){
-                this.infectionStatus = InfectionStatus.Infected;
-                this.infection = new Infection(InfectionParams.GetInfectionPeriod());
-                this.infectionRepr = this.infection.ToString();
-            } 
+            TryToInfect();
         }
-        // schedule related
         this.destination = this.office;
     }
     private void HandleDuskKeyTime((int,int) timeNow){
         if (infection != null){
-        // logic of pollute the tile
-            
+            PolluteThePosition();
         }else{
 
         }
@@ -94,13 +106,33 @@ public class Sims : MonoBehaviour
     }
     private void HandleNoonKeyTime((int,int) timeNow){
         if (infection != null){
-        // logic of pollute the tile
-            
+            PolluteThePosition();
         }else{
 
         }
-        this.destination = this.home;
     }
+    private void TryToInfect(){
+        Vector2 currentPosition = transform.position;
+        Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
+        VirusVolumeNode virusVolumeNode = virusVolumeMapManager.virusVolumeMap.GetNodeByCellPosition(currentCellPosition);
+        int virusVolume = virusVolumeNode.virusVolumeAndSims.Item1;
+        Sims infectedBy = virusVolumeNode.virusVolumeAndSims.Item2;
+        bool isInfected = InfectionParams.RollTheInfectionDice(virusVolume, this.infectionStatus);
+        if(isInfected){
+            this.infectionStatus = InfectionStatus.Infected;
+            this.infection = new Infection(InfectionParams.GetInfectionPeriod(),infectedBy);
+            this.infectionRepr = this.infection.ToString();
+        } 
+    }
+    private void PolluteThePosition(){
+        Debug.Log("Polluting");
+        Debug.Assert(this.infection != null, "the virus is not null");
+        Vector2 currentPosition = transform.position;
+        Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
+        virusVolumeMapManager.PolluteTheTile(currentCellPosition, this, this.infection.virusVolume);
+    }
+
+
     private void GenerateWorkHours()
     {
         int tmpMorningKeyTime, tmpDuskKeyTime, tmpNoonKeyTime;
