@@ -10,7 +10,7 @@ public class SimsManager: MonoBehaviour{
     public static event Action OnSimsSpawned;
     public GameObject simsFacotryObj;
     private SimsFactory simsFactory;
-
+    private Dictionary<int, Sims> simsDictionary = new Dictionary<int, Sims>();
     public List<Sims> simsList = new List<Sims>();
 
     public void Start()
@@ -22,8 +22,15 @@ public class SimsManager: MonoBehaviour{
         {
             this.simsFactory = this.simsFacotryObj.GetComponent<SimsFactory>();
             Sims newSims = this.simsFactory.CreateSims(new Vector2Int(7,1));
+            int uid = newSims.uid;
+            this.simsDictionary[uid] = newSims;
             this.simsList.Add(newSims);
         }
         OnSimsSpawned?.Invoke();
+        
+    }
+    public Sims GetSimsByUID(int uid)
+    {
+        return simsDictionary.TryGetValue(uid, out Sims sims) ? sims : null;
     }
 }

@@ -25,7 +25,8 @@ public class Place : MonoBehaviour
         string placeName,
         MapManager mapManager,
         GameObject flowFieldRootObject,
-        GameObject geoMapManagerObj
+        GameObject geoMapManagerObj,
+        GridDebugManager gridDebuggerManager
         )
     {
         this.uid = UniqueIDGenerator.GetUniqueID();
@@ -48,7 +49,7 @@ public class Place : MonoBehaviour
             basePosition, 
             "placeholder",
             mapManager,
-            flowFieldRootObject,
+            gridDebuggerManager.GetListedRoot(placeName + uid.ToString()),
             geoMapManagerObj
             );
     }

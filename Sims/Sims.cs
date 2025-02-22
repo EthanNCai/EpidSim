@@ -26,6 +26,7 @@ public class Sims : MonoBehaviour
     public static (int,int) keyTimeMorningRanges = (0,16);
     public static int minWorkHours = 7; 
     public (int,int) keyTimeMorning;
+    public (int,int) keyTimeNoon;
     public (int,int) keyTimeDusk;
     public int toWork = 0;
     public int toWorkQ = 0;
@@ -35,11 +36,14 @@ public class Sims : MonoBehaviour
 
     Infection infection = null;
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
+    
+    VirusVolumeMapManager virusVolumeMapManager;
 
     public string infectionRepr = "";
 
-    public void SimsInit(bool infected = false)
+    public void SimsInit(VirusVolumeMapManager virusVolumeMapManager, bool infected = false)
     {
+        this.virusVolumeMapManager = virusVolumeMapManager;
         this.uid = UniqueIDGenerator.GetUniqueID();
         this.simsName = SimsNameGenerator.GetSimsName();
         this.destination = home;
@@ -54,14 +58,18 @@ public class Sims : MonoBehaviour
         if(timeNow == keyTimeMorning){
             HandleMorningKeyTime(timeNow);
         }else if(timeNow == keyTimeDusk){
-            this.destination = this.home;
+            HandleDuskKeyTime(timeNow);
+        }else if(timeNow == keyTimeNoon){
+            HandleNoonKeyTime(timeNow);
         }
     }
     private void HandleMorningKeyTime((int,int) timeNow){
         if (infection != null){
                 // infection related
-                this.infectionStatus = infection.Progress();
-                this.infectionRepr = this.infection.ToString();
+            this.infectionStatus = infection.Progress();
+            this.infectionRepr = this.infection.ToString();
+                // pollute the tile
+            
         }
         else{
             // infect related
@@ -76,35 +84,43 @@ public class Sims : MonoBehaviour
         this.destination = this.office;
     }
     private void HandleDuskKeyTime((int,int) timeNow){
+        if (infection != null){
+        // logic of pollute the tile
+            
+        }else{
 
+        }
+        this.destination = this.home;
+    }
+    private void HandleNoonKeyTime((int,int) timeNow){
+        if (infection != null){
+        // logic of pollute the tile
+            
+        }else{
+
+        }
+        this.destination = this.home;
     }
     private void GenerateWorkHours()
     {
-        int workStart, workEnd;
-        int workStartQuarter, workEndQuarter;
-        
+        int tmpMorningKeyTime, tmpDuskKeyTime, tmpNoonKeyTime;
+        int morningKeyTimeQtr, duskKeyTimeQtr, noonKeyTimeQtr;
+
+
         int workZoneMid = (keyTimeMorningRanges.Item1 + keyTimeMorningRanges.Item2) / 2;  // 上班时间中位数
 
-        // 让上班时间尽量集中在 7-9 点，但仍然可能有早晚一点的情况
-        workStart = RandomManager.NextGaussianInt(workZoneMid, 1, keyTimeMorningRanges.Item1, keyTimeMorningRanges.Item2);
+        tmpMorningKeyTime = RandomManager.NextGaussianInt(workZoneMid, 1, keyTimeMorningRanges.Item1, keyTimeMorningRanges.Item2);
+        tmpDuskKeyTime = tmpMorningKeyTime + minWorkHours;
+        tmpNoonKeyTime = (tmpMorningKeyTime + tmpDuskKeyTime) / 2;  // 下班时间中位数
 
-        // 计算下班时间，保证固定工作时长
-        workEnd = workStart + minWorkHours;
-        
-        // 随机增加或减少一些下班时间（模拟一些员工拖延下班）
-        // workEnd += RandomManager.NextInt(-30, 31);  // 允许上下班时间有30分钟的误差（分钟）
+        morningKeyTimeQtr = RandomManager.NextInt(0, 4);
+        duskKeyTimeQtr = RandomManager.NextInt(0, 4);
+        noonKeyTimeQtr = RandomManager.NextInt(0, 4);
 
-        // 防止下班时间超过24点
-        // if (workEnd > 23 * 60 + 59) workEnd = 23 * 60 + 59;
-
-        // 随机 quarter（0, 1, 2, 3），对应 0、15、30、45 分钟
-        workStartQuarter = RandomManager.NextInt(0, 4);
-        workEndQuarter = RandomManager.NextInt(0, 4);
-
-        this.keyTimeMorning = (workStart, workStartQuarter);
-        this.keyTimeDusk = (workEnd, workEndQuarter);
+        this.keyTimeMorning = (tmpMorningKeyTime, morningKeyTimeQtr);
+        this.keyTimeDusk = (tmpDuskKeyTime, duskKeyTimeQtr);
+        this.keyTimeNoon = (tmpNoonKeyTime, noonKeyTimeQtr);
     }
-
 
     public void AllocateHomeOffice(ResidentialPlace home, OfficePlace office){
         this.home = home;

@@ -9,7 +9,8 @@ public class ResidentialPlace : Place
         int population,
         MapManager mapManager, 
         GameObject flowFieldRootObject,
-        GameObject geoMapManagerObj)
+        GameObject geoMapManagerObj,
+        GridDebugManager gridDebuggerManager)
     {
         string residentialName = PlaceNameGenerator.GetResidentialName();
         base.PlaceInit(
@@ -18,7 +19,8 @@ public class ResidentialPlace : Place
             residentialName,
             mapManager,
             flowFieldRootObject,
-            geoMapManagerObj);
+            geoMapManagerObj,
+            gridDebuggerManager);
         this.populationCapacity = population;
     }
     public void SayHi(){

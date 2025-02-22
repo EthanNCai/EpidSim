@@ -8,7 +8,8 @@ public class OfficePlace : Place
         Vector2Int basePosition, 
         MapManager mapManager, 
         GameObject flowFieldRootObject,
-        GameObject geoMapManagerObj)
+        GameObject geoMapManagerObj,
+        GridDebugManager gridDebuggerManager)
     {
         string officeName = PlaceNameGenerator.GetOfficeName();
         base.PlaceInit(
@@ -17,7 +18,8 @@ public class OfficePlace : Place
             officeName,
             mapManager,
             flowFieldRootObject,
-            geoMapManagerObj);
+            geoMapManagerObj,
+            gridDebuggerManager);
     }
     public void SayHi(){
         Debug.Log(base.ToString());

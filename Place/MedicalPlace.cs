@@ -12,14 +12,14 @@ public class MedicalPlace : Place
         GameObject geoMapManagerObj)
     {
         string medicalName = PlaceNameGenerator.GetMedicalName();
-        base.PlaceInit(
-            placeShape, 
-            basePosition,
-            medicalName,
-            mapManager,
-            flowFieldRootObject,
-            geoMapManagerObj);
-        this.populationCapacity = population;
+        // base.PlaceInit(
+        //     placeShape, 
+        //     basePosition,
+        //     medicalName,
+        //     mapManager,
+        //     flowFieldRootObject,
+        //     geoMapManagerObj);
+        // this.populationCapacity = population;
     }
     public void SayHi(){
         Debug.Log(base.ToString());
