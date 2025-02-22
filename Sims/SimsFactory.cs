@@ -5,13 +5,15 @@ public class SimsFactory: MonoBehaviour
 {
     public GameObject mapRoot;
     public GameObject simsPrefab;
-    public Sims CreateSims(Vector2Int position)
-    {
+    public GameObject virusVolumeMapManagerObj;
+    // public VirusVolumeMapManager virusVolumeMapManager;
+
+    public Sims CreateSims(Vector2Int position){
         GameObject obj = Instantiate(simsPrefab, mapRoot.transform);
         obj.transform.localPosition = new Vector3(position.x, position.y, 0);
         obj.transform.SetParent(transform);
         Sims sims = obj.GetComponent<Sims>();
-        sims.SimsInit(false);
+        sims.SimsInit(virusVolumeMapManagerObj.GetComponent<VirusVolumeGridMapManager>(),false);
         return sims;
     }
 }

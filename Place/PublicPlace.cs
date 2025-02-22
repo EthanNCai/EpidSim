@@ -11,15 +11,15 @@ public class PublicPlace : Place
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj)
     {
-        string publicName = PlaceNameGenerator.GetPublicName();
-        base.PlaceInit(
-            placeShape, 
-            basePosition,
-            publicName,
-            mapManager,
-            flowFieldRootObject,
-            geoMapManagerObj);
-        this.populationCapacity = population;
+        // string publicName = PlaceNameGenerator.GetPublicName();
+        // base.PlaceInit(
+        //     placeShape, 
+        //     basePosition,
+        //     publicName,
+        //     mapManager,
+        //     flowFieldRootObject,
+        //     geoMapManagerObj);
+        // this.populationCapacity = population;
     }
     public void SayHi(){
         Debug.Log(base.ToString());

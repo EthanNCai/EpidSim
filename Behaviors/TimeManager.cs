@@ -10,7 +10,7 @@ public class TimeManager : MonoBehaviour
     public int hour = 0;
     public int quarter = 0; // 1 小时 = 4 个 quarter，每个 quarter = 15 分钟
 
-    public float speed = 1.0f; // 时间流逝速度，1.0f = 1秒推进1个quarter
+    public float speed = 1f; // 时间流逝速度，1.0f = 1秒推进1个quarter
     private float timeAccumulator = 0f; // 记录时间
 
     private void Update()
