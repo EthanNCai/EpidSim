@@ -1,5 +1,9 @@
 using System;
+using System.Security.Cryptography;
+using System.Text;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.UIElements;
 
 /*
@@ -37,8 +41,8 @@ public class Sims : MonoBehaviour
     Infection infection = null;
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
     VirusVolumeGridMapManager virusVolumeMapManager;
-
-
+    Sims maxExposedBy = null;
+    int maxExposed = 0;
     public string infectionRepr = "";
 
     public void SimsInit(VirusVolumeGridMapManager virusVolumeMapManager, bool infected = false)
@@ -50,6 +54,7 @@ public class Sims : MonoBehaviour
         this.simsRigidbody = GetComponent<Rigidbody2D>();
         this.GenerateWorkHours();
         TimeManager.OnQuarterChanged += HandleTimeChange;
+        TimeManager.OnDayChanged += HandleDayChange;
         this.toWork = keyTimeMorning.Item1;
         this.toWorkQ = keyTimeMorning.Item2;
         this.speed = UnityEngine.Random.Range(4f,11f);
@@ -74,6 +79,8 @@ public class Sims : MonoBehaviour
     private void HandleOnTheRoad((int,int) timeNow){
         if (infection != null){
             PolluteThePosition();
+        }else{
+            UpdateMaximumExpose();
         }
     }
     private void HandleMorningKeyTime((int,int) timeNow){
@@ -92,6 +99,7 @@ public class Sims : MonoBehaviour
 
         }
         else{
+            UpdateMaximumExpose();
             TryToInfect();
         }
         this.destination = this.office;
@@ -100,7 +108,7 @@ public class Sims : MonoBehaviour
         if (infection != null){
             PolluteThePosition();
         }else{
-
+            UpdateMaximumExpose();
         }
         this.destination = this.home;
     }
@@ -108,24 +116,32 @@ public class Sims : MonoBehaviour
         if (infection != null){
             PolluteThePosition();
         }else{
-
+            UpdateMaximumExpose();
         }
     }
+
+    private void HandleDayChange(int dayIndex){
+        // infection related
+        this.maxExposed = 0;
+    }
     private void TryToInfect(){
-        Vector2 currentPosition = transform.position;
-        Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
-        VirusVolumeNode virusVolumeNode = virusVolumeMapManager.virusVolumeMap.GetNodeByCellPosition(currentCellPosition);
-        int virusVolume = virusVolumeNode.virusVolumeAndSims.Item1;
-        Sims infectedBy = virusVolumeNode.virusVolumeAndSims.Item2;
-        bool isInfected = InfectionParams.RollTheInfectionDice(virusVolume, this.infectionStatus);
+        // Vector2 currentPosition = transform.position;
+        // Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
+        // VirusVolumeNode virusVolumeNode = virusVolumeMapManager.virusVolumeMap.GetNodeByCellPosition(currentCellPosition);
+        // int virusVolume = virusVolumeNode.virusVolumeAndSims.Item1;
+        // Sims infectedBy = virusVolumeNode.virusVolumeAndSims.Item2;
+        bool isInfected = InfectionParams.RollTheInfectionDice(maxExposed, this.infectionStatus);
         if(isInfected){
             this.infectionStatus = InfectionStatus.Infected;
-            this.infection = new Infection(InfectionParams.GetInfectionPeriod(),infectedBy);
+            this.infection = new Infection(InfectionParams.GetInfectionPeriod(),this.maxExposedBy);
             this.infectionRepr = this.infection.ToString();
         } 
     }
     private void PolluteThePosition(){
-        Debug.Log("Polluting");
+        // Debug.Log("Polluting");  
+        if(this.infection.virusVolume <= 0){
+            return;
+        }
         Debug.Assert(this.infection != null, "the virus is not null");
         Vector2 currentPosition = transform.position;
         Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
@@ -237,6 +253,27 @@ public class Sims : MonoBehaviour
         
         return new Vector2Int(dirX, dirY);
     }
+    public void UpdateMaximumExpose(){
+        Debug.Assert(infection == null, "infection is not null");
+        Vector2 currentPosition = transform.position;
+        Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
+        VirusVolumeNode virusVolumeNode = virusVolumeMapManager.virusVolumeMap.GetNodeByCellPosition(currentCellPosition);
+        if(virusVolumeNode == null) return;
+        int volumeOnTheGround = virusVolumeNode.virusVolumeAndSims.Item1;
+        if(volumeOnTheGround >= this.maxExposed){
+            this.maxExposedBy = virusVolumeNode.virusVolumeAndSims.Item2;
+            this.maxExposed = volumeOnTheGround;
+        }
+        this.infectionRepr = GenerateMaximumExposeRepr();
+    }
+
+    private string GenerateMaximumExposeRepr(){
+        var builder = new StringBuilder();
+        builder.Append("exposed: ").Append(this.maxExposed).Append(", ");        
+        builder.Append("by: ").Append(this.maxExposedBy);
+        return builder.ToString();
+    }
+
 
     public void Update()
     {

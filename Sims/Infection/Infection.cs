@@ -9,7 +9,6 @@ public enum InfectionPeriod
     PeriodA,
     PeriodB,
     PeriodC,
-    
 }
 public enum InfectionStatus{
     Recovered,
@@ -17,7 +16,6 @@ public enum InfectionStatus{
     Infected,
     Dead,
 }
-
 
 public static class InfectionParams{
 

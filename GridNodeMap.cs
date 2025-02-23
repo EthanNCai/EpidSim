@@ -9,7 +9,7 @@ using TMPro;
 
 
 
-public interface IGridNode<TGridNodeObject>{
+public interface IGridNode<TGridNodeObject> where TGridNodeObject : class{
     void HandelClicked();
     public DirectionalNeighbors<TGridNodeObject> neighbors { get; set;}
     public int raw_value {get; set;}
@@ -17,7 +17,7 @@ public interface IGridNode<TGridNodeObject>{
     string ToString();
 }
 
-public class DirectionalNeighbors<TGridNodeObject>
+public class DirectionalNeighbors<TGridNodeObject> 
 {
     public TGridNodeObject up;
     public TGridNodeObject down;
@@ -53,7 +53,7 @@ public class DirectionalNeighbors<TGridNodeObject>
 }
 
 
-public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGridNodeObject>{
+public class GridNodeMap<TGridNodeObject> where TGridNodeObject : class, IGridNode<TGridNodeObject>{
 
     public string tag;
     public TGridNodeObject[,] gridNodes;
@@ -142,8 +142,15 @@ public class GridNodeMap<TGridNodeObject> where TGridNodeObject : IGridNode<TGri
 
     public TGridNodeObject GetNodeByCellPosition(Vector2Int cellPosition)
     {
-        return gridNodes[cellPosition.x,cellPosition.y];
+        // 检查 cellPosition 是否在 gridNodes 的有效索引范围内
+        if (cellPosition.x < 0 || cellPosition.x >= gridNodes.GetLength(0) ||
+            cellPosition.y < 0 || cellPosition.y >= gridNodes.GetLength(1))
+        {
+            return null;
+        }
+        return gridNodes[cellPosition.x, cellPosition.y];
     }
+
     public Vector2 GetNodeCenterPosition(Vector2Int cellPosition)
     {
         return new Vector2(cellPosition.x,cellPosition.y) + new Vector2(cellSize/2f,cellSize/2f);
