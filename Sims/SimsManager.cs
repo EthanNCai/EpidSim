@@ -12,6 +12,7 @@ public class SimsManager: MonoBehaviour{
     private SimsFactory simsFactory;
     private Dictionary<int, Sims> simsDictionary = new Dictionary<int, Sims>();
     public List<Sims> simsList = new List<Sims>();
+    public InfoDebuggerManager infoDebuggerManager;
 
     public void Start()
     {
@@ -28,9 +29,8 @@ public class SimsManager: MonoBehaviour{
         }
         // initial infect
         simsList[0].ManuallyInfect();
-
+        infoDebuggerManager.infectionInfoManager.InitializeInfectionInfo(this.simsList);
         OnSimsSpawned?.Invoke();
-        
     }
     public Sims GetSimsByUID(int uid)
     {

@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Xml.Serialization;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -56,7 +57,7 @@ public static class InfectionParams{
     }
 }
 
-class Infection{
+public class Infection{
     public InfectionPeriod currentInfectionPeriod;
     public int periodADayLen;
     public int periodBDayLen;
@@ -64,6 +65,7 @@ class Infection{
     public int currentPeriodDaysLeft;
     public int virusVolume = 0;
     public bool endWithDead;
+    StringBuilder stringBuilder = new StringBuilder();
 
     public Infection((int,int,int) infectionPeriod, Sims infectedBy){
         int periodA = infectionPeriod.Item1;
@@ -127,13 +129,12 @@ class Infection{
                 break;
         }
         return InfectionStatus.Infected;
-        
     }
     public override string ToString()
     {
-        var builder = new StringBuilder();
-        builder.Append("status ").Append(this.currentInfectionPeriod)
+        stringBuilder.Clear();
+        stringBuilder.Append("status ").Append(this.currentInfectionPeriod)
             .Append(", days left: ").Append(this.currentPeriodDaysLeft).Append("vol: ").Append(this.virusVolume);
-        return builder.ToString();
+        return stringBuilder.ToString();
     }
 }

@@ -15,7 +15,7 @@ using UnityEngine.UIElements;
 public class Sims : MonoBehaviour
 {
     // BASIC INFOs
-
+    public StringBuilder stringBuilder = new StringBuilder();
     public int uid;
     public string simsName;
     public Place destination = null;
@@ -35,21 +35,31 @@ public class Sims : MonoBehaviour
     public int toWork = 0;
     public int toWorkQ = 0;
 
+    // DEBUG RELATED
+    public InfoDebuggerManager infoDebuggerManager;
 
     // INFECTION RELATED
 
-    Infection infection = null;
+    public Infection infection = null;
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
     VirusVolumeGridMapManager virusVolumeMapManager;
     Sims maxExposedBy = null;
     int maxExposed = 0;
     public string infectionRepr = "";
 
-    public void SimsInit(VirusVolumeGridMapManager virusVolumeMapManager, bool infected = false)
+
+
+    public void SimsInit(
+        VirusVolumeGridMapManager virusVolumeMapManager,
+        InfoDebuggerManager infoDebuggerManager,
+        bool infected = false
+        )
     {
+        this.infoDebuggerManager = infoDebuggerManager;
         this.virusVolumeMapManager = virusVolumeMapManager;
         this.uid = UniqueIDGenerator.GetUniqueID();
         this.simsName = SimsNameGenerator.GetSimsName();
+        gameObject.name = this.simsName + uid;
         this.destination = home;
         this.simsRigidbody = GetComponent<Rigidbody2D>();
         this.GenerateWorkHours();
@@ -61,6 +71,7 @@ public class Sims : MonoBehaviour
     }
 
     public void ManuallyInfect(){
+        // DO not call infection info debugget method here
         this.infectionStatus = InfectionStatus.Infected;
         this.infection = new Infection(InfectionParams.GetInfectionPeriod(),this);
         this.infectionRepr = this.infection.ToString();
@@ -89,14 +100,15 @@ public class Sims : MonoBehaviour
             this.infectionRepr = this.infection.ToString();
             PolluteThePosition();
             if(this.infectionStatus == InfectionStatus.Recovered){
-                Debug.Log("Recoverd");
+                this.infoDebuggerManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
                 this.infection = null;
+                Debug.Log($"{this.simsName} has just recoverd!");
             }else if(this.infectionStatus == InfectionStatus.Dead){
-                Debug.Log("we currently don't handle dead situation");
-                this.infectionStatus = InfectionStatus.Recovered;
+                this.infoDebuggerManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
                 this.infection = null;
+                Debug.Log($"{this.simsName} has just dead!");
             }
-
+            
         }
         else{
             UpdateMaximumExpose();
@@ -130,11 +142,16 @@ public class Sims : MonoBehaviour
         // VirusVolumeNode virusVolumeNode = virusVolumeMapManager.virusVolumeMap.GetNodeByCellPosition(currentCellPosition);
         // int virusVolume = virusVolumeNode.virusVolumeAndSims.Item1;
         // Sims infectedBy = virusVolumeNode.virusVolumeAndSims.Item2;
+        if(this.infectionStatus == InfectionStatus.Dead){
+            Debug.LogWarning("<A dead sim tring to get infected> We currently don't handle dead logic");
+            return;
+        }
         bool isInfected = InfectionParams.RollTheInfectionDice(maxExposed, this.infectionStatus);
         if(isInfected){
-            this.infectionStatus = InfectionStatus.Infected;
             this.infection = new Infection(InfectionParams.GetInfectionPeriod(),this.maxExposedBy);
             this.infectionRepr = this.infection.ToString();
+            infoDebuggerManager.infectionInfoManager.InfectionAddition(this,this.infectionStatus);
+            this.infectionStatus = InfectionStatus.Infected;
         } 
     }
     private void PolluteThePosition(){
@@ -147,7 +164,6 @@ public class Sims : MonoBehaviour
         Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
         virusVolumeMapManager.PolluteTheTile(currentCellPosition, this, this.infection.virusVolume);
     }
-
 
     private void GenerateWorkHours()
     {
@@ -268,12 +284,11 @@ public class Sims : MonoBehaviour
     }
 
     private string GenerateMaximumExposeRepr(){
-        var builder = new StringBuilder();
-        builder.Append("exposed: ").Append(this.maxExposed).Append(", ");        
-        builder.Append("by: ").Append(this.maxExposedBy);
-        return builder.ToString();
+        stringBuilder.Clear();
+        stringBuilder.Append("exposed: ").Append(this.maxExposed).Append(", ");        
+        stringBuilder.Append("by: ").Append(this.maxExposedBy);
+        return stringBuilder.ToString();
     }
-
 
     public void Update()
     {

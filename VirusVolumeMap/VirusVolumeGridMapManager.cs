@@ -36,13 +36,13 @@ public class VirusVolumeGridMapManager : MonoBehaviour
     }
     public void SelfSanitize((int,int) timeNow){
         foreach (VirusVolumeNode node in this.virusVolumeMap.nodeIterator()) {
-            var (virusVolume, sims) = node.virusVolumeAndSims; // 解构元组
+            var (virusVolume, sims) = node.virusVolumeAndSims; 
             if(sims != null){
                 virusVolume -= (int)(InfectionParams.maxVirusVolume * selfSanitizeIndex);
                 if (virusVolume <= 0){
                     node.virusVolumeAndSims = (0, null);
                 }
-                node.virusVolumeAndSims = (virusVolume, sims); // 重新赋值
+                node.virusVolumeAndSims = (virusVolume, sims);
             }
         }
     }
