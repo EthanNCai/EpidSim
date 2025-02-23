@@ -11,7 +11,7 @@ public class VirusVolumeGridMapManager : MonoBehaviour
 {
     public MapManager mapManager;
     public GridNodeMap<VirusVolumeNode> virusVolumeMap = null;
-    public static float selfSanitizeIndex = 0.1f;
+    public static float selfSanitizeIndex = 0.01f;
     public GridDebugManager gridDebuggerManager;
     public GameObject geoMapManagerObj;
     private GeoMapsManager geoMapManager;
@@ -41,8 +41,10 @@ public class VirusVolumeGridMapManager : MonoBehaviour
                 virusVolume -= (int)(InfectionParams.maxVirusVolume * selfSanitizeIndex);
                 if (virusVolume <= 0){
                     node.virusVolumeAndSims = (0, null);
+                }else{
+                    node.virusVolumeAndSims = (virusVolume, sims);
                 }
-                node.virusVolumeAndSims = (virusVolume, sims);
+                // node.virusVolumeAndSims = (virusVolume, sims);
             }
         }
     }

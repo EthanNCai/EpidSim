@@ -159,7 +159,7 @@ public class Sims : MonoBehaviour
         if(this.infection.virusVolume <= 0){
             return;
         }
-        Debug.Assert(this.infection != null, "the virus is not null");
+        Debug.Assert(this.infection != null, "the virus is null");
         Vector2 currentPosition = transform.position;
         Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
         virusVolumeMapManager.PolluteTheTile(currentCellPosition, this, this.infection.virusVolume);
