@@ -10,15 +10,16 @@ public class TimeManager : MonoBehaviour
     public int hour = 0;
     public int quarter = 0; // 1 小时 = 4 个 quarter，每个 quarter = 15 分钟
 
-    public float speed = 1f; // 时间流逝速度，1.0f = 1秒推进1个quarter
+    private float speed = 4f; // 时间流逝速度，1.0f = 1秒推进1个quarter
     private float timeAccumulator = 0f; // 记录时间
+    private float timeStep = 1.0f;
 
     private void Update()
     {
         timeAccumulator += Time.deltaTime * speed;
-        if (timeAccumulator >= 1f)
+        if (timeAccumulator >= timeStep)
         {
-            timeAccumulator -= 1f;
+            timeAccumulator = 0;
             AdvanceTime();
         }
     }

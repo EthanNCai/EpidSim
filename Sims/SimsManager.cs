@@ -12,12 +12,13 @@ public class SimsManager: MonoBehaviour{
     private SimsFactory simsFactory;
     private Dictionary<int, Sims> simsDictionary = new Dictionary<int, Sims>();
     public List<Sims> simsList = new List<Sims>();
+    public InfoDebuggerManager infoDebuggerManager;
 
     public void Start()
     {
 
         Vector2Int mapSize = mapManager.mapsize;
-        int numSims = 2;
+        int numSims = 1000;
         for(int i =0; i < numSims; i++)
         {
             this.simsFactory = this.simsFacotryObj.GetComponent<SimsFactory>();
@@ -28,9 +29,8 @@ public class SimsManager: MonoBehaviour{
         }
         // initial infect
         simsList[0].ManuallyInfect();
-
+        infoDebuggerManager.infectionInfoManager.InitializeInfectionInfo(this.simsList);
         OnSimsSpawned?.Invoke();
-        
     }
     public Sims GetSimsByUID(int uid)
     {

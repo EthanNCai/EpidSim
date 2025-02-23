@@ -6,6 +6,8 @@ public class SimsFactory: MonoBehaviour
     public GameObject mapRoot;
     public GameObject simsPrefab;
     public GameObject virusVolumeMapManagerObj;
+
+    public InfoDebuggerManager infoDebuggerManager;
     // public VirusVolumeMapManager virusVolumeMapManager;
 
     public Sims CreateSims(Vector2Int position){
@@ -13,7 +15,10 @@ public class SimsFactory: MonoBehaviour
         obj.transform.localPosition = new Vector3(position.x, position.y, 0);
         obj.transform.SetParent(transform);
         Sims sims = obj.GetComponent<Sims>();
-        sims.SimsInit(virusVolumeMapManagerObj.GetComponent<VirusVolumeGridMapManager>(),false);
+        sims.SimsInit(
+            virusVolumeMapManagerObj.GetComponent<VirusVolumeGridMapManager>(),
+            infoDebuggerManager,
+            false);
         return sims;
     }
 }
