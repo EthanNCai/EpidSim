@@ -32,6 +32,24 @@ public class InfectionInfoManager{
         this.infectionInfoRoot = infectionInfoRoot;
     }
 
+    public void InitializeInfectionInfo(List<Sims> freshSims){
+        
+        // fresh sims got only two possible types:
+        // 1) Suscptible
+        // 2) Infected (Manually)
+
+        foreach(Sims sim in freshSims){
+            if(sim.infection != null){
+                this.infectedSims.Add(sim);
+            }else{
+                this.susceptibleSims.Add(sim);
+            }
+        }
+        debugInfoText = Utils.SpawnTextAtRelativePosition(this.infectionInfoRoot, new Vector2Int(1,1), "uninitialized debug text for infection.");
+        UpdateDebugInfo();
+    }
+
+
     private string GenerateReprString(){
         
         stringBuilder.Clear();
@@ -78,20 +96,5 @@ public class InfectionInfoManager{
         debugInfoText.text = newString;
     }
 
-    public void InitializeInfectionInfo(List<Sims> freshSims){
-        
-        // fresh sims got only two possible types:
-        // 1) Suscptible
-        // 2) Infected (Manually)
-
-        foreach(Sims sim in freshSims){
-            if(sim.infection != null){
-                this.infectedSims.Add(sim);
-            }else{
-                this.susceptibleSims.Add(sim);
-            }
-        }
-        debugInfoText = Utils.SpawnTextAtRelativePosition(this.infectionInfoRoot, new Vector2Int(1,1), "uninitialized debug text for infection.");
-        UpdateDebugInfo();
-    }
+    
 }
