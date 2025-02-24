@@ -7,25 +7,7 @@ public class GridDebugManager : MonoBehaviour
     List<GameObject> gridDebugRoots = new List<GameObject>();
     GameObject nowSelected = null;
     public int nowSelectedRoot = -1;
-
     private int uidCounter = 0;
-
-
-    void Update()
-    {
-        // if (Input.GetKeyDown(KeyCode.J))
-        // {
-        //     DeactivateAll();
-        // }
-        // else if (Input.GetKeyDown(KeyCode.K))
-        // {
-        //     SelectPrevious();
-        // }
-        // else if (Input.GetKeyDown(KeyCode.L))
-        // {
-        //     SelectNext();
-        // }
-    }
 
     public GameObject GetListedRoot(string debugName)
     {
