@@ -40,6 +40,6 @@ public class TimeManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"当前时间：第 {day} 天 {hour:D2}:{quarter * 15:D2}");
+        // Debug.Log($"当前时间：第 {day} 天 {hour:D2}:{quarter * 15:D2}");
     }
 }
