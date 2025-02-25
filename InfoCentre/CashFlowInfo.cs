@@ -34,7 +34,7 @@ public class CashFlowInfoManager{
         this.debugInfoText = Utils.SpawnTextAtRelativePosition(this.cashFlowDebugInfoRoot, new Vector2Int(1,1), "uninitialized debug text for cash flow manager.");
         UpdateDebugInfo();
     }
-    private string GenerateReprString(){
+    public string GenerateReprString(){
         stringBuilder.Clear();
         stringBuilder.Append("Cash Flow: ").Append(cashFlow).Append("\n");
         stringBuilder.Append($"Expense Sum Today: {GetExpenseSum()}\n");
@@ -67,6 +67,7 @@ public class CashFlowInfoManager{
             return true;
         }
     }   
+    
     public int GetBalance(){
         return cashFlow;
     }
@@ -82,6 +83,6 @@ public class CashFlowInfoManager{
 }
 
 static public class AmountMenu{
-    public static int incomeTaxPerHour = 10;
+    public static int incomeTaxPerQuarter = 4;
     public static int singleSearch = 10000;
 }

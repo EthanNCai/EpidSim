@@ -19,6 +19,7 @@ public class Sims : MonoBehaviour
     public int uid;
     public string simsName;
     public Place destination = null;
+    public Place inSite = null;
     public ResidentialPlace home;
     public OfficePlace office;
     private float speed = 0f;
@@ -45,9 +46,10 @@ public class Sims : MonoBehaviour
     VirusVolumeGridMapManager virusVolumeMapManager;
     Sims maxExposedBy = null;
     int maxExposed = 0;
+
+    // debug only
     public string infectionRepr = "";
-
-
+    public string inSiteRepr = "";
 
     public void SimsInit(
         VirusVolumeGridMapManager virusVolumeMapManager,
@@ -91,7 +93,7 @@ public class Sims : MonoBehaviour
         if (infection != null){
             PolluteThePosition();
         }else{
-            UpdateMaximumExpose();
+            UpdateInfectionRepr();
         }
     }
     private void HandleMorningKeyTime((int,int) timeNow){
@@ -108,27 +110,26 @@ public class Sims : MonoBehaviour
                 this.infection = null;
                 Debug.Log($"{this.simsName} has just dead!");
             }
-            
         }
         else{
-            UpdateMaximumExpose();
+            UpdateInfectionRepr();
             TryToInfect();
         }
-        this.destination = this.office;
+        this.SetOutMoving(this.office);
     }
     private void HandleDuskKeyTime((int,int) timeNow){
         if (infection != null){
             PolluteThePosition();
         }else{
-            UpdateMaximumExpose();
+            UpdateInfectionRepr();
         }
-        this.destination = this.home;
+        this.SetOutMoving(this.home);
     }
     private void HandleNoonKeyTime((int,int) timeNow){
         if (infection != null){
             PolluteThePosition();
         }else{
-            UpdateMaximumExpose();
+            UpdateInfectionRepr();
         }
     }
 
@@ -254,8 +255,20 @@ public class Sims : MonoBehaviour
 
     public void FinishUpMoving()
     {
+        this.inSite = this.destination;
+        this.inSite.InsertInsiteSims(this);
         finalApproachPosition = null; // 设为 null，表示无效
         destination = null;
+        UpdateInSiteRepr();
+        
+    }
+    public void SetOutMoving(Place destination)
+    {
+        if(this.inSite == null) return;
+        this.destination = destination;
+        this.inSite.RemoveInsiteSims(this);
+        this.inSite = null; // 设为 null，表示无效
+        UpdateInSiteRepr();
     }
     public static Vector2Int GetReturnDirection(Vector2Int position, Vector2Int mapSize)
     {
@@ -269,25 +282,31 @@ public class Sims : MonoBehaviour
         
         return new Vector2Int(dirX, dirY);
     }
-    public void UpdateMaximumExpose(){
+    public void UpdateInfectionRepr()
+    {
         Debug.Assert(infection == null, "infection is not null");
         Vector2 currentPosition = transform.position;
         Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
         VirusVolumeNode virusVolumeNode = virusVolumeMapManager.virusVolumeMap.GetNodeByCellPosition(currentCellPosition);
-        if(virusVolumeNode == null) return;
+        if (virusVolumeNode == null) return;
         int volumeOnTheGround = virusVolumeNode.virusVolumeAndSims.Item1;
-        if(volumeOnTheGround >= this.maxExposed){
+        if (volumeOnTheGround >= this.maxExposed){
             this.maxExposedBy = virusVolumeNode.virusVolumeAndSims.Item2;
             this.maxExposed = volumeOnTheGround;
         }
-        this.infectionRepr = GenerateMaximumExposeRepr();
-    }
-
-    private string GenerateMaximumExposeRepr(){
         stringBuilder.Clear();
-        stringBuilder.Append("exposed: ").Append(this.maxExposed).Append(", ");        
+        stringBuilder.Append("exposed: ").Append(this.maxExposed).Append(", ");
         stringBuilder.Append("by: ").Append(this.maxExposedBy);
-        return stringBuilder.ToString();
+        this.infectionRepr = stringBuilder.ToString();
+    }
+    public void UpdateInSiteRepr(){
+        stringBuilder.Clear();
+        if ( this.inSite != null){
+            stringBuilder.Append(this.inSite.palaceName);
+        }else{
+            stringBuilder.Append("Not in Site");
+        }
+        this.inSiteRepr = stringBuilder.ToString();
     }
 
     public void Update()
