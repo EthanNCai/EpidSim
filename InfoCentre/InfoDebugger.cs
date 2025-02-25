@@ -5,13 +5,14 @@ public class InfoDebuggerManager : MonoBehaviour{
     public GameObject rootOfTheAll;
     public InfectionInfoManager infectionInfoManager = null;
     public CashFlowInfoManager cashFlowManager = null;
-
+    public ToastManager toastManager;
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();
-
     public void Awake(){
         this.infectionInfoManager = new InfectionInfoManager(GetListedRoot("InfectionInfo"));
         this.cashFlowManager = new CashFlowInfoManager(GetListedRoot("CashFlowInfo"));
+        TimeManager.OnDayChanged += ShowDaySumUp;
+
     }
     private GameObject GetListedRoot(string debugName){
         GameObject newRoot = new GameObject(debugName + "_INFO_DEBUG" + $"_DBGID_{uidCounter.ToString()}");
@@ -26,5 +27,9 @@ public class InfoDebuggerManager : MonoBehaviour{
     }
     public void ManuallyExpense(int amount){
         cashFlowManager.ExpenseFromCashFlow(amount, ExpenseTypes.TestExpense);
+    }
+
+    public void ShowDaySumUp(int day){
+        toastManager.MakeAToast(this.cashFlowManager.GenerateReprString());
     }
 }

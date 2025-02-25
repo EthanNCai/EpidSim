@@ -9,7 +9,8 @@ public class OfficePlace : Place
         MapManager mapManager, 
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
-        GridDebugManager gridDebuggerManager)
+        GridDebugManager gridDebuggerManager,
+        InfoDebuggerManager infoDebuggerManager)
     {
         string officeName = PlaceNameGenerator.GetOfficeName();
         base.PlaceInit(
@@ -19,10 +20,19 @@ public class OfficePlace : Place
             mapManager,
             flowFieldRootObject,
             geoMapManagerObj,
-            gridDebuggerManager);
+            gridDebuggerManager,
+            infoDebuggerManager);
+        TimeManager.OnQuarterChanged += ((int, int) timeNow) => {
+            ContributeIncomeTaxQuarterly();
+        };
     }
     public void SayHi(){
         Debug.Log(base.ToString());
     }
-    
+    public void ContributeIncomeTaxQuarterly(){
+        int workingSims = base.inSiteSims.Count;
+        if(workingSims == 0) return;
+        int taxes = workingSims * AmountMenu.incomeTaxPerQuarter;
+        base.infoDebuggerManager.cashFlowManager.ContributeToCashFlow(taxes, ContributeTypes.IncomeTax);
+    }
 }

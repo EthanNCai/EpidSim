@@ -17,8 +17,8 @@ public class Place : MonoBehaviour
     public Vector2Int placeURAnchor;
     public Vector2Int basePosition;
     public FlowFieldMapManager flowFieldMapsManager;
-    public List<Sims> relevantSims = new List<Sims>();
-
+    public List<Sims> inSiteSims = new List<Sims>();
+    public InfoDebuggerManager infoDebuggerManager;
     public void PlaceInit(
         Vector2Int placeShape, 
         Vector2Int basePosition, 
@@ -26,9 +26,11 @@ public class Place : MonoBehaviour
         MapManager mapManager,
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
-        GridDebugManager gridDebuggerManager
+        GridDebugManager gridDebuggerManager,
+        InfoDebuggerManager infoDebuggerManager
         )
     {
+        this.infoDebuggerManager = infoDebuggerManager;
         this.uid = UniqueIDGenerator.GetUniqueID();
         this.palaceName = placeName;
         this.placeShape = placeShape;
@@ -54,6 +56,8 @@ public class Place : MonoBehaviour
             );
     }
 
+    // public void 1
+
     public Vector2 GetRandomPositionInside()
     {
         return new Vector2(
@@ -65,24 +69,29 @@ public class Place : MonoBehaviour
     private bool CheckIsAvailable(){
         int tiles = this.placeShape.x * this.placeShape.y;
         int volume = tiles * volumePerTile;
-        if (this.relevantSims.Count < volume){
+        if (this.inSiteSims.Count < volume){
             return true;   
         }else{
             return false;
         }
     }
 
-    public bool InsertRelevantSimsWithAvailabilityCheck(Sims incomingSim){
-        if (CheckIsAvailable()){
-            this.relevantSims.Add(incomingSim);   
-            return true;
-        }else{
-            return false;
-        }
-    }
+    // public bool InsertRelevantSimsWithAvailabilityCheck(Sims incomingSim){
+    //     if (CheckIsAvailable()){
+    //         this.inSiteSims.Add(incomingSim);   
+    //         return true;
+    //     }else{
+    //         return false;
+    //     }
+    // }
 
-    public void InsertRelevantSims(Sims incomingSim){
-        this.relevantSims.Add(incomingSim);   
+    public void InsertInsiteSims(Sims incomingSim){
+        this.inSiteSims.Add(incomingSim);   
+    }
+    public void RemoveInsiteSims(Sims leavingSim){
+        if(this.inSiteSims.Contains(leavingSim)){
+            this.inSiteSims.Remove(leavingSim);   
+        }
     }
 
     public void SetUpGeoMapBlocked(GeoMapsManager geoMapManager){
@@ -96,6 +105,8 @@ public class Place : MonoBehaviour
             }
         }
     }
+
+    
 
     public override string ToString()
     {

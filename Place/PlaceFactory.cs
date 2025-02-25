@@ -9,13 +9,16 @@ public class PlaceFactory : MonoBehaviour
     public GameObject officePrefab;
     public GameObject medicalPrefab;
 
+
+
     public ResidentialPlace CreateResidentialPlace(
         Vector2Int placeShape, Vector2Int position,
         int population,
         MapManager mapManager,
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
-        GridDebugManager gridDebugManager)
+        GridDebugManager gridDebugManager,
+        InfoDebuggerManager infoDebuggerManager)
     {
         ResidentialPlace residentialPlace = CreatePlaceInstance<ResidentialPlace>(residentialPrefab, placeShape, position);
         residentialPlace.ResPlaceInit(
@@ -25,7 +28,8 @@ public class PlaceFactory : MonoBehaviour
             mapManager,
             flowFieldRootObject,
             geoMapManagerObj,
-            gridDebugManager);
+            gridDebugManager,
+            infoDebuggerManager);
         return residentialPlace;
     }
 
@@ -34,7 +38,8 @@ public class PlaceFactory : MonoBehaviour
         MapManager mapManager,
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
-        GridDebugManager gridDebugManager)
+        GridDebugManager gridDebugManager,
+        InfoDebuggerManager infoDebuggerManager)
     {
         OfficePlace officePlace = CreatePlaceInstance<OfficePlace>(officePrefab, placeShape, position);
         officePlace.OfficePlaceInit(
@@ -43,7 +48,8 @@ public class PlaceFactory : MonoBehaviour
             mapManager,
             flowFieldRootObject,
             geoMapManagerObj,
-            gridDebugManager);
+            gridDebugManager,
+            infoDebuggerManager);
         return officePlace;
     }
 

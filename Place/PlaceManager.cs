@@ -13,6 +13,8 @@ public class PlaceManager : MonoBehaviour
 
     public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
     public List<OfficePlace> officePlaces = new List<OfficePlace>();
+    public InfoDebuggerManager infoDebuggerManager;
+
 
     // public ResidentialPlace residentialPlace;
     // public OfficePlace officePlace;
@@ -33,7 +35,8 @@ public class PlaceManager : MonoBehaviour
                 mapManager, 
                 flowFieldRootObject,
                 geoMapManagerObj,
-                gridDebuggerManager
+                gridDebuggerManager,
+                infoDebuggerManager
                 );
             newResidential.SayHi();
             residentialPlaces.Add(newResidential);
@@ -46,7 +49,8 @@ public class PlaceManager : MonoBehaviour
                 mapManager,
                 flowFieldRootObject,
                 geoMapManagerObj,
-                gridDebuggerManager
+                gridDebuggerManager,
+                infoDebuggerManager
                 );
             newOffice.SayHi();
             this.officePlaces.Add(newOffice);   

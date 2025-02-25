@@ -39,13 +39,10 @@ public class VirusVolumeNode : IGridNode<VirusVolumeNode>
     {
         // throw new System.NotImplementedException();
     }
-
     public override string ToString()
     {
         string simName = virusVolumeAndSims.Item2?.simsName ?? ".";
         int volume = virusVolumeAndSims.Item1;
         return $"{simName}\n{volume}";
     }
-
-
 }
