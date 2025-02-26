@@ -1,8 +1,9 @@
-using EasyUI.Toast ;using UnityEngine;
+using UnityEngine;
 
 
 public class ToastManager: MonoBehaviour{
     public void MakeAToast(string texts){
-        Toast.Show(texts);
+        Debug.Log($"DailyReportToast:{texts}");
+
     }
 }
