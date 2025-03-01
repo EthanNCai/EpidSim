@@ -3,14 +3,25 @@
 ## Floating Todos
 * 试图修复一下回家的时候卡在墙里的bug（这个不紧急）
 
+
+
+## Wk4 3.3
+本周的合理目标：在这周结束的时候完全完成所有建筑的建造以及配套的Service注册系统
+本周的超额目标：Policy系统的最小功能
+* 周一 - 周二： Building 系统闭环
+* 周三： 待定
+* 周四到周五： 待定
+* 周末：待定
+
+
 ## Wk3 2.24
 本周的合理目标：希望在这周结束之后我们可以获得一个Service的消费和购买系统, Service指的是政府可以购买的一些例如，查看区域感染情况（其分为一次性Service 和 持续订阅消费）
 本周的超额目标：MedicalBuilding + PublicBuilding 的定义 +　建造系统初步 shaping
 * 周一：税收系统＋税收系统加入 + Flexible\ Controllable Debug Panal  - Done
 * 周二: 税收系统 + Daily Toast 通知系统 - Done
-* 周三： Service系统
-* 周四到周五：  
-* 周末： 
+* 周三： 休息，上班太tmd累了
+* 周四到周五： 仍然休息
+* 周末： APS系统
 
 
 ## Wk2 2.17
