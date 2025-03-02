@@ -6,7 +6,7 @@ public class SimsFactory: MonoBehaviour
     public GameObject mapRoot;
     public GameObject simsPrefab;
     public GameObject virusVolumeMapManagerObj;
-    public InfoDebuggerManager infoDebuggerManager;
+    public InfoManager infoDebuggerManager;
     // public VirusVolumeMapManager virusVolumeMapManager;
 
     public Sims CreateSims(Vector2Int position){

@@ -12,7 +12,7 @@ public class SimsManager: MonoBehaviour{
     private SimsFactory simsFactory;
     private Dictionary<int, Sims> simsDictionary = new Dictionary<int, Sims>();
     public List<Sims> simsList = new List<Sims>();
-    public InfoDebuggerManager infoDebuggerManager;
+    public InfoManager infoDebuggerManager;
 
     public void Start()
     {

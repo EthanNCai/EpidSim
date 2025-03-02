@@ -37,7 +37,7 @@ public class Sims : MonoBehaviour
     public int toWorkQ = 0;
 
     // DEBUG RELATED
-    public InfoDebuggerManager infoDebuggerManager;
+    public InfoManager infoDebuggerManager;
 
     // INFECTION RELATED
 
@@ -53,7 +53,7 @@ public class Sims : MonoBehaviour
 
     public void SimsInit(
         VirusVolumeGridMapManager virusVolumeMapManager,
-        InfoDebuggerManager infoDebuggerManager,
+        InfoManager infoDebuggerManager,
         bool infected = false
         )
     {

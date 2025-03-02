@@ -9,7 +9,7 @@ public class GeoMapsManager : MonoBehaviour
     public GridNodeMap<GeoNode> geoMap;
     // public GameObject geoRootObject;
     // public GameObject gridDebuggerObj;
-    public GridDebugManager gridDebuggerManager;
+    public GridInfoManager gridDebuggerManager;
 
 
     public static event Action OnMapChanged;

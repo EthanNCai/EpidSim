@@ -12,7 +12,7 @@ public class VirusVolumeGridMapManager : MonoBehaviour
     public MapManager mapManager;
     public GridNodeMap<VirusVolumeNode> virusVolumeMap = null;
     public static float selfSanitizeIndex = 0.01f;
-    public GridDebugManager gridDebuggerManager;
+    public GridInfoManager gridInfoManager;
     public GameObject geoMapManagerObj;
     private GeoMapsManager geoMapManager;
 
@@ -22,7 +22,7 @@ public class VirusVolumeGridMapManager : MonoBehaviour
             "",
             1, 
             this.mapManager.mapsize,
-            gridDebuggerManager.GetListedRoot("virusVolumeMap"), 
+            gridInfoManager.GetListedRoot("virusVolumeMap"), 
             (int v, GridNodeMap<VirusVolumeNode> gnm ,Vector2Int c) => new VirusVolumeNode(v,gnm,c));
         TimeManager.OnQuarterChanged += SelfSanitize;
     }

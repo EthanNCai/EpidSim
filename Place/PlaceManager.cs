@@ -9,13 +9,13 @@ public class PlaceManager : MonoBehaviour
     public GameObject geoMapManagerObj;
     private PlaceFactory placeFactory;
     // public GameObject gridDebuggerObj;
-    public GridDebugManager gridDebuggerManager;
+    public GridInfoManager gridDebuggerManager;
 
     public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
     public List<OfficePlace> officePlaces = new List<OfficePlace>();
-    public InfoDebuggerManager infoDebuggerManager;
+    public InfoManager infoDebuggerManager;
 
-
+    public CashFlowEntityManager cfeManager;
     // public ResidentialPlace residentialPlace;
     // public OfficePlace officePlace;
     public static event Action OnPlaceSpwaned;
@@ -50,7 +50,8 @@ public class PlaceManager : MonoBehaviour
                 flowFieldRootObject,
                 geoMapManagerObj,
                 gridDebuggerManager,
-                infoDebuggerManager
+                infoDebuggerManager,
+                cfeManager
                 );
             newOffice.SayHi();
             this.officePlaces.Add(newOffice);   
