@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GridDebugManager : MonoBehaviour
+public class GridInfoManager : MonoBehaviour
 {
     public GameObject rootOfTheAll;
     List<GameObject> gridDebugRoots = new List<GameObject>();

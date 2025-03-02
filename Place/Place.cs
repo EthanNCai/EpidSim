@@ -12,13 +12,15 @@ public class Place : MonoBehaviour
     public int uid;
     public int volumePerTile = 10;
     public string palaceName = "default";
+    public string placeFullName;
     public Vector2Int placeShape;
     public Vector2Int placeLLAnchor;
     public Vector2Int placeURAnchor;
     public Vector2Int basePosition;
     public FlowFieldMapManager flowFieldMapsManager;
     public List<Sims> inSiteSims = new List<Sims>();
-    public InfoDebuggerManager infoDebuggerManager;
+    public InfoManager infoManager;
+    public CashFlowEntityManager cfeManager;
     public void PlaceInit(
         Vector2Int placeShape, 
         Vector2Int basePosition, 
@@ -26,13 +28,16 @@ public class Place : MonoBehaviour
         MapManager mapManager,
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
-        GridDebugManager gridDebuggerManager,
-        InfoDebuggerManager infoDebuggerManager
+        GridInfoManager gridInfoManager,
+        InfoManager infoManager,
+        CashFlowEntityManager cfeManager = null
         )
-    {
-        this.infoDebuggerManager = infoDebuggerManager;
+    {   
+        this.cfeManager = cfeManager;
+        this.infoManager = infoManager;
         this.uid = UniqueIDGenerator.GetUniqueID();
         this.palaceName = placeName;
+        this.placeFullName = placeName + this.uid.ToString();
         this.placeShape = placeShape;
         this.placeLLAnchor = basePosition;
         this.placeURAnchor = basePosition + placeShape; // 确保边界正确
@@ -51,7 +56,7 @@ public class Place : MonoBehaviour
             basePosition, 
             "placeholder",
             mapManager,
-            gridDebuggerManager.GetListedRoot(placeName + uid.ToString()),
+            gridInfoManager.GetListedRoot(placeName + uid.ToString()),
             geoMapManagerObj
             );
     }

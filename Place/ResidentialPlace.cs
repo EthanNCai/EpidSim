@@ -10,8 +10,8 @@ public class ResidentialPlace : Place
         MapManager mapManager, 
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
-        GridDebugManager gridDebuggerManager,
-        InfoDebuggerManager infoDebuggerManager)
+        GridInfoManager gridDebuggerManager,
+        InfoManager infoDebuggerManager)
     {
         string residentialName = PlaceNameGenerator.GetResidentialName();
         base.PlaceInit(
