@@ -13,6 +13,8 @@ public class PlaceManager : MonoBehaviour
 
     public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
     public List<OfficePlace> officePlaces = new List<OfficePlace>();
+    public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
+
     public InfoManager infoDebuggerManager;
 
     public CashFlowEntityManager cfeManager;
