@@ -10,10 +10,11 @@ public class PlaceManager : MonoBehaviour
     private PlaceFactory placeFactory;
     // public GameObject gridDebuggerObj;
     public GridInfoManager gridDebuggerManager;
-
+    public List<MedicalPlace> medicalPlaces = new List<MedicalPlace>();
+    public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
     public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
     public List<OfficePlace> officePlaces = new List<OfficePlace>();
-    public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
+    // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
 
     public InfoManager infoDebuggerManager;
 

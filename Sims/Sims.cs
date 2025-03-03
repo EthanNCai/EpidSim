@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
@@ -22,11 +23,15 @@ public class Sims : MonoBehaviour
     public Place inSite = null;
     public ResidentialPlace home;
     public OfficePlace office;
+    public List<MedicalPlace> medicalPlaces = new List<MedicalPlace>(); // just a ref
+    public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>(); // just a ref
     private float speed = 0f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
     private static float temperature = 0.5f;
+
+    
 
     public static (int,int) keyTimeMorningRanges = (0,16);
     public static int minWorkHours = 7; 

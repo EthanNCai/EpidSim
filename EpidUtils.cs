@@ -71,5 +71,19 @@ public static class RandomManager
         int result = (int)Math.Round(mean + stdDev * randStdNormal);
         return Math.Clamp(result, min, max);
     }
+    public static bool FlipTheCoin(double probability)
+    {
+        if (probability < 0 || probability > 1){
+            throw new ArgumentOutOfRangeException(nameof(probability), "Probability must be between 0 and 1.");
+        }
+        return random.NextDouble() < probability;
+    }
+    public static (int dayOff1, int dayOff2) GetRandomDayOff(int weekendIndex)
+    {
+        int[] weightedDays = { 0, 1, 2, 3, 4, 5,5,5, 6,6,6 };
+        int dayOff1 = weightedDays[random.Next(weightedDays.Length)];
+        int dayOff2 = weightedDays[random.Next(weightedDays.Length)];
+        return (dayOff1, dayOff2);
+    }
 }
 
