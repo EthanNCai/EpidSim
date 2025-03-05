@@ -31,8 +31,7 @@ public class CommercialPlace : Place, ICommonTaxContributor
     public void SayHi(){
         Debug.Log(base.ToString());
     }
-    public int calculateQContribution()
-    {
+    public int calculateQContribution(){
         int inSiteSims = base.inSiteSims.Count;
         if(inSiteSims == 0){
           return 0;  

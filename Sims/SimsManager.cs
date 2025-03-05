@@ -14,6 +14,8 @@ public class SimsManager: MonoBehaviour{
     public List<Sims> simsList = new List<Sims>();
     public InfoManager infoDebuggerManager;
 
+    // public PlaceManager placeManager();
+
     public void Start()
     {
 

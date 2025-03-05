@@ -5,7 +5,7 @@ public class PlaceFactory : MonoBehaviour
 {
     public GameObject mapRoot;
     public GameObject residentialPrefab; // 住宅类的 Prefab
-    public GameObject publicPrefab;
+    public GameObject commercialPrefab;
     public GameObject officePrefab;
     public GameObject medicalPrefab;
 
@@ -53,7 +53,27 @@ public class PlaceFactory : MonoBehaviour
         return officePlace;
     }
 
-
+    public CommercialPlace CreateCommercialPlace(
+        Vector2Int placeShape, Vector2Int position,
+        MapManager mapManager,
+        GameObject flowFieldRootObject,
+        GameObject geoMapManagerObj,
+        GridInfoManager gridDebugManager,
+        InfoManager infoDebuggerManager,
+        CashFlowEntityManager cfeManager)
+    {
+        CommercialPlace commercialPlace = CreatePlaceInstance<CommercialPlace>(commercialPrefab, placeShape, position);
+        commercialPlace.CommercialInit(
+            placeShape,
+            position,
+            mapManager,
+            flowFieldRootObject,
+            geoMapManagerObj,
+            gridDebugManager,
+            infoDebuggerManager,
+            cfeManager);
+        return commercialPlace;
+    }
 
     private T CreatePlaceInstance<T>(GameObject prefab, Vector2Int placeShape, Vector2Int position) where T : Place
     {

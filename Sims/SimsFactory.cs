@@ -7,6 +7,8 @@ public class SimsFactory: MonoBehaviour
     public GameObject simsPrefab;
     public GameObject virusVolumeMapManagerObj;
     public InfoManager infoDebuggerManager;
+
+    public PlaceManager placeManager;
     // public VirusVolumeMapManager virusVolumeMapManager;
 
     public Sims CreateSims(Vector2Int position){
@@ -17,6 +19,7 @@ public class SimsFactory: MonoBehaviour
         sims.SimsInit(
             virusVolumeMapManagerObj.GetComponent<VirusVolumeGridMapManager>(),
             infoDebuggerManager,
+            placeManager,
             false);
         return sims;
     }
