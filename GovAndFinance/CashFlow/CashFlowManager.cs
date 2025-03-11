@@ -17,12 +17,10 @@ public class CashFlowManager{
     public List<ContributeItem> contributeItemList = new List<ContributeItem>();
     public List<ExpenseItem> expenseItemList = new List<ExpenseItem>();
     public Stack<ActionExpenseItem> actionExpenseStack = new Stack<ActionExpenseItem>();
-
     public int cashFlow;    
     
     public CashFlowManager(GameObject cashFlowDebugInfoRoot){
         this.cashFlow = 10000;
-
         TimeManager.OnDayChanged += HandleDayChanged;
         this.cashFlowDebugInfoRoot = cashFlowDebugInfoRoot;    
         this.debugInfoText = Utils.SpawnTextAtRelativePosition(this.cashFlowDebugInfoRoot, new Vector2Int(1,1), "uninitialized debug text for cash flow manager.");
@@ -36,8 +34,6 @@ public class CashFlowManager{
         string newString = GenerateReprString();
         debugInfoText.text = newString;
     }
-
-    
     public int GetBalance(){
         return cashFlow;
     }

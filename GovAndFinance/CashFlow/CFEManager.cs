@@ -1,0 +1,104 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Text;
+using UnityEngine;
+
+
+public class CashFlowEntityManager : MonoBehaviour{
+
+    // For debug
+    private GameObject cashFlowDebugInfoRoot;
+    private TextMesh debugInfoText;
+    public StringBuilder stringBuilder = new StringBuilder();
+    public StringBuilder stringBuilderForDebug = new StringBuilder();
+    // Cash Flow 
+    public int cashFlow; 
+
+    // CFEs
+    public List<CFECommon> commonCFEs = new List<CFECommon>();
+    public List<CFEService> serviceCFEs = new List<CFEService>();
+
+    public void Start(){
+        this.cashFlow = 10000;
+        TimeManager.AfterQuarterChanged += HandelAfterQuarterChanged;
+    }
+    public void SetupDebug(GameObject debugRoot){
+        this.cashFlowDebugInfoRoot = debugRoot;
+        this.debugInfoText = Utils.SpawnTextAtRelativePosition(this.cashFlowDebugInfoRoot, new Vector2Int(1,10), "uninitialized debug text for cash flow manager.");
+    }
+
+    private void HandelAfterQuarterChanged ((int,int) timeNow){
+        QUpdateCFEs(timeNow);
+        QUpdateDebugPanal(timeNow);
+    }
+    private void QUpdateDebugPanal((int,int) timeNow){
+        
+    }
+
+    public CFECommonTax<TPlace> CreateCommonTaxCFE<TPlace>(TPlace place) where TPlace : Place, ICommonTaxContributor
+    {
+        // 这个函数的核心作用是Create并且 **注册** 到Manager的List里面
+        // 并且这个注册，使用的是ContributeType来注册
+        CFECommonTax<TPlace> commonTax = new CFECommonTax<TPlace>(place);
+        commonCFEs.Add(commonTax);  
+        return commonTax;
+    }
+    public CFEServiceBuildingMaintaining<TPlace> CreateServiceBuildingMaintainingCFE<TPlace>(TPlace place) where TPlace : Place, IBuilingMaintaingExpense
+    {
+        CFEServiceBuildingMaintaining<TPlace> serviceBuildingMaintaining = new CFEServiceBuildingMaintaining<TPlace>(place);
+        serviceCFEs.Add(serviceBuildingMaintaining);  
+        return serviceBuildingMaintaining;
+    }
+
+    public void RemoveCommonTaxCFE<TPlace>(CFECommonTax<TPlace> target) where TPlace : Place, ICommonTaxContributor
+    {
+        commonCFEs.Remove(target);
+    }
+
+    public void QUpdateCFEs((int,int) timeNow)
+    {
+        for( int i=0; i<commonCFEs.Count;i++){
+            commonCFEs[i].QUpdateContributeItem();
+        }
+        for( int i=0; i<serviceCFEs.Count;i++){
+            serviceCFEs[i].QUpdateExpenseItem();
+        }
+        debugInfoText.text = GenerateCFEsRepr();
+        // Debug.Log(GetAllCFEsRepr());
+    }
+
+    public string GenerateCFEsRepr(){
+        stringBuilder.Clear();
+        // CashFlow
+        stringBuilder.Append("\n==== CashFlow ====\n");
+        stringBuilder.Append(this.cashFlow);
+
+        // COMMON
+        stringBuilder.Append("\n==== Commons ====\n");
+        for( int i=0; i<commonCFEs.Count;i++){
+            string CFEName = commonCFEs[i].CFEName;
+            (int QuartContribute,int DayContribute) =  commonCFEs[i].contributeItem.QGetContribution();
+            stringBuilder.Append(CFEName);
+            stringBuilder.Append(" - Quert: ");
+            stringBuilder.Append(QuartContribute);
+            stringBuilder.Append(" - Day: ");
+            stringBuilder.Append(DayContribute);
+            stringBuilder.Append("\n");
+        }
+
+        // SERVICE
+        stringBuilder.Append("\n==== Service ====\n");
+        for( int i=0; i<serviceCFEs.Count;i++){
+            string CFEName = serviceCFEs[i].CFEName;
+            (int QuartExpense,int DayExpense) =  serviceCFEs[i].expenseItem.QGetExpense();
+            stringBuilder.Append(CFEName);
+            stringBuilder.Append(" - Quert: ");
+            stringBuilder.Append(QuartExpense);
+            stringBuilder.Append(" - Day: ");
+            stringBuilder.Append(DayExpense);
+            stringBuilder.Append("\n");
+        }
+        return stringBuilder.ToString();
+    }   
+}

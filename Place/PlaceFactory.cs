@@ -75,6 +75,28 @@ public class PlaceFactory : MonoBehaviour
         return commercialPlace;
     }
 
+    public MedicalPlace CreateMedicalPlace(
+        Vector2Int placeShape, Vector2Int position,
+        MapManager mapManager,
+        GameObject flowFieldRootObject,
+        GameObject geoMapManagerObj,
+        GridInfoManager gridDebugManager,
+        InfoManager infoDebuggerManager,
+        CashFlowEntityManager cfeManager)
+    {
+        MedicalPlace medicalPlace = CreatePlaceInstance<MedicalPlace>(medicalPrefab, placeShape, position);
+        medicalPlace.CommercialInit(
+            placeShape,
+            position,
+            mapManager,
+            flowFieldRootObject,
+            geoMapManagerObj,
+            gridDebugManager,
+            infoDebuggerManager,
+            cfeManager);
+        return medicalPlace;
+    }
+
     private T CreatePlaceInstance<T>(GameObject prefab, Vector2Int placeShape, Vector2Int position) where T : Place
     {
         GameObject obj = Instantiate(prefab, mapRoot.transform);
