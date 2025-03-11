@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using UnityEngine.Analytics;
@@ -9,7 +11,6 @@ using UnityEngine.UIElements;
 /*
 规则：
     destination 只能由 scheduler 设置， 只能由 navigator 取消
-    
 */
 
 public class Sims : MonoBehaviour
@@ -22,23 +23,29 @@ public class Sims : MonoBehaviour
     public Place inSite = null;
     public ResidentialPlace home;
     public OfficePlace office;
+    public List<MedicalPlace> medicalPlaces = new List<MedicalPlace>(); // just a ref
+    // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>(); // just a ref
     private float speed = 0f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
     private static float temperature = 0.5f;
-
     public static (int,int) keyTimeMorningRanges = (0,16);
     public static int minWorkHours = 7; 
     public (int,int) keyTimeMorning;
     public (int,int) keyTimeNoon;
     public (int,int) keyTimeDusk;
+    public HashSet<int> dayOff;
+    public int day_;
     public int toWork = 0;
     public int toWorkQ = 0;
 
+    // General
+
+    public PlaceManager placeManager;
+
     // DEBUG RELATED
     public InfoManager infoDebuggerManager;
-
     // INFECTION RELATED
 
     public Infection infection = null;
@@ -54,9 +61,11 @@ public class Sims : MonoBehaviour
     public void SimsInit(
         VirusVolumeGridMapManager virusVolumeMapManager,
         InfoManager infoDebuggerManager,
+        PlaceManager placeManager,
         bool infected = false
         )
     {
+        this.placeManager = placeManager;
         this.infoDebuggerManager = infoDebuggerManager;
         this.virusVolumeMapManager = virusVolumeMapManager;
         this.uid = UniqueIDGenerator.GetUniqueID();
@@ -70,6 +79,7 @@ public class Sims : MonoBehaviour
         this.toWork = keyTimeMorning.Item1;
         this.toWorkQ = keyTimeMorning.Item2;
         this.speed = UnityEngine.Random.Range(4f,11f);
+        this.dayOff = RandomManager.GetRandomDayOff();
     }
 
     public void ManuallyInfect(){
@@ -96,7 +106,10 @@ public class Sims : MonoBehaviour
             UpdateInfectionRepr();
         }
     }
+
+    // ========= CORE FUNCTION =========
     private void HandleMorningKeyTime((int,int) timeNow){
+        // 无条件环境交互
         if (infection != null){
             this.infectionStatus = infection.Progress();
             this.infectionRepr = this.infection.ToString();
@@ -115,16 +128,40 @@ public class Sims : MonoBehaviour
             UpdateInfectionRepr();
             TryToInfect();
         }
-        this.SetOutMoving(this.office);
+
+        // 客观因素 Routing
+
+        // 主观因素 Routing
+        if(this.isTodayDayOff(this.day_) ){
+            if(isTodayGoOutForFun()){
+                if(this.placeManager == null){
+                    return;
+                }
+                Place commercialChoosed = RandomManager.Choice(this.placeManager.commercialPlaces);
+                this.SetOutMoving(commercialChoosed);
+            }else{
+                return;
+            }
+            
+        }else{
+            this.SetOutMoving(this.office);
+        }
     }
     private void HandleDuskKeyTime((int,int) timeNow){
+        
+        // 无条件环境交互
         if (infection != null){
             PolluteThePosition();
         }else{
             UpdateInfectionRepr();
         }
+        // 客观因素 Routing
+
+        // 主观因素 Routing
+
         this.SetOutMoving(this.home);
     }
+    // ========= END OF CORE FUNCTION =========
     private void HandleNoonKeyTime((int,int) timeNow){
         if (infection != null){
             PolluteThePosition();
@@ -132,11 +169,20 @@ public class Sims : MonoBehaviour
             UpdateInfectionRepr();
         }
     }
-
     private void HandleDayChange(int dayIndex){
         // infection related
         this.maxExposed = 0;
+        this.day_ = dayIndex;
     }
+
+    public bool isTodayGoOutForFun(){
+        // 客观因素
+        return RandomManager.FlipTheCoin(0.5f);
+        
+        // 主观因素
+    }
+
+
     private void TryToInfect(){
         // Vector2 currentPosition = transform.position;
         // Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
@@ -261,6 +307,9 @@ public class Sims : MonoBehaviour
         destination = null;
         UpdateInSiteRepr();
         
+    }
+    public bool isTodayDayOff(int day){
+        return dayOff.Contains(day);
     }
     public void SetOutMoving(Place destination)
     {

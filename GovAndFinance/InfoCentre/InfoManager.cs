@@ -4,13 +4,14 @@ using UnityEngine;
 public class InfoManager : MonoBehaviour{
     public GameObject rootOfTheAll;
     public InfectionInfoManager infectionInfoManager = null;
-    public CashFlowManager cashFlowManager = null;
+    public CashFlowEntityManager cashFlowEntityManager = null;
+    public CashFlowManager CFEManager = null;
     // public ToastManager toastManager;
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();
     public void Awake(){
         this.infectionInfoManager = new InfectionInfoManager(GetListedRoot("InfectionInfo"));
-        this.cashFlowManager = new CashFlowManager(GetListedRoot("CashFlowInfo"));
+        this.cashFlowEntityManager.SetupDebug(GetListedRoot("CFEInfo"));
         TimeManager.OnDayChanged += ShowDaySumUp;
 
     }
@@ -21,12 +22,6 @@ public class InfoManager : MonoBehaviour{
         infoDebuggerRoots.Add(newRoot);
         uidCounter ++;
         return newRoot;
-    }
-    public void ManuallyContribute(int amount){
-        // cashFlowManager.ContributeToCashFlow(amount, ContributeTypes.TestIncome);
-    }
-    public void ManuallyExpense(int amount){
-        // cashFlowManager.ExpenseFromCashFlow(amount, ExpenseTypes.TestExpense);
     }
 
     public void ShowDaySumUp(int day){

@@ -10,9 +10,12 @@ public class PlaceManager : MonoBehaviour
     private PlaceFactory placeFactory;
     // public GameObject gridDebuggerObj;
     public GridInfoManager gridDebuggerManager;
-
+    public List<MedicalPlace> medicalPlaces = new List<MedicalPlace>();
+    public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
     public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
     public List<OfficePlace> officePlaces = new List<OfficePlace>();
+    // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
+
     public InfoManager infoDebuggerManager;
 
     public CashFlowEntityManager cfeManager;
@@ -23,6 +26,8 @@ public class PlaceManager : MonoBehaviour
     {
         //temporary use
         // this.gridDebuggerManager =  gridDebuggerObj.GetComponent<GridDebugManager>();
+        List<Vector2Int> medicals = new List<Vector2Int>{new Vector2Int(19,3)};
+        List<Vector2Int> commercials = new List<Vector2Int>{new Vector2Int(17,3), new Vector2Int(12,7)};
         List<Vector2Int> homes = new List<Vector2Int>{new Vector2Int(1,3),new Vector2Int(1,1),new Vector2Int(7,2), new Vector2Int(11,3),new Vector2Int(5,4) };
         List<Vector2Int> offices = new List<Vector2Int>{new Vector2Int(2,7), new Vector2Int(5,7), new Vector2Int(8,7), new Vector2Int(4,1) , new Vector2Int(14,7), new Vector2Int(17,7)};
         this.placeFactory = placeFactoryObj.GetComponent<PlaceFactory>();
@@ -57,6 +62,35 @@ public class PlaceManager : MonoBehaviour
             this.officePlaces.Add(newOffice);   
         }
         OnPlaceSpwaned?.Invoke();
+
+
+        foreach(var commercialPosition in commercials){
+            CommercialPlace newCommercialPlace = this.placeFactory.CreateCommercialPlace(
+                new Vector2Int(1, 2),
+                commercialPosition,
+                mapManager,
+                flowFieldRootObject,
+                geoMapManagerObj,
+                gridDebuggerManager,
+                infoDebuggerManager,
+                cfeManager
+                );
+            this.commercialPlaces.Add(newCommercialPlace);
+        }
+
+        foreach(var medicalPosition in medicals){
+            MedicalPlace newMedicalPlace = this.placeFactory.CreateMedicalPlace(
+                new Vector2Int(1, 1),
+                medicalPosition,
+                mapManager,
+                flowFieldRootObject,
+                geoMapManagerObj,
+                gridDebuggerManager,
+                infoDebuggerManager,
+                cfeManager
+                );
+            this.medicalPlaces.Add(newMedicalPlace);
+        }
     }
     public OfficePlace GetRandomOffice(){
         return officePlaces[UnityEngine.Random.Range(0,officePlaces.Count)];

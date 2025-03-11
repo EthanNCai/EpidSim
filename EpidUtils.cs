@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using CodeMonkey.Utils;
 using System;
+using System.Collections.Generic;
 public class Utils
 {
     public static TextMesh SpawnTextAtRelativePosition(GameObject parent, Vector2 relativePosition, string text)
@@ -70,6 +71,35 @@ public static class RandomManager
         double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
         int result = (int)Math.Round(mean + stdDev * randStdNormal);
         return Math.Clamp(result, min, max);
+    }
+    public static bool FlipTheCoin(double probability)
+    {
+        if (probability < 0 || probability > 1){
+            throw new ArgumentOutOfRangeException(nameof(probability), "Probability must be between 0 and 1.");
+        }
+        return random.NextDouble() < probability;
+    }
+    public static HashSet<int> GetRandomDayOff()
+    {
+        int[] weightedDays = { 0, 1, 2, 3, 4, 5, 5, 5, 6, 6, 6 };
+        HashSet<int> dayOffSet = new HashSet<int>();
+
+        while (dayOffSet.Count < 2) // 确保有两个不同的休息日
+        {
+            dayOffSet.Add(weightedDays[random.Next(weightedDays.Length)]);
+        }
+
+        return dayOffSet;
+    }
+    public static T Choice<T>(List<T> items)
+    {
+        if (items == null || items.Count == 0)
+        {
+            throw new ArgumentException("List cannot be null or empty.");
+        }
+        
+        int index = random.Next(items.Count); // 随机索引
+        return items[index];
     }
 }
 
