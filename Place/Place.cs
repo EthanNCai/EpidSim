@@ -20,7 +20,10 @@ public class Place : MonoBehaviour
     public FlowFieldMapManager flowFieldMapsManager;
     public List<Sims> inSiteSims = new List<Sims>();
     public InfoManager infoManager;
-    public CashFlowEntityManager cfeManager;
+    public CFEManager cfeManager;
+
+    public int QAccumulatedSubsidies = 0;
+
     public void PlaceInit(
         Vector2Int placeShape, 
         Vector2Int basePosition, 
@@ -30,7 +33,7 @@ public class Place : MonoBehaviour
         GameObject geoMapManagerObj,
         GridInfoManager gridInfoManager,
         InfoManager infoManager,
-        CashFlowEntityManager cfeManager = null
+        CFEManager cfeManager
         )
     {   
         this.cfeManager = cfeManager;
@@ -70,7 +73,7 @@ public class Place : MonoBehaviour
             Random.Range(placeLLAnchor.y + 0.1f, placeURAnchor.y - 0.1f)
         );
     }
-
+    
     private bool CheckIsAvailable(){
         int tiles = this.placeShape.x * this.placeShape.y;
         int volume = tiles * volumePerTile;
@@ -117,5 +120,14 @@ public class Place : MonoBehaviour
     {
         return palaceName + " " + placeLLAnchor.ToString() + " " + placeURAnchor.ToString();
     }
+}
+
+public interface IContributablePlace
+{
+    public int CalculateQContribution();
+}
+public interface IExpensablePlace
+{
+    public int CalculateQExpense();
 }
 
