@@ -1,7 +1,7 @@
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-public class OfficePlace : Place, ICommonTaxContributor
+public class OfficePlace : Place, IContributablePlace
 {   
     
     public CFECommonTax<OfficePlace> commonTaxCFE;
@@ -13,7 +13,7 @@ public class OfficePlace : Place, ICommonTaxContributor
         GameObject geoMapManagerObj,
         GridInfoManager gridDebuggerManager,
         InfoManager infoDebuggerManager,
-        CashFlowEntityManager cfeManager)
+        CFEManager cfeManager)
     {
         string officeName = PlaceNameGenerator.GetOfficeName();
         base.PlaceInit(
@@ -26,19 +26,19 @@ public class OfficePlace : Place, ICommonTaxContributor
             gridDebuggerManager,
             infoDebuggerManager,
             cfeManager);
-        this.commonTaxCFE = cfeManager.CreateCommonTaxCFE<OfficePlace>(this);
+        this.commonTaxCFE = cfeManager.CreateAndRegisterCommonTaxCFE<OfficePlace>(this);
     }
     public void SayHi(){
         Debug.Log(base.ToString());
     }
-    public int calculateQContribution()
+    public int CalculateQContribution()
     {
         int workingSims = base.inSiteSims.Count;
         if(workingSims == 0){
           return 0;  
         } 
         else{
-            return workingSims * PriceMenu.officeTaxUnit;
+            return workingSims * PriceMenu.QOfficeTaxUnit;
         }
     }
 }

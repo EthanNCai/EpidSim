@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Analytics;
 using UnityEngine.UIElements;
@@ -15,7 +18,12 @@ using UnityEngine.UIElements;
 
 public class Sims : MonoBehaviour
 {
-    // BASIC INFOs
+    // Daily Flushed INFOs
+    public bool isTodayOff = false; 
+    Sims maxExposedBy = null;
+    int maxExposed = 0;
+
+    // Persistance INFOs
     public StringBuilder stringBuilder = new StringBuilder();
     public int uid;
     public string simsName;
@@ -23,6 +31,7 @@ public class Sims : MonoBehaviour
     public Place inSite = null;
     public ResidentialPlace home;
     public OfficePlace office;
+    public SimSchedule simSchedule;
     public List<MedicalPlace> medicalPlaces = new List<MedicalPlace>(); // just a ref
     // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>(); // just a ref
     private float speed = 0f;
@@ -36,11 +45,10 @@ public class Sims : MonoBehaviour
     public (int,int) keyTimeNoon;
     public (int,int) keyTimeDusk;
     public HashSet<int> dayOff;
-    public int day_;
     public int toWork = 0;
     public int toWorkQ = 0;
-
     // General
+    private int balance = 10000;
 
     public PlaceManager placeManager;
 
@@ -51,8 +59,7 @@ public class Sims : MonoBehaviour
     public Infection infection = null;
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
     VirusVolumeGridMapManager virusVolumeMapManager;
-    Sims maxExposedBy = null;
-    int maxExposed = 0;
+
 
     // debug only
     public string infectionRepr = "";
@@ -80,6 +87,21 @@ public class Sims : MonoBehaviour
         this.toWorkQ = keyTimeMorning.Item2;
         this.speed = UnityEngine.Random.Range(4f,11f);
         this.dayOff = RandomManager.GetRandomDayOff();
+        this.simSchedule = new SimSchedule(this);
+        this.HandleDayChange(0);
+    }
+    // public void
+
+    public void ReceivePaycheck(int paycheckIn){
+        this.balance += paycheckIn;
+    }
+    public void DoLifeExpense(){
+        if(this.balance - PriceMenu.QSimLifeExpense < 0){
+            this.home.AttachSubsidyToResidential(-1 * (this.balance - PriceMenu.QSimLifeExpense));
+            this.balance = 0;
+        }else{
+            this.balance -= PriceMenu.QSimLifeExpense;
+        }
     }
 
     public void ManuallyInfect(){
@@ -88,7 +110,12 @@ public class Sims : MonoBehaviour
         this.infection = new Infection(InfectionParams.GetInfectionPeriod(),this);
         this.infectionRepr = this.infection.ToString();
     }
+
+    // ============== Time Handlers ==============
+
     private void HandleTimeChange((int,int) timeNow){
+        
+        HandleEveryQ(timeNow);
         if(timeNow == keyTimeMorning){
             HandleMorningKeyTime(timeNow);
         }else if(timeNow == keyTimeDusk){
@@ -99,96 +126,73 @@ public class Sims : MonoBehaviour
             HandleOnTheRoad(timeNow);
         }
     }
-    private void HandleOnTheRoad((int,int) timeNow){
-        if (infection != null){
-            PolluteThePosition();
-        }else{
-            UpdateInfectionRepr();
-        }
-    }
-
-    // ========= CORE FUNCTION =========
-    private void HandleMorningKeyTime((int,int) timeNow){
-        // 无条件环境交互
-        if (infection != null){
-            this.infectionStatus = infection.Progress();
-            this.infectionRepr = this.infection.ToString();
-            PolluteThePosition();
-            if(this.infectionStatus == InfectionStatus.Recovered){
-                this.infoDebuggerManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
-                this.infection = null;
-                Debug.Log($"{this.simsName} has just recoverd!");
-            }else if(this.infectionStatus == InfectionStatus.Dead){
-                this.infoDebuggerManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
-                this.infection = null;
-                Debug.Log($"{this.simsName} has just dead!");
-            }
-        }
-        else{
-            UpdateInfectionRepr();
-            TryToInfect();
-        }
-
-        // 客观因素 Routing
-
-        // 主观因素 Routing
-        if(this.isTodayDayOff(this.day_) ){
-            if(isTodayGoOutForFun()){
-                if(this.placeManager == null){
-                    return;
-                }
-                Place commercialChoosed = RandomManager.Choice(this.placeManager.commercialPlaces);
-                this.SetOutMoving(commercialChoosed);
-            }else{
-                return;
-            }
-            
-        }else{
-            this.SetOutMoving(this.office);
-        }
-    }
-    private void HandleDuskKeyTime((int,int) timeNow){
+    
+    private void HandleEveryQ((int,int) timeNow){
         
-        // 无条件环境交互
-        if (infection != null){
-            PolluteThePosition();
-        }else{
-            UpdateInfectionRepr();
+        // 这个逻辑用于处理每个Q的支出和Paycheck
+        if(inSite == this.office){
+            this.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
         }
-        // 客观因素 Routing
-
-        // 主观因素 Routing
-
-        this.SetOutMoving(this.home);
-    }
-    // ========= END OF CORE FUNCTION =========
-    private void HandleNoonKeyTime((int,int) timeNow){
-        if (infection != null){
-            PolluteThePosition();
-        }else{
-            UpdateInfectionRepr();
-        }
+        this.DoLifeExpense();
     }
     private void HandleDayChange(int dayIndex){
         // infection related
         this.maxExposed = 0;
-        this.day_ = dayIndex;
+        this.isTodayOff = GetIsTodayOff(dayIndex);
     }
 
-    public bool isTodayGoOutForFun(){
-        // 客观因素
-        return RandomManager.FlipTheCoin(0.5f);
+    public void HandlePolicyChange(){
         
-        // 主观因素
+    }
+    public void HandleInfectionChange(){
+
     }
 
+    // 早晨KeyTime的更新
+    private void HandleMorningKeyTime((int,int) timeNow){
+        this.simSchedule.UpdateScheduleOnMorning();
+        if (infection != null){
+            this.DailyInteractWithInfection();
+        }
+        else{
+            this.UpdateExposureFromTile();
+            this.TryToInfect();
+        }
+        this.SetOutMoving(simSchedule.GetDestination());
+    }
 
+    // 晚间KeyTime的更新
+    private void HandleDuskKeyTime((int,int) timeNow){
+        
+        this.simSchedule.UpdateScheduleOnDusk();
+        if (infection != null){
+            PolluteThePosition();
+        }else{
+            UpdateExposureFromTile();
+        }
+        this.SetOutMoving(simSchedule.GetDestination());
+    }
+
+    // 中午KeyTime的更新
+    private void HandleNoonKeyTime((int,int) timeNow){
+        if (infection != null){
+            PolluteThePosition();
+        }else{
+            UpdateExposureFromTile();
+        }
+    }
+
+    // On the road KeyTime的更新
+    private void HandleOnTheRoad((int,int) timeNow){
+        if (infection != null){
+            PolluteThePosition();
+        }else{
+            UpdateExposureFromTile();
+        }
+    }
+    
+    // ============== End of Time Handlers ==============
     private void TryToInfect(){
-        // Vector2 currentPosition = transform.position;
-        // Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));
-        // VirusVolumeNode virusVolumeNode = virusVolumeMapManager.virusVolumeMap.GetNodeByCellPosition(currentCellPosition);
-        // int virusVolume = virusVolumeNode.virusVolumeAndSims.Item1;
-        // Sims infectedBy = virusVolumeNode.virusVolumeAndSims.Item2;
         if(this.infectionStatus == InfectionStatus.Dead){
             Debug.LogWarning("<A dead sim tring to get infected> We currently don't handle dead logic");
             return;
@@ -243,6 +247,21 @@ public class Sims : MonoBehaviour
     {
         if (destination == null) return false;
         return Utils.IsPointInsideArea(currentPosition, destination.placeLLAnchor, destination.placeURAnchor);
+    }
+
+    public void DailyInteractWithInfection(){
+        this.infectionStatus = infection.Progress();
+        this.infectionRepr = this.infection.ToString();
+        PolluteThePosition();
+        if(this.infectionStatus == InfectionStatus.Recovered){
+            this.infoDebuggerManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
+            this.infection = null;
+            Debug.Log($"{this.simsName} has just recoverd!");
+        }else if(this.infectionStatus == InfectionStatus.Dead){
+            this.infoDebuggerManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
+            this.infection = null;
+            Debug.Log($"{this.simsName} has just dead!");
+        }
     }
 
     public void Navigate()
@@ -308,14 +327,25 @@ public class Sims : MonoBehaviour
         UpdateInSiteRepr();
         
     }
-    public bool isTodayDayOff(int day){
-        return dayOff.Contains(day);
+
+    public bool GetIsTodayOff(int day){
+        // return true;
+        // today Off 需要被Sim的经济情况还有今天是不是休息日来进行一个主观决定，因此需要被放在Sim主类里面
+        if(dayOff.Contains(day)){
+            // return true;
+            if(RandomManager.FlipTheCoin(0.5f)){
+                return true;
+            }
+        }
+        return false;
     }
+
     public void SetOutMoving(Place destination)
     {
-        if(this.inSite == null) return;
+        if(this.inSite != null){
+            this.inSite.RemoveInsiteSims(this);
+        }
         this.destination = destination;
-        this.inSite.RemoveInsiteSims(this);
         this.inSite = null; // 设为 null，表示无效
         UpdateInSiteRepr();
     }
@@ -331,8 +361,9 @@ public class Sims : MonoBehaviour
         
         return new Vector2Int(dirX, dirY);
     }
-    public void UpdateInfectionRepr()
+    public void UpdateExposureFromTile()
     {
+        // 这个函数用于更新Sim被Tile所感染的情况，以及更新Repr
         Debug.Assert(infection == null, "infection is not null");
         Vector2 currentPosition = transform.position;
         Vector2Int currentCellPosition = new Vector2Int(Mathf.FloorToInt(currentPosition.x), Mathf.FloorToInt(currentPosition.y));

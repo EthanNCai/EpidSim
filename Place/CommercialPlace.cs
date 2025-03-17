@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-public class CommercialPlace : Place, ICommonTaxContributor
+public class CommercialPlace : Place, IContributablePlace
 {   
     public CFECommonTax<CommercialPlace> commonTaxCFE;
     public void CommercialInit(
@@ -13,7 +13,7 @@ public class CommercialPlace : Place, ICommonTaxContributor
         GameObject geoMapManagerObj,
         GridInfoManager gridDebuggerManager,
         InfoManager infoDebuggerManager,
-        CashFlowEntityManager cfeManager)
+        CFEManager cfeManager)
     {
         string commercialName = GetRandCommercialName();
         base.PlaceInit(
@@ -26,18 +26,18 @@ public class CommercialPlace : Place, ICommonTaxContributor
             gridDebuggerManager,
             infoDebuggerManager,
             cfeManager);
-        this.commonTaxCFE = cfeManager.CreateCommonTaxCFE<CommercialPlace>(this);
+        this.commonTaxCFE = cfeManager.CreateAndRegisterCommonTaxCFE<CommercialPlace>(this);
     }
     public void SayHi(){
         Debug.Log(base.ToString());
     }
-    public int calculateQContribution(){
+    public int CalculateQContribution(){
         int inSiteSims = base.inSiteSims.Count;
         if(inSiteSims == 0){
           return 0;  
         } 
         else{
-            return inSiteSims * PriceMenu.commercialTaxUnit;
+            return inSiteSims * PriceMenu.QCommercialTaxUnit;
         }
     }
 

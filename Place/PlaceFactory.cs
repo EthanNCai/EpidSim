@@ -16,7 +16,8 @@ public class PlaceFactory : MonoBehaviour
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
-        InfoManager infoDebuggerManager)
+        InfoManager infoDebuggerManager,
+        CFEManager cfeManager)
     {
         ResidentialPlace residentialPlace = CreatePlaceInstance<ResidentialPlace>(residentialPrefab, placeShape, position);
         residentialPlace.ResPlaceInit(
@@ -27,7 +28,8 @@ public class PlaceFactory : MonoBehaviour
             flowFieldRootObject,
             geoMapManagerObj,
             gridDebugManager,
-            infoDebuggerManager);
+            infoDebuggerManager,
+            cfeManager);
         return residentialPlace;
     }
 
@@ -38,7 +40,7 @@ public class PlaceFactory : MonoBehaviour
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
         InfoManager infoDebuggerManager,
-        CashFlowEntityManager cfeManager)
+        CFEManager cfeManager)
     {
         OfficePlace officePlace = CreatePlaceInstance<OfficePlace>(officePrefab, placeShape, position);
         officePlace.OfficePlaceInit(
@@ -60,7 +62,7 @@ public class PlaceFactory : MonoBehaviour
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
         InfoManager infoDebuggerManager,
-        CashFlowEntityManager cfeManager)
+        CFEManager cfeManager)
     {
         CommercialPlace commercialPlace = CreatePlaceInstance<CommercialPlace>(commercialPrefab, placeShape, position);
         commercialPlace.CommercialInit(
@@ -82,7 +84,7 @@ public class PlaceFactory : MonoBehaviour
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
         InfoManager infoDebuggerManager,
-        CashFlowEntityManager cfeManager)
+        CFEManager cfeManager)
     {
         MedicalPlace medicalPlace = CreatePlaceInstance<MedicalPlace>(medicalPrefab, placeShape, position);
         medicalPlace.CommercialInit(

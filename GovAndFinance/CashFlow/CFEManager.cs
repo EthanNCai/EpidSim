@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 
 
-public class CashFlowEntityManager : MonoBehaviour{
+public class CFEManager : MonoBehaviour{
 
     // For debug
     private GameObject cashFlowDebugInfoRoot;
@@ -16,6 +16,7 @@ public class CashFlowEntityManager : MonoBehaviour{
     public int cashFlow; 
 
     // CFEs
+    public List<CFEPolicy> policyCFEs = new List<CFEPolicy>();
     public List<CFECommon> commonCFEs = new List<CFECommon>();
     public List<CFEService> serviceCFEs = new List<CFEService>();
 
@@ -33,10 +34,10 @@ public class CashFlowEntityManager : MonoBehaviour{
         QUpdateDebugPanal(timeNow);
     }
     private void QUpdateDebugPanal((int,int) timeNow){
-        
+        this.debugInfoText.text = GenerateCFEsRepr();
     }
 
-    public CFECommonTax<TPlace> CreateCommonTaxCFE<TPlace>(TPlace place) where TPlace : Place, ICommonTaxContributor
+    public CFECommonTax<TPlace> CreateAndRegisterCommonTaxCFE<TPlace>(TPlace place) where TPlace : Place, IContributablePlace
     {
         // 这个函数的核心作用是Create并且 **注册** 到Manager的List里面
         // 并且这个注册，使用的是ContributeType来注册
@@ -44,14 +45,21 @@ public class CashFlowEntityManager : MonoBehaviour{
         commonCFEs.Add(commonTax);  
         return commonTax;
     }
-    public CFEServiceBuildingMaintaining<TPlace> CreateServiceBuildingMaintainingCFE<TPlace>(TPlace place) where TPlace : Place, IBuilingMaintaingExpense
+    public CFEServiceBuildingMaintaining<TPlace> CreateAndRegisterServiceBuildingMaintainingCFE<TPlace>(TPlace place) where TPlace : Place, IBuilingMaintaingExpense
     {
         CFEServiceBuildingMaintaining<TPlace> serviceBuildingMaintaining = new CFEServiceBuildingMaintaining<TPlace>(place);
         serviceCFEs.Add(serviceBuildingMaintaining);  
         return serviceBuildingMaintaining;
     }
 
-    public void RemoveCommonTaxCFE<TPlace>(CFECommonTax<TPlace> target) where TPlace : Place, ICommonTaxContributor
+    public CFEPolicyMinSub<TPlace> CreateAndRegisterPolicyMinSubCFE<TPlace>(TPlace place) where TPlace : Place, IContributablePlace{
+        CFEPolicyMinSub<TPlace> policyMinSubCFE = new CFEPolicyMinSub<TPlace>(place);
+        policyCFEs.Add(policyMinSubCFE);  
+        return policyMinSubCFE;
+    }
+
+
+    public void RemoveCommonTaxCFE<TPlace>(CFECommonTax<TPlace> target) where TPlace : Place, IContributablePlace
     {
         commonCFEs.Remove(target);
     }
@@ -64,10 +72,11 @@ public class CashFlowEntityManager : MonoBehaviour{
         for( int i=0; i<serviceCFEs.Count;i++){
             serviceCFEs[i].QUpdateExpenseItem();
         }
-        debugInfoText.text = GenerateCFEsRepr();
-        // Debug.Log(GetAllCFEsRepr());
+        for( int i=0; i<policyCFEs.Count;i++){
+            policyCFEs[i].QUpdateExpenseItem();
+        }
     }
-
+    
     public string GenerateCFEsRepr(){
         stringBuilder.Clear();
         // CashFlow
@@ -92,6 +101,19 @@ public class CashFlowEntityManager : MonoBehaviour{
         for( int i=0; i<serviceCFEs.Count;i++){
             string CFEName = serviceCFEs[i].CFEName;
             (int QuartExpense,int DayExpense) =  serviceCFEs[i].expenseItem.QGetExpense();
+            stringBuilder.Append(CFEName);
+            stringBuilder.Append(" - Quert: ");
+            stringBuilder.Append(QuartExpense);
+            stringBuilder.Append(" - Day: ");
+            stringBuilder.Append(DayExpense);
+            stringBuilder.Append("\n");
+        }
+
+        // POLICY
+        stringBuilder.AppendFormat("\n==== Policy ====\n");
+        for( int i=0; i<policyCFEs.Count;i++){
+            string CFEName = policyCFEs[i].CFEName;
+            (int QuartExpense,int DayExpense) =  policyCFEs[i].expenseItem.QGetExpense();
             stringBuilder.Append(CFEName);
             stringBuilder.Append(" - Quert: ");
             stringBuilder.Append(QuartExpense);

@@ -13,7 +13,7 @@ public class MedicalPlace : Place, IBuilingMaintaingExpense
         GameObject geoMapManagerObj,
         GridInfoManager gridDebuggerManager,
         InfoManager infoDebuggerManager,
-        CashFlowEntityManager cfeManager)
+        CFEManager cfeManager)
     {
         string medicalPlaceName = GetMedicalName();
         base.PlaceInit(
@@ -26,7 +26,7 @@ public class MedicalPlace : Place, IBuilingMaintaingExpense
             gridDebuggerManager,
             infoDebuggerManager,
             cfeManager);
-        this.serviceBuildingMaintainingCFE = cfeManager.CreateServiceBuildingMaintainingCFE<MedicalPlace>(this);
+        this.serviceBuildingMaintainingCFE = cfeManager.CreateAndRegisterServiceBuildingMaintainingCFE<MedicalPlace>(this);
     }
     public void SayHi(){
         Debug.Log(base.ToString());
@@ -40,6 +40,6 @@ public class MedicalPlace : Place, IBuilingMaintaingExpense
 
     public int calculateQExpense()
     {
-        return PriceMenu.medicalPlaceMaintaingExpense;
+        return PriceMenu.QMedicalPlaceMaintaingExpense;
     }
 }

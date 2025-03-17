@@ -18,7 +18,7 @@ public class PlaceManager : MonoBehaviour
 
     public InfoManager infoDebuggerManager;
 
-    public CashFlowEntityManager cfeManager;
+    public CFEManager cfeManager;
     // public ResidentialPlace residentialPlace;
     // public OfficePlace officePlace;
     public static event Action OnPlaceSpwaned;
@@ -41,7 +41,8 @@ public class PlaceManager : MonoBehaviour
                 flowFieldRootObject,
                 geoMapManagerObj,
                 gridDebuggerManager,
-                infoDebuggerManager
+                infoDebuggerManager,
+                cfeManager
                 );
             newResidential.SayHi();
             residentialPlaces.Add(newResidential);
