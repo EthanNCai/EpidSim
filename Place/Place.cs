@@ -10,7 +10,6 @@ using UnityEngine.UIElements;
 public class Place : MonoBehaviour
 {
     public int uid;
-    public int volumePerTile = 10;
     public string palaceName = "default";
     public string placeFullName;
     public Vector2Int placeShape;
@@ -74,15 +73,7 @@ public class Place : MonoBehaviour
         );
     }
     
-    private bool CheckIsAvailable(){
-        int tiles = this.placeShape.x * this.placeShape.y;
-        int volume = tiles * volumePerTile;
-        if (this.inSiteSims.Count < volume){
-            return true;   
-        }else{
-            return false;
-        }
-    }
+
 
     // public bool InsertRelevantSimsWithAvailabilityCheck(Sims incomingSim){
     //     if (CheckIsAvailable()){

@@ -100,4 +100,17 @@ public class PlaceManager : MonoBehaviour
     {
         return residentialPlaces[UnityEngine.Random.Range(0,residentialPlaces.Count)];
     }
+
+    public MedicalPlace GetAvailableMedicalPlace()
+    {
+        foreach (var medicalPlace in medicalPlaces)
+        {
+            if (medicalPlace.CheckIsAvailable())
+            {
+                return medicalPlace;
+            }
+        }
+        return null;
+    }
+
 }

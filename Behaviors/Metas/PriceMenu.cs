@@ -10,5 +10,9 @@ public static class PriceMenu{
     public static int QSimOfficeIncome = 10;
 
     // 下面的东西都是按Call算的
+
+
+
+    public static int QRawMedicalFee = 10;
     
 }   

@@ -6,6 +6,7 @@ public class InfoManager : MonoBehaviour{
     public InfectionInfoManager infectionInfoManager = null;
     public CFEManager cfeManager = null;
     public CashFlowManager CFEManager = null;
+    public PolicyManager policyManager = null;
     // public ToastManager toastManager;
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();

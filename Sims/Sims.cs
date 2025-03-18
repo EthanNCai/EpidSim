@@ -48,12 +48,12 @@ public class Sims : MonoBehaviour
     public int toWork = 0;
     public int toWorkQ = 0;
     // General
-    private int balance = 10000;
+    public int balance = 10000;
 
     public PlaceManager placeManager;
 
     // DEBUG RELATED
-    public InfoManager infoDebuggerManager;
+    public InfoManager infoManager;
     // INFECTION RELATED
 
     public Infection infection = null;
@@ -67,13 +67,13 @@ public class Sims : MonoBehaviour
 
     public void SimsInit(
         VirusVolumeGridMapManager virusVolumeMapManager,
-        InfoManager infoDebuggerManager,
+        InfoManager infoManager,
         PlaceManager placeManager,
         bool infected = false
         )
     {
         this.placeManager = placeManager;
-        this.infoDebuggerManager = infoDebuggerManager;
+        this.infoManager = infoManager;
         this.virusVolumeMapManager = virusVolumeMapManager;
         this.uid = UniqueIDGenerator.GetUniqueID();
         this.simsName = SimsNameGenerator.GetSimsName();
@@ -201,7 +201,7 @@ public class Sims : MonoBehaviour
         if(isInfected){
             this.infection = new Infection(InfectionParams.GetInfectionPeriod(),this.maxExposedBy);
             this.infectionRepr = this.infection.ToString();
-            infoDebuggerManager.infectionInfoManager.InfectionAddition(this,this.infectionStatus);
+            infoManager.infectionInfoManager.InfectionAddition(this,this.infectionStatus);
             this.infectionStatus = InfectionStatus.Infected;
         } 
     }
@@ -251,14 +251,15 @@ public class Sims : MonoBehaviour
 
     public void DailyInteractWithInfection(){
         this.infectionStatus = infection.Progress();
+        this.simSchedule.UpdateScheduleOnInfectionChanged();
         this.infectionRepr = this.infection.ToString();
         PolluteThePosition();
         if(this.infectionStatus == InfectionStatus.Recovered){
-            this.infoDebuggerManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
+            this.infoManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
             this.infection = null;
             Debug.Log($"{this.simsName} has just recoverd!");
         }else if(this.infectionStatus == InfectionStatus.Dead){
-            this.infoDebuggerManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
+            this.infoManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
             this.infection = null;
             Debug.Log($"{this.simsName} has just dead!");
         }
