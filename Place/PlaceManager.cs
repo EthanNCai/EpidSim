@@ -62,7 +62,7 @@ public class PlaceManager : MonoBehaviour
             newOffice.SayHi();
             this.officePlaces.Add(newOffice);   
         }
-        OnPlaceSpwaned?.Invoke();
+        
 
 
         foreach(var commercialPosition in commercials){
@@ -92,6 +92,7 @@ public class PlaceManager : MonoBehaviour
                 );
             this.medicalPlaces.Add(newMedicalPlace);
         }
+        OnPlaceSpwaned?.Invoke();
     }
     public OfficePlace GetRandomOffice(){
         return officePlaces[UnityEngine.Random.Range(0,officePlaces.Count)];
@@ -100,4 +101,17 @@ public class PlaceManager : MonoBehaviour
     {
         return residentialPlaces[UnityEngine.Random.Range(0,residentialPlaces.Count)];
     }
+
+    public MedicalPlace GetAvailableMedicalPlace()
+    {
+        foreach (var medicalPlace in medicalPlaces)
+        {
+            if (medicalPlace.CheckIsAvailable())
+            {
+                return medicalPlace;
+            }
+        }
+        return null;
+    }
+
 }

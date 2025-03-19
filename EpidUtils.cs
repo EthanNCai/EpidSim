@@ -74,9 +74,14 @@ public static class RandomManager
     }
     public static bool FlipTheCoin(double probability)
     {
-        if (probability < 0 || probability > 1){
-            throw new ArgumentOutOfRangeException(nameof(probability), "Probability must be between 0 and 1.");
-        }
+
+        Debug.Assert(probability >= 0 && probability <= 1, $"Probability is out of range {probability}");
+
+        // 确保概率在 [0,1] 范围内
+        probability = Math.Clamp(probability, 0.0, 1.0);
+
+        // 断言，确保值已经被 clamped
+
         return random.NextDouble() < probability;
     }
     public static HashSet<int> GetRandomDayOff()

@@ -10,14 +10,13 @@ using UnityEngine.UIElements;
 public class Place : MonoBehaviour
 {
     public int uid;
-    public int volumePerTile = 10;
     public string palaceName = "default";
     public string placeFullName;
     public Vector2Int placeShape;
     public Vector2Int placeLLAnchor;
     public Vector2Int placeURAnchor;
     public Vector2Int basePosition;
-    public FlowFieldMapManager flowFieldMapsManager;
+    public SingleFlowFieldMapManager flowFieldMapsManager;
     public List<Sims> inSiteSims = new List<Sims>();
     public InfoManager infoManager;
     public CFEManager cfeManager;
@@ -54,7 +53,7 @@ public class Place : MonoBehaviour
         GeoMapsManager geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
         this.SetUpGeoMapBlocked(geoMapManager);
         geoMapManager.InvokeMapChangedEvent();
-        this.flowFieldMapsManager = gameObject.AddComponent<FlowFieldMapManager>();
+        this.flowFieldMapsManager = gameObject.AddComponent<SingleFlowFieldMapManager>();
         this.flowFieldMapsManager.FlowFieldMapsManagerInit(
             basePosition, 
             "placeholder",
@@ -74,15 +73,7 @@ public class Place : MonoBehaviour
         );
     }
     
-    private bool CheckIsAvailable(){
-        int tiles = this.placeShape.x * this.placeShape.y;
-        int volume = tiles * volumePerTile;
-        if (this.inSiteSims.Count < volume){
-            return true;   
-        }else{
-            return false;
-        }
-    }
+
 
     // public bool InsertRelevantSimsWithAvailabilityCheck(Sims incomingSim){
     //     if (CheckIsAvailable()){

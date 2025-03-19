@@ -29,7 +29,7 @@ public class VirusVolumeGridMapManager : MonoBehaviour
 
     public void PolluteTheTile(Vector2Int cellPosition, Sims sims, int incomingVolume){
         VirusVolumeNode virusVolumeNode = this.virusVolumeMap.GetNodeByCellPosition(cellPosition);
-        if(virusVolumeMap == null) return;
+        if(virusVolumeNode == null) return;
         if (virusVolumeNode.virusVolumeAndSims.Item1 <= incomingVolume){
             virusVolumeNode.virusVolumeAndSims = (incomingVolume, sims);
         }
