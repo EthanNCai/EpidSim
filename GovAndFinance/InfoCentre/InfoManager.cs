@@ -8,11 +8,14 @@ public class InfoManager : MonoBehaviour{
     public CashFlowManager CFEManager = null;
     public PolicyManager policyManager = null;
     // public ToastManager toastManager;
+    public VirusManager virusManager;
+    
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();
     public void Awake(){
         this.infectionInfoManager = new InfectionInfoManager(GetListedRoot("InfectionInfo"));
         this.cfeManager.SetupDebug(GetListedRoot("CFEInfo"));
+        this.virusManager.SetupDebug(GetListedRoot("VirusSevirity"));
         TimeManager.OnDayChanged += ShowDaySumUp;
 
     }

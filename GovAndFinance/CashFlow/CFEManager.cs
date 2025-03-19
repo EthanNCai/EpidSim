@@ -11,7 +11,7 @@ public class CFEManager : MonoBehaviour{
     private GameObject cashFlowDebugInfoRoot;
     private TextMesh debugInfoText;
     public StringBuilder stringBuilder = new StringBuilder();
-    public StringBuilder stringBuilderForDebug = new StringBuilder();
+    // public StringBuilder stringBuilderForDebug = new StringBuilder();
     // Cash Flow 
     public int cashFlow; 
 

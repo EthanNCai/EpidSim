@@ -62,7 +62,7 @@ public class PlaceManager : MonoBehaviour
             newOffice.SayHi();
             this.officePlaces.Add(newOffice);   
         }
-        OnPlaceSpwaned?.Invoke();
+        
 
 
         foreach(var commercialPosition in commercials){
@@ -92,6 +92,7 @@ public class PlaceManager : MonoBehaviour
                 );
             this.medicalPlaces.Add(newMedicalPlace);
         }
+        OnPlaceSpwaned?.Invoke();
     }
     public OfficePlace GetRandomOffice(){
         return officePlaces[UnityEngine.Random.Range(0,officePlaces.Count)];

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Assertions.Must;
 
 public class SimSchedule{
@@ -49,29 +50,35 @@ public class SimSchedule{
         // 0 - +inf
         int balance = this.hostedSim.balance;
         // 0 - 100
-        int sickness = infection.virusVolume;
+        int volume = infection.virusVolume;
+
+        Debug.Assert(volume >= 0 || justDead || justRevocerd, $"sims->{hostedSim.uid}-{hostedSim.infection.virusVolume}-belowzero");
         // 96
         int qPerday = CommonConsts.qPerday;
-
-        float willingnessToMedical = this.CalculateHospitalWillingness(acutalMedicalFee,balance,sickness,qPerday);
-        bool isGoToMedicalRightNow = RandomManager.FlipTheCoin(willingnessToMedical);
-
-        // this.FlushSchedule();
-        if(isGoToMedicalRightNow && !justRevocerd){
-            if(this.pInfectionRelated == null){
-                // 还没在医院了
-                MedicalPlace medicalPlace = this.hostedSim.placeManager.GetAvailableMedicalPlace();
-                if(medicalPlace == null){
-                    Debug.Log("A sim willing to go to hospital, but no seats left");
+        
+        if(!justRevocerd && !justDead){
+            float willingnessToMedical = this.CalculateHospitalWillingness(acutalMedicalFee,balance,volume,qPerday);
+            bool isGoToMedicalRightNow = RandomManager.FlipTheCoin(willingnessToMedical);
+            Debug.Log("willingness to Med" + willingnessToMedical);
+            if(isGoToMedicalRightNow){
+                if(this.pInfectionRelated == null){
+                    // 还没在医院了
+                    MedicalPlace medicalPlace = this.hostedSim.placeManager.GetAvailableMedicalPlace();
+                    if(medicalPlace == null){
+                        Debug.Log("A sim willing to go to hospital, but no seats left");
+                    }else{
+                        pInfectionRelated = medicalPlace;
+                    }
                 }else{
-                    pInfectionRelated = medicalPlace;
+                    // 已经在一个medical facility了
+                    // do nothing here...
                 }
             }else{
-                // 已经在一个medical facility了
-                // do nothing here...
+                // 放弃治疗
+                this.pInfectionRelated = null;
             }
         }else{
-            // just recoverd
+            // 已经痊愈或者死亡
             this.pInfectionRelated = null;
         }
     }
@@ -94,42 +101,24 @@ public class SimSchedule{
     public bool isTodayDayOff(int day){
         return hostedSim.dayOff.Contains(day);
     }
-    float CalculateHospitalWillingness(int acutalMedicalFee, int balance, int sickness, int qPerday)
+    float CalculateHospitalWillingness(int actualMedicalFee, int balance, int volume, int qPerday)
     {
-        float maxWillingness = 1.0f; // 最大意愿
         float minWillingness = 0.0f; // 最小意愿
 
         // 计算每天的医疗支出
-        int dailyCost = qPerday * acutalMedicalFee;
-        int fiveDayCost = dailyCost * 5;
+        int dailyCost = qPerday * actualMedicalFee;
+        int twoDaysCost = dailyCost * 2;
 
-        // **情况 1：余额不足 1 天治疗费用，直接 0**
-        if (balance < dailyCost)
+            // STEP 1: 钱的判断（二极管）
+        if (balance <= twoDaysCost)
         {
-            return minWillingness;
+            return minWillingness; // 没钱
+        }else{
+            // STEP 2: sickness的判断（线性）
+            return this.hostedSim.infoManager.virusManager.GetVirusSeverity() * volume * 0.01f;
         }
-
-        if (sickness <= 20){
-            return minWillingness;
-        }
-
-        // **情况 2：余额足够 3 天，意愿直接 1**
-        if (balance >= fiveDayCost)
-        {
-            return maxWillingness;
-        }
-
-        // **情况 3：余额在 1-3 天之间，意愿度线性增长**
-        float balanceFactor = (float)(balance - dailyCost) / (fiveDayCost - dailyCost); // 归一化到 0-1
-
-        // **疾病影响，越严重越想去**
-        float sicknessFactor = sickness / 100f;
-
-        // **综合意愿度 = 余额影响 + 疾病影响**
-        float willingness = Mathf.Clamp01(0.5f * balanceFactor + 0.5f * sicknessFactor);
-
-        return willingness;
     }
+
     private void FlushSchedule(){
         pInfectionRelated = null; // infection related
         pJobRelated = null;

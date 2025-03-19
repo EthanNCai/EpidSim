@@ -16,7 +16,7 @@ public class Place : MonoBehaviour
     public Vector2Int placeLLAnchor;
     public Vector2Int placeURAnchor;
     public Vector2Int basePosition;
-    public FlowFieldMapManager flowFieldMapsManager;
+    public SingleFlowFieldMapManager flowFieldMapsManager;
     public List<Sims> inSiteSims = new List<Sims>();
     public InfoManager infoManager;
     public CFEManager cfeManager;
@@ -53,7 +53,7 @@ public class Place : MonoBehaviour
         GeoMapsManager geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
         this.SetUpGeoMapBlocked(geoMapManager);
         geoMapManager.InvokeMapChangedEvent();
-        this.flowFieldMapsManager = gameObject.AddComponent<FlowFieldMapManager>();
+        this.flowFieldMapsManager = gameObject.AddComponent<SingleFlowFieldMapManager>();
         this.flowFieldMapsManager.FlowFieldMapsManagerInit(
             basePosition, 
             "placeholder",

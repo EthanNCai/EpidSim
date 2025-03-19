@@ -5,7 +5,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEditor.UI;
 using UnityEngine;
 
-public class FlowFieldMapManager : MonoBehaviour
+public class SingleFlowFieldMapManager : MonoBehaviour
 {
     public MapManager mapManager;
     public FlowFieldNode destination;
@@ -95,26 +95,43 @@ public class FlowFieldMapManager : MonoBehaviour
             GeoMapsManager geoMapManager = geoMapManagerObj.GetComponent<GeoMapsManager>();
             GridNodeMap<GeoNode> geoMap = geoMapManager.geoMap;
 
-            if(geoMap.GetNodeByCellPosition(currentNode.cellPosition).blocked){
-                
-                foreach (var neighbor in new FlowFieldNode[] { 
-                neighbors.left,
-                neighbors.right,
-                }){
+            if (geoMap.GetNodeByCellPosition(currentNode.cellPosition).blocked)
+            {
+                FlowFieldNode leftNeighbor = neighbors.left;
+                FlowFieldNode rightNeighbor = neighbors.right;
 
-                    if (!geoMap.GetNodeByCellPosition(neighbor.cellPosition).blocked)
-                    {
-                        minStepsToDestinationNeighbor = neighbor;
-                        break;
-                    }
+                bool leftValid = (leftNeighbor != null) && !geoMap.GetNodeByCellPosition(leftNeighbor.cellPosition).blocked;
+                bool rightValid = (rightNeighbor != null) && !geoMap.GetNodeByCellPosition(rightNeighbor.cellPosition).blocked;
+
+                if (leftValid && rightValid)
+                {
+                    // 计算左右邻居到目标的距离
+                    int leftDistance = Mathf.Abs(leftNeighbor.cellPosition.x - destination.cellPosition.x);
+                    int rightDistance = Mathf.Abs(rightNeighbor.cellPosition.x - destination.cellPosition.x);
+
+                    // 选择距离较小的方向
+                    minStepsToDestinationNeighbor = (leftDistance < rightDistance) ? leftNeighbor : rightNeighbor;
                 }
-                if(minStepsToDestinationNeighbor != null){
-                    currentNode.flowFieldDirection =  minStepsToDestinationNeighbor.cellPosition - currentNode.cellPosition;
-                }else{
-                    currentNode.flowFieldDirection = Vector2Int.left;
+                else if (leftValid)
+                {
+                    minStepsToDestinationNeighbor = leftNeighbor;
                 }
-                
-            }else{
+                else if (rightValid)
+                {
+                    minStepsToDestinationNeighbor = rightNeighbor;
+                }
+
+                // 设定 flowFieldDirection
+                if (minStepsToDestinationNeighbor != null)
+                {
+                    currentNode.flowFieldDirection = minStepsToDestinationNeighbor.cellPosition - currentNode.cellPosition;
+                }
+                else
+                {
+                    currentNode.flowFieldDirection = Vector2Int.left; // 如果都不行，默认向左
+                }
+            }
+            else{
                 foreach (var neighbor in new FlowFieldNode[] { 
                 neighbors.up,
                 neighbors.down,
