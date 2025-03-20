@@ -5,7 +5,7 @@ public class InfoManager : MonoBehaviour{
     public GameObject rootOfTheAll;
     public InfectionInfoManager infectionInfoManager = null;
     public CFEManager cfeManager = null;
-    public CashFlowManager CFEManager = null;
+    // public CashFlowManager CFEManager = null;
     public PolicyManager policyManager = null;
     // public ToastManager toastManager;
     public VirusManager virusManager;

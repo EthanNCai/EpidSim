@@ -52,11 +52,12 @@ public class SimSchedule{
         // 0 - 100
         int volume = infection.virusVolume;
 
-        Debug.Assert(volume >= 0 || justDead || justRevocerd, $"sims->{hostedSim.uid}-{hostedSim.infection.virusVolume}-belowzero");
         // 96
         int qPerday = CommonConsts.qPerday;
         
         if(!justRevocerd && !justDead){
+
+            Debug.Assert(volume >= 0 || justDead || justRevocerd, $"sims->{hostedSim.uid}-{hostedSim.infection.virusVolume}-belowzero");
             float willingnessToMedical = this.CalculateHospitalWillingness(acutalMedicalFee,balance,volume,qPerday);
             bool isGoToMedicalRightNow = RandomManager.FlipTheCoin(willingnessToMedical);
             Debug.Log("willingness to Med" + willingnessToMedical);
@@ -88,6 +89,16 @@ public class SimSchedule{
     public void UpdateScheduleOnInfectionKowledgeChange(){
         // read policy
     }
+
+    public void UpdateScheduleOnFeeUnaffordable(){
+        // 当Sims因为非生活费的原因而破产的时候，就会触发这个函数
+        Debug.Assert(hostedSim.inSite is MedicalPlace,"Sims 破产了，但是它却不再医院里面（理论上只有医院才能导致破产）");
+        if(this.hostedSim.inSite is MedicalPlace){
+            this.pInfectionRelated = null;
+            return;
+        }
+    }
+
     public Place GetDestination(){
         if(pInfectionRelated != null){
             return pInfectionRelated;

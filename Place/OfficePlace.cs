@@ -26,7 +26,7 @@ public class OfficePlace : Place, IContributablePlace
             gridDebuggerManager,
             infoDebuggerManager,
             cfeManager);
-        this.commonTaxCFE = cfeManager.CreateAndRegisterCommonTaxCFE<OfficePlace>(this);
+        this.commonTaxCFE = cfeManager.CreateCommonTaxCFE<OfficePlace>(this);
     }
     public void SayHi(){
         Debug.Log(base.ToString());

@@ -3,11 +3,12 @@ using Unity.VisualScripting;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-public class MedicalPlace : Place, IBuilingMaintaingExpense
+public class MedicalPlace : Place, IContributablePlace, IExpensablePlace
 {   
     public int volumePerTile = 10;
     public int volume;
     public CFEServiceBuildingMaintaining<MedicalPlace> serviceBuildingMaintainingCFE;
+    public CFECommonFees<MedicalPlace> commonFeesCFE;
     public void CommercialInit(
         Vector2Int placeShape, 
         Vector2Int basePosition, 
@@ -30,7 +31,8 @@ public class MedicalPlace : Place, IBuilingMaintaingExpense
             infoDebuggerManager,
             cfeManager);
         this.volume = volumePerTile * placeShape.x * placeShape.y;
-        this.serviceBuildingMaintainingCFE = cfeManager.CreateAndRegisterServiceBuildingMaintainingCFE<MedicalPlace>(this);
+        this.serviceBuildingMaintainingCFE = cfeManager.CreateServiceBuildingMaintainingCFE<MedicalPlace>(this);
+        this.commonFeesCFE = cfeManager.CreateCommonFeesCFE<MedicalPlace>(this);
     }
     public void SayHi(){
         Debug.Log(base.ToString());
@@ -49,10 +51,10 @@ public class MedicalPlace : Place, IBuilingMaintaingExpense
         }
     }
 
-    public int calculateQExpense(){
+    public int CalculateQExpense(){
         return PriceMenu.QMedicalPlaceMaintaingExpense;
     }
     public int CalculateQContribution(){
-        return inSiteSims.Count * PriceMenu.QRawMedicalFee;
+        return inSiteSims.Count * infoManager.policyManager.GetSubsidisedMedicalFee();
     }
 }

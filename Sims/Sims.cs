@@ -95,12 +95,24 @@ public class Sims : MonoBehaviour
     public void ReceivePaycheck(int paycheckIn){
         this.balance += paycheckIn;
     }
-    public void DoLifeExpense(){
+    public void CommitLifeExpense(){
         if(this.balance - PriceMenu.QSimLifeExpense < 0){
             this.home.AttachSubsidyToResidential(-1 * (this.balance - PriceMenu.QSimLifeExpense));
             this.balance = 0;
         }else{
             this.balance -= PriceMenu.QSimLifeExpense;
+        }
+    }
+    public void CommitMedicalExpense(){
+        int medicalCost = this.infoManager.policyManager.GetSubsidisedMedicalFee();
+        if(this.balance - medicalCost <= 0){
+            // kick off the hospital right now
+            Debug.Log($"{this.simsName} has just bankrupt because of medical cost");
+            this.simSchedule.UpdateScheduleOnFeeUnaffordable();
+            this.SetOutMoving(simSchedule.GetDestination());
+        }else{
+            this.balance -= medicalCost;
+            Debug.Log($"{this.simsName} has just paid {medicalCost} for medical care");
         }
     }
 
@@ -130,10 +142,13 @@ public class Sims : MonoBehaviour
     private void HandleEveryQ((int,int) timeNow){
         
         // 这个逻辑用于处理每个Q的支出和Paycheck
-        if(inSite == this.office){
+        if(inSite is OfficePlace){
             this.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
         }
-        this.DoLifeExpense();
+        if (inSite is MedicalPlace){
+            this.CommitMedicalExpense();
+        }
+        this.CommitLifeExpense();
     }
     private void HandleDayChange(int dayIndex){
         // infection related
@@ -147,6 +162,8 @@ public class Sims : MonoBehaviour
     public void HandleInfectionChange(){
 
     }
+
+    
 
     // 早晨KeyTime的更新
     private void HandleMorningKeyTime((int,int) timeNow){
