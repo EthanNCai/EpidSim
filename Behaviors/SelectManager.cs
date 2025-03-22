@@ -4,7 +4,9 @@ using TMPro;
 public class SelectionManager : MonoBehaviour
 {
     public TextMeshProUGUI hoverText;  // 悬浮提示文本（拖入UI组件）
-    
+    public SimsInfoUIManager simsInfoUIManager; // 关联 UI 管理脚本
+
+    private Sims highlightedSims;
     private SelectableObject highlightedObject;  // 记录当前高亮对象
 
     void Start()
@@ -24,37 +26,46 @@ public class SelectionManager : MonoBehaviour
     void DetectHoverAndSelect()
     {
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hitSims = Physics2D.Raycast(mousePos, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Sims"));
-        RaycastHit2D hitPlace = Physics2D.Raycast(mousePos, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Place"));
 
-        SelectableObject newHighlighted = null;
+        // **优先检测 Sims**
+        RaycastHit2D hitSims = Physics2D.Raycast(mousePos, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Sims"));
+        Sims newHighlightedSims = null;
+        SelectableObject newHighlightedObject = null;
 
         if (hitSims.collider != null)
         {
-            newHighlighted = hitSims.collider.GetComponent<SelectableObject>();
+            newHighlightedSims = hitSims.collider.GetComponent<Sims>();
+            newHighlightedObject = hitSims.collider.GetComponent<SelectableObject>();
         }
-        else if (hitPlace.collider != null)
+        else
         {
-            newHighlighted = hitPlace.collider.GetComponent<SelectableObject>();
+            // **如果没有检测到 Sims，再检测 Place**
+            RaycastHit2D hitPlace = Physics2D.Raycast(mousePos, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Place"));
+            if (hitPlace.collider != null)
+            {
+                newHighlightedObject = hitPlace.collider.GetComponent<SelectableObject>();
+            }
         }
 
-        // 处理悬浮文本
-        if (newHighlighted != null && hoverText != null)
+        // **更新悬浮文本**
+        if (newHighlightedObject != null && hoverText != null)
         {
-            hoverText.text = newHighlighted.gameObject.name; // 显示选中物体的名字
+            hoverText.text = newHighlightedObject.gameObject.name; // 显示物体名称
             hoverText.gameObject.SetActive(true);
-            highlightedObject = newHighlighted;  // 更新当前选中的对象
         }
         else if (hoverText != null)
         {
-            hoverText.gameObject.SetActive(false); // 没有选中物体就隐藏
-            highlightedObject = null;
+            hoverText.gameObject.SetActive(false); // 隐藏文本
         }
 
-        // 处理鼠标点击
-        if (Input.GetMouseButtonDown(0) && highlightedObject != null)
+        // **更新选中对象**
+        highlightedSims = newHighlightedSims;
+        highlightedObject = newHighlightedObject;
+
+        // **处理鼠标点击**
+        if (Input.GetMouseButtonDown(0) && highlightedSims != null)
         {
-            Debug.Log("Selected: " + highlightedObject.gameObject.name);
+            simsInfoUIManager.ShowSimsInfo(highlightedSims);
         }
     }
 

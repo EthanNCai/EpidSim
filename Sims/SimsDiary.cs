@@ -8,18 +8,27 @@ using UnityEngine.UIElements;
 
 public class SimsDiary
 {
-    private Queue<SimsDiaryItem> diaryQueue = new Queue<SimsDiaryItem>();
+    private List<SimsDiaryItem> diaryList = new List<SimsDiaryItem>();
 
     public void AppendDiaryItem(SimsDiaryItem item)
     {
-        if (diaryQueue.Count >= 50) // check if the size is over 50, if so remove the old entries.
+        if (diaryList.Count >= 50) // check if the size is over 50, if so remove the oldest entries.
         {
-            diaryQueue.Dequeue(); // remove the oldest entry
+            diaryList.RemoveAt(0); // remove the oldest entry
         }
-        diaryQueue.Enqueue(item); // add new entry
+        diaryList.Add(item); // add new entry
+    }
+
+    public void GetDiaryEntries(List<string> entries)
+    {
+        entries.Clear(); // Reuse the existing list, clear previous entries
+        foreach (var item in diaryList)
+        {
+            entries.Add($"[{item.timestamp.d}D {item.timestamp.h}H {item.timestamp.q}Q] {item.simBehaviorDetial}");
+        }
+        // return entries;
     }
 }
-
 
 public struct SimsDiaryItem{
 
@@ -34,12 +43,12 @@ public struct SimsDiaryItem{
     public (int d, int h, int q) timestamp;
     public string simBehaviorDetial;
 
-    public StringBuilder stringBuilder;
+    // public StringBuilder stringBuilder;
 
     public SimsDiaryItem( (int d, int h, int q) timestamp, string simBehaviorDetial){
         this.timestamp = timestamp;
         this.simBehaviorDetial = simBehaviorDetial;
-        this.stringBuilder = new StringBuilder();
+        // this.stringBuilder = new StringBuilder();
     }
 }
 

@@ -55,6 +55,8 @@ public class Sims : MonoBehaviour
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
     VirusVolumeGridMapManager virusVolumeMapManager;
 
+    public TimeManager timeManager;
+
     // debug only
     public string infectionRepr = "";
     public string inSiteRepr = "";
@@ -63,9 +65,11 @@ public class Sims : MonoBehaviour
         VirusVolumeGridMapManager virusVolumeMapManager,
         InfoManager infoManager,
         PlaceManager placeManager,
+        TimeManager timeManager,
         bool infected = false
         )
     {
+        this.timeManager = timeManager;
         this.placeManager = placeManager;
         this.infoManager = infoManager;
         this.virusVolumeMapManager = virusVolumeMapManager;

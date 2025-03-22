@@ -7,7 +7,7 @@ public class SimsFactory: MonoBehaviour
     public GameObject simsPrefab;
     public GameObject virusVolumeMapManagerObj;
     public InfoManager infoDebuggerManager;
-
+    public TimeManager timeManager;
     public PlaceManager placeManager;
     // public VirusVolumeMapManager virusVolumeMapManager;
 
@@ -20,6 +20,7 @@ public class SimsFactory: MonoBehaviour
             virusVolumeMapManagerObj.GetComponent<VirusVolumeGridMapManager>(),
             infoDebuggerManager,
             placeManager,
+            timeManager,
             false);
         return sims;
     }

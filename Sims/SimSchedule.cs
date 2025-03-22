@@ -19,15 +19,20 @@ public class SimScheduler{
     // 早晨决定去哪里？
     public void UpdateScheduleOnMorning(){
         // flush Leisure 
-        Debug.Log(hostedSim.isTodayOff);
+        // Debug.Log(hostedSim.isTodayOff);
         this.pLeisureRelated = null;
         if(hostedSim.isTodayOff){
             Place commercialChoosed = RandomManager.Choice(hostedSim.placeManager.commercialPlaces);
             this.pLeisureRelated = commercialChoosed;
         }else{
             this.pLeisureRelated = null;
-            this.pJobRelated = hostedSim.home;
+            //this.pJobRelated = hostedSim.home;
         }
+        this.hostedSim.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                this.hostedSim.timeManager.GetTime(),
+                SimBehaviorDetial.GotoWorkEvent(hostedSim.office)
+            ));
         this.pJobRelated = hostedSim.office;
     }
 
@@ -35,8 +40,13 @@ public class SimScheduler{
     public void UpdateScheduleOnDusk(){
         this.pJobRelated = hostedSim.home;
         if(hostedSim.isTodayOff){
-            this.pLeisureRelated = hostedSim.home;
+            this.pLeisureRelated = null;
         }
+        this.hostedSim.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                this.hostedSim.timeManager.GetTime(),
+                SimBehaviorDetial.GoHomeEvent(hostedSim.home)
+        ));
     }
     public void UpdateScheduleOnInfectionChanged(bool justRevocerd = false, bool justDead = false){
         // read infection
@@ -60,7 +70,7 @@ public class SimScheduler{
             Debug.Assert(volume >= 0 || justDead || justRevocerd, $"sims->{hostedSim.uid}-{hostedSim.infection.virusVolume}-belowzero");
             float willingnessToMedical = this.CalculateHospitalWillingness(acutalMedicalFee,balance,volume,qPerday);
             bool isGoToMedicalRightNow = RandomManager.FlipTheCoin(willingnessToMedical);
-            Debug.Log("willingness to Med" + willingnessToMedical);
+            // Debug.Log("willingness to Med" + willingnessToMedical);
             if(isGoToMedicalRightNow){
                 if(this.pInfectionRelated == null){
                     // 还没在医院了
