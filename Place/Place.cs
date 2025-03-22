@@ -61,6 +61,8 @@ public class Place : MonoBehaviour
             gridInfoManager.GetListedRoot(placeName + uid.ToString()),
             geoMapManagerObj
             );
+        this.gameObject.AddComponent<SelectableObject>();
+        gameObject.name = this.placeFullName;
     }
 
     // public void 1

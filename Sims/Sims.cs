@@ -41,7 +41,7 @@ public class Sims : MonoBehaviour
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
-    private static float temperature = 0.5f;
+    private static float temperature = 0.4f;
     public static (int,int) keyTimeMorningRanges = (0,16);
     public static int minWorkHours = 7; 
     public (int,int) keyTimeMorning;
@@ -77,10 +77,12 @@ public class Sims : MonoBehaviour
         this.GenerateWorkHours();
         TimeManager.OnQuarterChanged += HandleTimeChange;
         TimeManager.OnDayChanged += HandleDayChange;
-        this.speed = UnityEngine.Random.Range(4f,11f);
+        this.speed = UnityEngine.Random.Range(6f,11f);
         this.dayOff = RandomManager.GetRandomDayOff();
         this.simScheduler = new SimScheduler(this);
         this.isTodayOff = GetIsTodayOff(0);
+        this.gameObject.AddComponent<SelectableObject>();
+        this.simDiary = new SimsDiary();
     }
     /*
         模拟市民的全部功能有下面几点(这个类只能设计的部分)
@@ -108,6 +110,7 @@ public class Sims : MonoBehaviour
     private void CommitPayCheckForToday((int,int) timeNow){
         // Debug.Log($"{this.simsName}获得了今天的工资：{accumulatedPaycheckToday}");
         this.balance += accumulatedPaycheckToday;
+        // SimBehaviorDetial.PaycheckEvent(accumulatedPaycheckToday,balance);
         this.simDiary.AppendDiaryItem(
             new SimsDiaryItem(
                 GetDetailedTime(timeNow),
