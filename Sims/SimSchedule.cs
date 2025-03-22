@@ -4,14 +4,14 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Assertions.Must;
 
-public class SimSchedule{
+public class SimScheduler{
     // 这个脚本不仅是关系到模拟市民的本人意愿，更关系到政策的强制执行力
     Place pInfectionRelated = null; // infection related
     Place pLeisureRelated = null; // leisure related
     Place pJobRelated = null; // work related
     Sims hostedSim;
 
-    public SimSchedule(Sims sim){
+    public SimScheduler(Sims sim){
         this.hostedSim = sim;
     }
     

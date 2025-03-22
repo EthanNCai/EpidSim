@@ -72,17 +72,6 @@ public class Place : MonoBehaviour
             Random.Range(placeLLAnchor.y + 0.1f, placeURAnchor.y - 0.1f)
         );
     }
-    
-
-
-    // public bool InsertRelevantSimsWithAvailabilityCheck(Sims incomingSim){
-    //     if (CheckIsAvailable()){
-    //         this.inSiteSims.Add(incomingSim);   
-    //         return true;
-    //     }else{
-    //         return false;
-    //     }
-    // }
 
     public void InsertInsiteSims(Sims incomingSim){
         this.inSiteSims.Add(incomingSim);   

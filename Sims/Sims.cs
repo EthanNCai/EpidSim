@@ -22,6 +22,8 @@ public class Sims : MonoBehaviour
     public bool isTodayOff = false; 
     Sims maxExposedBy = null;
     int maxExposed = 0;
+    int accumulatedPaycheckToday = 0;
+    int accumulatedSubsidyToday = 0;
 
     // Persistance INFOs
     public StringBuilder stringBuilder = new StringBuilder();
@@ -31,7 +33,8 @@ public class Sims : MonoBehaviour
     public Place inSite = null;
     public ResidentialPlace home;
     public OfficePlace office;
-    public SimSchedule simSchedule;
+    public SimScheduler simScheduler;
+    public SimsDiary simDiary;
     public List<MedicalPlace> medicalPlaces = new List<MedicalPlace>(); // just a ref
     // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>(); // just a ref
     private float speed = 0f;
@@ -60,7 +63,6 @@ public class Sims : MonoBehaviour
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
     VirusVolumeGridMapManager virusVolumeMapManager;
 
-
     // debug only
     public string infectionRepr = "";
     public string inSiteRepr = "";
@@ -87,15 +89,48 @@ public class Sims : MonoBehaviour
         this.toWorkQ = keyTimeMorning.Item2;
         this.speed = UnityEngine.Random.Range(4f,11f);
         this.dayOff = RandomManager.GetRandomDayOff();
-        this.simSchedule = new SimSchedule(this);
-        this.HandleDayChange(0);
+        this.simScheduler = new SimScheduler(this);
+        this.isTodayOff = GetIsTodayOff(0);
     }
-    // public void
+    /*
+        模拟市民的全部功能有下面几点(这个类只能设计的部分)
 
-    public void ReceivePaycheck(int paycheckIn){
-        this.balance += paycheckIn;
+        (1) 所有（被动和主动）付钱、(被动)接受钱的接口， e.g. 接受工资、支付医疗费用、登记政府补贴
+            a. 补贴的发放由所在residential统一在上午Quart分发，Sim自己提交结算
+            b. 工资由所在的office统一在每一个Quart发放，Sim自己提交结算
+        (2) 在每天的各个时间节点做出相应的决策 e.g. 每天早上决定要去上班，每天决定is today off 等等
+        (3) 每天记录积攒的工资和补贴
+    */
+
+    public void PayMedicalFee(){
+        // call by medical institution
+        int medicalCost = this.infoManager.policyManager.GetSubsidisedMedicalFee();
+        if(this.balance - medicalCost <= 0){
+            // kick off the hospital right now
+            Debug.Log($"{this.simsName} has just bankrupt because of medical cost");
+            this.simScheduler.UpdateScheduleOnFeeUnaffordable();
+            this.SetOutMoving(simScheduler.GetDestination());
+        }else{
+            this.balance -= medicalCost;
+            Debug.Log($"{this.simsName} has just paid {medicalCost} for medical care");
+        }
     }
-    public void CommitLifeExpense(){
+    private void CommitPayCheckForToday(){
+        this.balance += accumulatedPaycheckToday;
+        Debug.Log($"{this.simsName}获得了今天的工资：{accumulatedPaycheckToday}");
+        this.accumulatedPaycheckToday = 0;
+    }
+    public void ReceivePaycheck(int paycheckIn){
+        accumulatedPaycheckToday += paycheckIn;
+    }
+    public void CheckAndGetSubsidy(){
+
+    }
+    private void CommitSubsidyForToday(){
+
+    }
+
+    public void QDoLifeExpense(){
         if(this.balance - PriceMenu.QSimLifeExpense < 0){
             this.home.AttachSubsidyToResidential(-1 * (this.balance - PriceMenu.QSimLifeExpense));
             this.balance = 0;
@@ -103,18 +138,7 @@ public class Sims : MonoBehaviour
             this.balance -= PriceMenu.QSimLifeExpense;
         }
     }
-    public void CommitMedicalExpense(){
-        int medicalCost = this.infoManager.policyManager.GetSubsidisedMedicalFee();
-        if(this.balance - medicalCost <= 0){
-            // kick off the hospital right now
-            Debug.Log($"{this.simsName} has just bankrupt because of medical cost");
-            this.simSchedule.UpdateScheduleOnFeeUnaffordable();
-            this.SetOutMoving(simSchedule.GetDestination());
-        }else{
-            this.balance -= medicalCost;
-            Debug.Log($"{this.simsName} has just paid {medicalCost} for medical care");
-        }
-    }
+    
 
     public void ManuallyInfect(){
         // DO not call infection info debugget method here
@@ -143,12 +167,12 @@ public class Sims : MonoBehaviour
         
         // 这个逻辑用于处理每个Q的支出和Paycheck
         if(inSite is OfficePlace){
-            this.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
+            // this.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
         }
         if (inSite is MedicalPlace){
-            this.CommitMedicalExpense();
+            // this.PayMedicalFee();
         }
-        this.CommitLifeExpense();
+        this.QDoLifeExpense();
     }
     private void HandleDayChange(int dayIndex){
         // infection related
@@ -167,7 +191,7 @@ public class Sims : MonoBehaviour
 
     // 早晨KeyTime的更新
     private void HandleMorningKeyTime((int,int) timeNow){
-        this.simSchedule.UpdateScheduleOnMorning();
+        this.simScheduler.UpdateScheduleOnMorning();
         if (infection != null){
             this.DailyInteractWithInfection();
         }
@@ -175,19 +199,20 @@ public class Sims : MonoBehaviour
             this.UpdateExposureFromTile();
             this.TryToInfect();
         }
-        this.SetOutMoving(simSchedule.GetDestination());
+        this.SetOutMoving(simScheduler.GetDestination());
     }
 
     // 晚间KeyTime的更新
     private void HandleDuskKeyTime((int,int) timeNow){
         
-        this.simSchedule.UpdateScheduleOnDusk();
+        this.simScheduler.UpdateScheduleOnDusk();
         if (infection != null){
             PolluteThePosition();
         }else{
             UpdateExposureFromTile();
         }
-        this.SetOutMoving(simSchedule.GetDestination());
+        this.SetOutMoving(simScheduler.GetDestination());
+        CommitPayCheckForToday();
     }
 
     // 中午KeyTime的更新
@@ -268,7 +293,7 @@ public class Sims : MonoBehaviour
 
     public void DailyInteractWithInfection(){
         this.infectionStatus = infection.Progress();
-        this.simSchedule.UpdateScheduleOnInfectionChanged();
+        this.simScheduler.UpdateScheduleOnInfectionChanged();
         this.infectionRepr = this.infection.ToString();
         PolluteThePosition();
         if(this.infectionStatus == InfectionStatus.Recovered){
