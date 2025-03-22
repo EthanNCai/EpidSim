@@ -6,11 +6,17 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEngine.UIElements;
 
-public class SimsDiary{
-    public StringBuilder stringBuilder = new StringBuilder();
-    public List<SimsDiaryItem> diaryItems;
-    public SimsDiary(){
-        diaryItems = new List<SimsDiaryItem>();
+public class SimsDiary
+{
+    private Queue<SimsDiaryItem> diaryQueue = new Queue<SimsDiaryItem>();
+
+    public void AppendDiaryItem(SimsDiaryItem item)
+    {
+        if (diaryQueue.Count >= 50) // check if the size is over 50, if so remove the old entries.
+        {
+            diaryQueue.Dequeue(); // remove the oldest entry
+        }
+        diaryQueue.Enqueue(item); // add new entry
     }
 }
 
@@ -39,7 +45,6 @@ public struct SimsDiaryItem{
 
 public static class SimBehaviorDetial{
     public static StringBuilder stringBuilder = new StringBuilder();
-
     public static string InfectedBy(Sims infector){
         stringBuilder.Clear();
         stringBuilder.Append("Infected by");
@@ -89,23 +94,27 @@ public static class SimBehaviorDetial{
         return stringBuilder.ToString();
     }
 
-    public static string SubsidiesEvent(int DSubsidiesCollected){
+    public static string SubsidiesEvent(int DSubsidiesCollected, int balance){
         stringBuilder.Clear();
         stringBuilder.Append("Gov Subsidised ");
         stringBuilder.Append(DSubsidiesCollected);
-        stringBuilder.Append("$ today");
+        stringBuilder.Append("$ today, balance now:");
+        stringBuilder.Append(balance);
         return stringBuilder.ToString();
 
     }
-    public static string PaycheckEvent(int DPaycheck){
+    public static string PaycheckEvent(int DPaycheck, int balance){
         stringBuilder.Clear();
         if(DPaycheck > 0){
             stringBuilder.Append("Paycheck: ");
             stringBuilder.Append(DPaycheck);
-            stringBuilder.Append("$ today");
+            stringBuilder.Append("$ today, balance now:");
+            stringBuilder.Append(balance);
             return stringBuilder.ToString();
         }else{
-            stringBuilder.Append("No Paycheck today");
+            stringBuilder.Append("No Paycheck today ");
+            stringBuilder.Append("balance now:");
+            stringBuilder.Append(balance);
             return stringBuilder.ToString();
         }
     }

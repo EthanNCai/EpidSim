@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
@@ -24,6 +25,7 @@ public class Sims : MonoBehaviour
     int maxExposed = 0;
     int accumulatedPaycheckToday = 0;
     int accumulatedSubsidyToday = 0;
+    int dayRecord = 0;
 
     // Persistance INFOs
     public StringBuilder stringBuilder = new StringBuilder();
@@ -35,8 +37,6 @@ public class Sims : MonoBehaviour
     public OfficePlace office;
     public SimScheduler simScheduler;
     public SimsDiary simDiary;
-    public List<MedicalPlace> medicalPlaces = new List<MedicalPlace>(); // just a ref
-    // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>(); // just a ref
     private float speed = 0f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
@@ -48,17 +48,9 @@ public class Sims : MonoBehaviour
     public (int,int) keyTimeNoon;
     public (int,int) keyTimeDusk;
     public HashSet<int> dayOff;
-    public int toWork = 0;
-    public int toWorkQ = 0;
-    // General
     public int balance = 10000;
-
     public PlaceManager placeManager;
-
-    // DEBUG RELATED
     public InfoManager infoManager;
-    // INFECTION RELATED
-
     public Infection infection = null;
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
     VirusVolumeGridMapManager virusVolumeMapManager;
@@ -85,8 +77,6 @@ public class Sims : MonoBehaviour
         this.GenerateWorkHours();
         TimeManager.OnQuarterChanged += HandleTimeChange;
         TimeManager.OnDayChanged += HandleDayChange;
-        this.toWork = keyTimeMorning.Item1;
-        this.toWorkQ = keyTimeMorning.Item2;
         this.speed = UnityEngine.Random.Range(4f,11f);
         this.dayOff = RandomManager.GetRandomDayOff();
         this.simScheduler = new SimScheduler(this);
@@ -115,19 +105,31 @@ public class Sims : MonoBehaviour
             Debug.Log($"{this.simsName} has just paid {medicalCost} for medical care");
         }
     }
-    private void CommitPayCheckForToday(){
+    private void CommitPayCheckForToday((int,int) timeNow){
+        // Debug.Log($"{this.simsName}获得了今天的工资：{accumulatedPaycheckToday}");
         this.balance += accumulatedPaycheckToday;
-        Debug.Log($"{this.simsName}获得了今天的工资：{accumulatedPaycheckToday}");
+        this.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                GetDetailedTime(timeNow),
+                SimBehaviorDetial.PaycheckEvent(accumulatedPaycheckToday,balance)));
         this.accumulatedPaycheckToday = 0;
     }
     public void ReceivePaycheck(int paycheckIn){
         accumulatedPaycheckToday += paycheckIn;
     }
     public void CheckAndGetSubsidy(){
-
+        if ((this.balance + this.accumulatedPaycheckToday - PriceMenu.QSimLifeExpense) < 0){
+            this.home.AttachSubsidyToResidential(PriceMenu.QSimLifeExpense);
+            this.accumulatedSubsidyToday += PriceMenu.QSimLifeExpense;
+        }
     }
-    private void CommitSubsidyForToday(){
-
+    private void CommitSubsidyForToday((int,int) timeNow){
+        this.balance += this.accumulatedSubsidyToday;
+        this.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                GetDetailedTime(timeNow),
+                SimBehaviorDetial.SubsidiesEvent(accumulatedSubsidyToday,this.balance)));
+        this.accumulatedSubsidyToday = 0;
     }
 
     public void QDoLifeExpense(){
@@ -174,10 +176,11 @@ public class Sims : MonoBehaviour
         }
         this.QDoLifeExpense();
     }
-    private void HandleDayChange(int dayIndex){
+    private void HandleDayChange(int day){
         // infection related
+        this.dayRecord = day;
         this.maxExposed = 0;
-        this.isTodayOff = GetIsTodayOff(dayIndex);
+        this.isTodayOff = GetIsTodayOff(day);
     }
 
     public void HandlePolicyChange(){
@@ -212,7 +215,7 @@ public class Sims : MonoBehaviour
             UpdateExposureFromTile();
         }
         this.SetOutMoving(simScheduler.GetDestination());
-        CommitPayCheckForToday();
+        CommitPayCheckForToday(timeNow);
     }
 
     // 中午KeyTime的更新
@@ -368,7 +371,6 @@ public class Sims : MonoBehaviour
         finalApproachPosition = null; // 设为 null，表示无效
         destination = null;
         UpdateInSiteRepr();
-        
     }
 
     public bool GetIsTodayOff(int day){
@@ -430,6 +432,9 @@ public class Sims : MonoBehaviour
             stringBuilder.Append("Not in Site");
         }
         this.inSiteRepr = stringBuilder.ToString();
+    }
+    private (int,int,int) GetDetailedTime((int h,int q) timeNow){
+        return (this.dayRecord,timeNow.h,timeNow.q);
     }
 
     public void Update()
