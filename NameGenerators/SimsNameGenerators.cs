@@ -5,12 +5,14 @@ using UnityEditor.Experimental.GraphView;
 using UnityEditor.UI;
 using UnityEngine;
 
+
 class SimsNameGenerator
 {
-    private static List<string> namePrefixes = new List<string>{"蔡","郑","游","涂","林","李","韦"};
-    private static List<string> nameSuffixes = new List<string>{"佳伊","俊志","江得","淑琴","挺","永佳","孜","伟佳"};
+    private static List<string> namePrefixes = new List<string> { "Alex", "Chris", "Taylor", "Jordan", "Morgan", "Casey", "Riley" };
+    private static List<string> nameSuffixes = new List<string> { "Smith", "Johnson", "Brown", "Davis", "Miller", "Wilson", "Anderson", "Taylor" };
 
-    public static string GetSimsName(){
-        return namePrefixes[Random.Range(0,namePrefixes.Count)] + nameSuffixes[Random.Range(0, nameSuffixes.Count)];
+    public static string GetSimsName()
+    {
+        return namePrefixes[Random.Range(0, namePrefixes.Count)] + " " + nameSuffixes[Random.Range(0, nameSuffixes.Count)];
     }
 }

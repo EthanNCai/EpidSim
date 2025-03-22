@@ -41,8 +41,9 @@ public class CommercialPlace : Place, IContributablePlace
         }
     }
 
-    private static List<string> publicPrefixes = new List<string>{"九龙","敬贤","深圳湾","万象城","万达","中央"};
-    private static List<string> publicSuffixes = new List<string>{"公共事务中心","运动场","公园","广场","商场"};
+    private static List<string> publicPrefixes = new List<string> { "Riverside", "Grandview", "Maplewood", "Ocean Breeze", "Sunset", "Evergreen" };
+    private static List<string> publicSuffixes = new List<string> { "Community Center", "Stadium", "Park", "Plaza", "Mall" };
+
     public static string GetRandCommercialName(){
         return publicPrefixes[Random.Range(0,publicPrefixes.Count)] + publicSuffixes[Random.Range(0,publicSuffixes.Count)];
     } 
