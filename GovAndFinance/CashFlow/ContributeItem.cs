@@ -38,7 +38,7 @@ public class ContributeItem
         {
             case ContributeSubTypes.Taxes:
                 return ContributeTypes.Common;
-            case ContributeSubTypes.PublicServiceFees:
+            case ContributeSubTypes.Fees:
                 return ContributeTypes.Fees;
             default:
                 throw new Exception("Invalid contribute sub type");
@@ -53,5 +53,5 @@ public enum ContributeTypes {
 
 public enum ContributeSubTypes {
     Taxes,
-    PublicServiceFees
+    Fees
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
@@ -22,6 +23,9 @@ public class Sims : MonoBehaviour
     public bool isTodayOff = false; 
     Sims maxExposedBy = null;
     int maxExposed = 0;
+    int accumulatedPaycheckToday = 0;
+    int accumulatedSubsidyToday = 0;
+    int dayRecord = 0;
 
     // Persistance INFOs
     public StringBuilder stringBuilder = new StringBuilder();
@@ -31,35 +35,27 @@ public class Sims : MonoBehaviour
     public Place inSite = null;
     public ResidentialPlace home;
     public OfficePlace office;
-    public SimSchedule simSchedule;
-    public List<MedicalPlace> medicalPlaces = new List<MedicalPlace>(); // just a ref
-    // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>(); // just a ref
+    public SimScheduler simScheduler;
+    public SimsDiary simDiary;
     private float speed = 0f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
     private Vector2? finalApproachPosition = null; // 使用 nullable 变量
-    private static float temperature = 0.5f;
+    private static float temperature = 0.4f;
     public static (int,int) keyTimeMorningRanges = (0,16);
     public static int minWorkHours = 7; 
     public (int,int) keyTimeMorning;
     public (int,int) keyTimeNoon;
     public (int,int) keyTimeDusk;
     public HashSet<int> dayOff;
-    public int toWork = 0;
-    public int toWorkQ = 0;
-    // General
     public int balance = 10000;
-
     public PlaceManager placeManager;
-
-    // DEBUG RELATED
     public InfoManager infoManager;
-    // INFECTION RELATED
-
     public Infection infection = null;
     InfectionStatus infectionStatus = InfectionStatus.Suscptible;
     VirusVolumeGridMapManager virusVolumeMapManager;
 
+    public TimeManager timeManager;
 
     // debug only
     public string infectionRepr = "";
@@ -69,9 +65,11 @@ public class Sims : MonoBehaviour
         VirusVolumeGridMapManager virusVolumeMapManager,
         InfoManager infoManager,
         PlaceManager placeManager,
+        TimeManager timeManager,
         bool infected = false
         )
     {
+        this.timeManager = timeManager;
         this.placeManager = placeManager;
         this.infoManager = infoManager;
         this.virusVolumeMapManager = virusVolumeMapManager;
@@ -83,19 +81,65 @@ public class Sims : MonoBehaviour
         this.GenerateWorkHours();
         TimeManager.OnQuarterChanged += HandleTimeChange;
         TimeManager.OnDayChanged += HandleDayChange;
-        this.toWork = keyTimeMorning.Item1;
-        this.toWorkQ = keyTimeMorning.Item2;
-        this.speed = UnityEngine.Random.Range(4f,11f);
+        this.speed = UnityEngine.Random.Range(6f,11f);
         this.dayOff = RandomManager.GetRandomDayOff();
-        this.simSchedule = new SimSchedule(this);
-        this.HandleDayChange(0);
+        this.simScheduler = new SimScheduler(this);
+        this.isTodayOff = GetIsTodayOff(0);
+        this.gameObject.AddComponent<SelectableObject>();
+        this.simDiary = new SimsDiary();
     }
-    // public void
+    /*
+        模拟市民的全部功能有下面几点(这个类只能设计的部分)
 
-    public void ReceivePaycheck(int paycheckIn){
-        this.balance += paycheckIn;
+        (1) 所有（被动和主动）付钱、(被动)接受钱的接口， e.g. 接受工资、支付医疗费用、登记政府补贴
+            a. 补贴的发放由所在residential统一在上午Quart分发，Sim自己提交结算
+            b. 工资由所在的office统一在每一个Quart发放，Sim自己提交结算
+        (2) 在每天的各个时间节点做出相应的决策 e.g. 每天早上决定要去上班，每天决定is today off 等等
+        (3) 每天记录积攒的工资和补贴
+    */
+
+    public void PayMedicalFee(){
+        // call by medical institution
+        int medicalCost = this.infoManager.policyManager.GetSubsidisedMedicalFee();
+        if(this.balance - medicalCost <= 0){
+            // kick off the hospital right now
+            Debug.Log($"{this.simsName} has just bankrupt because of medical cost");
+            this.simScheduler.UpdateScheduleOnFeeUnaffordable();
+            this.SetOutMoving(simScheduler.GetDestination());
+        }else{
+            this.balance -= medicalCost;
+            Debug.Log($"{this.simsName} has just paid {medicalCost} for medical care");
+        }
     }
-    public void DoLifeExpense(){
+    private void CommitPayCheckForToday((int,int) timeNow){
+        // Debug.Log($"{this.simsName}获得了今天的工资：{accumulatedPaycheckToday}");
+        this.balance += accumulatedPaycheckToday;
+        // SimBehaviorDetial.PaycheckEvent(accumulatedPaycheckToday,balance);
+        this.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                GetDetailedTime(timeNow),
+                SimBehaviorDetial.PaycheckEvent(accumulatedPaycheckToday,balance)));
+        this.accumulatedPaycheckToday = 0;
+    }
+    public void ReceivePaycheck(int paycheckIn){
+        accumulatedPaycheckToday += paycheckIn;
+    }
+    public void CheckAndGetSubsidy(){
+        if ((this.balance + this.accumulatedPaycheckToday - PriceMenu.QSimLifeExpense) < 0){
+            this.home.AttachSubsidyToResidential(PriceMenu.QSimLifeExpense);
+            this.accumulatedSubsidyToday += PriceMenu.QSimLifeExpense;
+        }
+    }
+    private void CommitSubsidyForToday((int,int) timeNow){
+        this.balance += this.accumulatedSubsidyToday;
+        this.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                GetDetailedTime(timeNow),
+                SimBehaviorDetial.SubsidiesEvent(accumulatedSubsidyToday,this.balance)));
+        this.accumulatedSubsidyToday = 0;
+    }
+
+    public void QDoLifeExpense(){
         if(this.balance - PriceMenu.QSimLifeExpense < 0){
             this.home.AttachSubsidyToResidential(-1 * (this.balance - PriceMenu.QSimLifeExpense));
             this.balance = 0;
@@ -103,6 +147,7 @@ public class Sims : MonoBehaviour
             this.balance -= PriceMenu.QSimLifeExpense;
         }
     }
+    
 
     public void ManuallyInfect(){
         // DO not call infection info debugget method here
@@ -130,15 +175,19 @@ public class Sims : MonoBehaviour
     private void HandleEveryQ((int,int) timeNow){
         
         // 这个逻辑用于处理每个Q的支出和Paycheck
-        if(inSite == this.office){
-            this.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
+        if(inSite is OfficePlace){
+            // this.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
         }
-        this.DoLifeExpense();
+        if (inSite is MedicalPlace){
+            // this.PayMedicalFee();
+        }
+        this.QDoLifeExpense();
     }
-    private void HandleDayChange(int dayIndex){
+    private void HandleDayChange(int day){
         // infection related
+        this.dayRecord = day;
         this.maxExposed = 0;
-        this.isTodayOff = GetIsTodayOff(dayIndex);
+        this.isTodayOff = GetIsTodayOff(day);
     }
 
     public void HandlePolicyChange(){
@@ -148,9 +197,11 @@ public class Sims : MonoBehaviour
 
     }
 
+    
+
     // 早晨KeyTime的更新
     private void HandleMorningKeyTime((int,int) timeNow){
-        this.simSchedule.UpdateScheduleOnMorning();
+        this.simScheduler.UpdateScheduleOnMorning();
         if (infection != null){
             this.DailyInteractWithInfection();
         }
@@ -158,19 +209,20 @@ public class Sims : MonoBehaviour
             this.UpdateExposureFromTile();
             this.TryToInfect();
         }
-        this.SetOutMoving(simSchedule.GetDestination());
+        this.SetOutMoving(simScheduler.GetDestination());
     }
 
     // 晚间KeyTime的更新
     private void HandleDuskKeyTime((int,int) timeNow){
         
-        this.simSchedule.UpdateScheduleOnDusk();
+        this.simScheduler.UpdateScheduleOnDusk();
         if (infection != null){
             PolluteThePosition();
         }else{
             UpdateExposureFromTile();
         }
-        this.SetOutMoving(simSchedule.GetDestination());
+        this.SetOutMoving(simScheduler.GetDestination());
+        CommitPayCheckForToday(timeNow);
     }
 
     // 中午KeyTime的更新
@@ -251,7 +303,7 @@ public class Sims : MonoBehaviour
 
     public void DailyInteractWithInfection(){
         this.infectionStatus = infection.Progress();
-        this.simSchedule.UpdateScheduleOnInfectionChanged();
+        this.simScheduler.UpdateScheduleOnInfectionChanged();
         this.infectionRepr = this.infection.ToString();
         PolluteThePosition();
         if(this.infectionStatus == InfectionStatus.Recovered){
@@ -326,7 +378,6 @@ public class Sims : MonoBehaviour
         finalApproachPosition = null; // 设为 null，表示无效
         destination = null;
         UpdateInSiteRepr();
-        
     }
 
     public bool GetIsTodayOff(int day){
@@ -388,6 +439,9 @@ public class Sims : MonoBehaviour
             stringBuilder.Append("Not in Site");
         }
         this.inSiteRepr = stringBuilder.ToString();
+    }
+    private (int,int,int) GetDetailedTime((int h,int q) timeNow){
+        return (this.dayRecord,timeNow.h,timeNow.q);
     }
 
     public void Update()

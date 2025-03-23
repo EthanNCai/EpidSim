@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ResidentialPlace : Place, IContributablePlace
+public class ResidentialPlace : Place, IExpensablePlace
 {
     public int populationCapacity;
     public CFEPolicyMinSub<ResidentialPlace> policyMinSub;
@@ -28,7 +28,7 @@ public class ResidentialPlace : Place, IContributablePlace
             cfeManager);
         this.populationCapacity = population;
         // Debug.Log(cfeManager == null);
-        this.policyMinSub = cfeManager.CreateAndRegisterPolicyMinSubCFE<ResidentialPlace>(this);
+        this.policyMinSub = cfeManager.CreatePolicyMinSubCFE<ResidentialPlace>(this);
     }
     public void SayHi(){
         Debug.Log(base.ToString());
@@ -37,7 +37,7 @@ public class ResidentialPlace : Place, IContributablePlace
         this.QAccumulatedSubsidies += subsidyAmount;
     }
 
-    public int CalculateQContribution(){
+    public int CalculateQExpense(){
         // get and clear acc subsidies
         int temp =  this.QAccumulatedSubsidies;
         this.QAccumulatedSubsidies = 0;

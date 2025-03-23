@@ -26,7 +26,8 @@ public class OfficePlace : Place, IContributablePlace
             gridDebuggerManager,
             infoDebuggerManager,
             cfeManager);
-        this.commonTaxCFE = cfeManager.CreateAndRegisterCommonTaxCFE<OfficePlace>(this);
+        this.commonTaxCFE = cfeManager.CreateCommonTaxCFE<OfficePlace>(this);
+        TimeManager.OnQuarterChanged += DistributePaycheck;
     }
     public void SayHi(){
         Debug.Log(base.ToString());
@@ -40,5 +41,10 @@ public class OfficePlace : Place, IContributablePlace
         else{
             return workingSims * PriceMenu.QOfficeTaxUnit;
         }
+    }
+    public void DistributePaycheck((int , int ) _){
+        foreach( Sims sim in inSiteSims){
+            sim.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
+        } 
     }
 }

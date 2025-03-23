@@ -37,7 +37,7 @@ public class CFEManager : MonoBehaviour{
         this.debugInfoText.text = GenerateCFEsRepr();
     }
 
-    public CFECommonTax<TPlace> CreateAndRegisterCommonTaxCFE<TPlace>(TPlace place) where TPlace : Place, IContributablePlace
+    public CFECommonTax<TPlace> CreateCommonTaxCFE<TPlace>(TPlace place) where TPlace : Place, IContributablePlace
     {
         // 这个函数的核心作用是Create并且 **注册** 到Manager的List里面
         // 并且这个注册，使用的是ContributeType来注册
@@ -45,14 +45,22 @@ public class CFEManager : MonoBehaviour{
         commonCFEs.Add(commonTax);  
         return commonTax;
     }
-    public CFEServiceBuildingMaintaining<TPlace> CreateAndRegisterServiceBuildingMaintainingCFE<TPlace>(TPlace place) where TPlace : Place, IBuilingMaintaingExpense
+    public CFECommonFees<TPlace> CreateCommonFeesCFE<TPlace>(TPlace place) where TPlace : Place, IContributablePlace
+    {
+        // 这个函数的核心作用是Create并且 **注册** 到Manager的List里面
+        // 并且这个注册，使用的是ContributeType来注册
+        CFECommonFees<TPlace> commonFees = new CFECommonFees<TPlace>(place);
+        commonCFEs.Add(commonFees);  
+        return commonFees;
+    }
+    public CFEServiceBuildingMaintaining<TPlace> CreateServiceBuildingMaintainingCFE<TPlace>(TPlace place) where TPlace : Place, IExpensablePlace
     {
         CFEServiceBuildingMaintaining<TPlace> serviceBuildingMaintaining = new CFEServiceBuildingMaintaining<TPlace>(place);
         serviceCFEs.Add(serviceBuildingMaintaining);  
         return serviceBuildingMaintaining;
     }
 
-    public CFEPolicyMinSub<TPlace> CreateAndRegisterPolicyMinSubCFE<TPlace>(TPlace place) where TPlace : Place, IContributablePlace{
+    public CFEPolicyMinSub<TPlace> CreatePolicyMinSubCFE<TPlace>(TPlace place) where TPlace : Place, IExpensablePlace{
         CFEPolicyMinSub<TPlace> policyMinSubCFE = new CFEPolicyMinSub<TPlace>(place);
         policyCFEs.Add(policyMinSubCFE);  
         return policyMinSubCFE;
