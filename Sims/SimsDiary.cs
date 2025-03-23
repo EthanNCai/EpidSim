@@ -6,6 +6,20 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEngine.UIElements;
 
+// 这个Diary应该include是一些主观的，以Sims为视角的一些体验、得到的东西、行动以及行动的原因
+// example:
+/*
+    身体体验：今天感觉有一些不舒服 
+    情感体验：感觉最近好严重，不太敢出门了
+    收获：今天赚了n块钱
+    支出：今天在医院花了n块钱
+    行动：因为没有钱所以没有去医院
+    行动：因为医院没有位置所以没有去医院
+    行动：去上班了
+    行动：下班了
+    行动：没有钱治下去了
+
+*/
 public class SimsDiary
 {
     private List<SimsDiaryItem> diaryList = new List<SimsDiaryItem>();
@@ -24,9 +38,9 @@ public class SimsDiary
         entries.Clear(); // Reuse the existing list, clear previous entries
         foreach (var item in diaryList)
         {
-            entries.Add($"[{item.timestamp.d}D {item.timestamp.h}H {item.timestamp.q}Q] {item.simBehaviorDetial}");
+            string formattedTime = $"[day {item.timestamp.d:D2}, {item.timestamp.h:D2}:{item.timestamp.q:D2}]";
+            entries.Add($"{formattedTime} {item.simBehaviorDetial}");
         }
-        // return entries;
     }
 }
 
@@ -97,18 +111,35 @@ public static class SimBehaviorDetial
         return stringBuilder.ToString();
     }
 
-    public static string Bankrupt()
+    public static string BankruptEvent(string reason)
     {
         stringBuilder.Clear();
-        stringBuilder.Append("Spent all of the balance");
+        stringBuilder.Append($"Spent all of the balance, because {reason}");
         return stringBuilder.ToString();
     }
 
-    public static string InfectionProgressEvent(Infection infection)
+    public static string GoOutForFunEvent(Place place){
+        stringBuilder.Clear();
+        stringBuilder.Append("Today off, Go out for fun in ");
+        stringBuilder.Append(place.palaceName);
+        return stringBuilder.ToString();
+    }
+    
+    public static string SicknessAwarenessEvent(SicknessTag sicknessTag)
+    {
+        stringBuilder.Clear();
+        stringBuilder.Append(SicknessTagConverter.SicknessTagToDescription(sicknessTag));
+        return stringBuilder.ToString();
+    }
+
+
+    public static string InfectionProgressEvent(Infection infection, SicknessTag sicknessTag)
     {
         // Hidden from the player
+
+
         stringBuilder.Clear();
-        stringBuilder.Append("Infection progressed, ");
+        stringBuilder.Append("<DEBUG ONLY>Infection progressed, ");
         stringBuilder.Append("Period: ");
         stringBuilder.Append(infection.currentInfectionPeriod);
         stringBuilder.Append(", Volume: ");
@@ -144,4 +175,6 @@ public static class SimBehaviorDetial
         }
         return stringBuilder.ToString();
     }
+
+    
 }

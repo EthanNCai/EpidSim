@@ -18,6 +18,44 @@ public enum InfectionStatus{
     Dead,
 }
 
+public enum SicknessTag{
+    Normal,
+    Mild,
+    Moderate,
+    Severe,
+    Critical,
+}
+public static class SicknessTagConverter{
+    public static SicknessTag GetSicknessTag(float sickness){
+        switch(sickness){
+            case < 0.1f:
+                return SicknessTag.Normal;
+            case < 0.2f:
+                return SicknessTag.Mild;
+            case < 0.5f:
+                return SicknessTag.Moderate;
+            case < 0.7f:
+                return SicknessTag.Severe;
+            default:
+                return SicknessTag.Critical;
+        }
+    }
+    public static string SicknessTagToDescription(SicknessTag sicknessTag){
+        switch(sicknessTag){
+            case SicknessTag.Normal:
+                return "Nothing feels wrong today";
+            case SicknessTag.Mild:
+                return "I felt a tiny bit uncomfortable";
+            case SicknessTag.Moderate:
+                return "Something doesn't feel right today";
+            case SicknessTag.Severe:
+                return "I felt a noticable uncomfortable";
+            default:
+                return "unbearable pain happend to me today";
+        }
+    }
+}
+
 public static class InfectionParams{
 
     public static float infectionProbSuscptible = 1f;
@@ -67,7 +105,9 @@ public class Infection{
     public bool endWithDead;
     StringBuilder stringBuilder = new StringBuilder();
 
-    public Infection((int,int,int) infectionPeriod, Sims infectedBy){
+    Sims hostedSims;
+
+    public Infection((int,int,int) infectionPeriod, Sims hostedSims){
         int periodA = infectionPeriod.Item1;
         int periodB = infectionPeriod.Item2;
         int periodC =  infectionPeriod.Item3;
@@ -75,6 +115,7 @@ public class Infection{
         periodBDayLen = periodB;
         periodCDayLen = periodC;
         currentPeriodDaysLeft = periodA;
+        this.hostedSims = hostedSims;
     }
 
     public InfectionStatus Progress()
@@ -136,5 +177,9 @@ public class Infection{
         stringBuilder.Append("status ").Append(this.currentInfectionPeriod)
             .Append(", days left: ").Append(this.currentPeriodDaysLeft).Append("vol: ").Append(this.virusVolume);
         return stringBuilder.ToString();
+    }
+    public void CalculateSeverity(){
+        float sevirity = this.hostedSims.infoManager.virusManager.GetVirusSeverity();
+        float sickness = sevirity * this.virusVolume * 0.01f;
     }
 }
