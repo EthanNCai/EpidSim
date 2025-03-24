@@ -6,11 +6,16 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+public interface ITaxPayer{
+    public int GetAndResetTaxContributedLastD();
+}
 
 public class Place : MonoBehaviour
 {
+
+    public PlaceDiary placeDiary;
     public int uid;
-    public string palaceName = "default";
+    public string placeName = "default";
     public string placeFullName;
     public Vector2Int placeShape;
     public Vector2Int placeLLAnchor;
@@ -20,7 +25,7 @@ public class Place : MonoBehaviour
     public List<Sims> inSiteSims = new List<Sims>();
     public InfoManager infoManager;
     public CFEManager cfeManager;
-
+    // public bool isIsolated;
     public int QAccumulatedSubsidies = 0;
 
     public void PlaceInit(
@@ -38,7 +43,7 @@ public class Place : MonoBehaviour
         this.cfeManager = cfeManager;
         this.infoManager = infoManager;
         this.uid = UniqueIDGenerator.GetUniqueID();
-        this.palaceName = placeName;
+        this.placeName = placeName;
         this.placeFullName = placeName + this.uid.ToString();
         this.placeShape = placeShape;
         this.placeLLAnchor = basePosition;
@@ -63,6 +68,7 @@ public class Place : MonoBehaviour
             );
         this.gameObject.AddComponent<SelectableObject>();
         gameObject.name = this.placeFullName;
+        placeDiary = new PlaceDiary();
     }
 
     // public void 1
@@ -96,11 +102,25 @@ public class Place : MonoBehaviour
         }
     }
 
-    
-
     public override string ToString()
     {
-        return palaceName + " " + placeLLAnchor.ToString() + " " + placeURAnchor.ToString();
+        return placeName + " " + placeLLAnchor.ToString() + " " + placeURAnchor.ToString();
+    }
+
+    public static string GetPlaceTypeDescription<T>(T place) where T : Place
+    {   
+       
+        if (place is MedicalPlace){
+            return "Medical Institution";
+        }else if(place is ResidentialPlace){
+            return "Residential Building";
+        }else if(place is CommercialPlace){
+            return "Commercial Building";
+        }else if(place is OfficePlace){
+            return "Office";
+        }else{
+            return "Unidentified Building";
+        }
     }
 }
 

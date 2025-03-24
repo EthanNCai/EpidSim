@@ -27,6 +27,8 @@ public class Sims : MonoBehaviour
     int accumulatedSubsidyToday = 0;
     int dayRecord = 0;
 
+    SicknessTag sicknessTag = SicknessTag.Normal;
+
     // Persistance INFOs
     public StringBuilder stringBuilder = new StringBuilder();
     public int uid;
@@ -134,7 +136,7 @@ public class Sims : MonoBehaviour
         this.balance += this.accumulatedSubsidyToday;
         this.simDiary.AppendDiaryItem(
             new SimsDiaryItem(
-                GetDetailedTime(timeNow),
+                timeManager.GetTime(),
                 SimBehaviorDetial.SubsidiesEvent(accumulatedSubsidyToday,this.balance)));
         this.accumulatedSubsidyToday = 0;
     }
@@ -232,6 +234,7 @@ public class Sims : MonoBehaviour
         }else{
             UpdateExposureFromTile();
         }
+        UpdateSickness();
     }
 
     // On the road KeyTime的更新
@@ -251,7 +254,7 @@ public class Sims : MonoBehaviour
         }
         bool isInfected = InfectionParams.RollTheInfectionDice(maxExposed, this.infectionStatus);
         if(isInfected){
-            this.infection = new Infection(InfectionParams.GetInfectionPeriod(),this.maxExposedBy);
+            this.infection = new Infection(InfectionParams.GetInfectionPeriod(), this);
             this.infectionRepr = this.infection.ToString();
             infoManager.infectionInfoManager.InfectionAddition(this,this.infectionStatus);
             this.infectionStatus = InfectionStatus.Infected;
@@ -302,6 +305,7 @@ public class Sims : MonoBehaviour
     }
 
     public void DailyInteractWithInfection(){
+        // 离开这个函数的时候是不存在脏状态的，也就是说，不存在：这个人已经痊愈了，但是infection仍然不是null
         this.infectionStatus = infection.Progress();
         this.simScheduler.UpdateScheduleOnInfectionChanged();
         this.infectionRepr = this.infection.ToString();
@@ -431,10 +435,21 @@ public class Sims : MonoBehaviour
         stringBuilder.Append("by: ").Append(this.maxExposedBy);
         this.infectionRepr = stringBuilder.ToString();
     }
+    public void UpdateSickness(){
+        if(this.infection != null){
+            this.sicknessTag = SicknessTagConverter.GetSicknessTag(this.infection.virusVolume);
+        }else{
+            this.sicknessTag = SicknessTagConverter.GetSicknessTag(RandomManager.Get0toN(0.4f));
+        }
+        this.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                timeManager.GetTime(),
+                SimBehaviorDetial.SicknessAwarenessEvent(this.sicknessTag)));
+    }
     public void UpdateInSiteRepr(){
         stringBuilder.Clear();
         if ( this.inSite != null){
-            stringBuilder.Append(this.inSite.palaceName);
+            stringBuilder.Append(this.inSite.placeName);
         }else{
             stringBuilder.Append("Not in Site");
         }

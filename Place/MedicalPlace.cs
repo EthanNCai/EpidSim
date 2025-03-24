@@ -38,8 +38,8 @@ public class MedicalPlace : Place, IContributablePlace, IExpensablePlace
         Debug.Log(base.ToString());
     }
 
-    private static List<string> medicalPrefixes = new List<string>{"厦门市医学院","奥梅","厦门市","孙厝"};
-    private static List<string> medicalSuffixes = new List<string>{"附属第二医院","诊所","中医院","第一人民医院"};
+    private static List<string> medicalPrefixes = new List<string> { "Riverside", "Starlight", "Harmony", "Evergreen", "Summit", "Clearview", "Oakwood" };
+    private static List<string> medicalSuffixes = new List<string> { "General Hospital", "Clinic", "Medical Center", "Health Institute", "Community Hospital" };
     public static string GetMedicalName(){
         return medicalPrefixes[Random.Range(0,medicalPrefixes.Count)] + medicalSuffixes[Random.Range(0,medicalSuffixes.Count)];
     }

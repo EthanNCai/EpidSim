@@ -6,6 +6,20 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEngine.UIElements;
 
+// 这个Diary应该include是一些主观的，以Sims为视角的一些体验、得到的东西、行动以及行动的原因
+// example:
+/*
+    身体体验：今天感觉有一些不舒服 
+    情感体验：感觉最近好严重，不太敢出门了
+    收获：今天赚了n块钱
+    支出：今天在医院花了n块钱
+    行动：因为没有钱所以没有去医院
+    行动：因为医院没有位置所以没有去医院
+    行动：去上班了
+    行动：下班了
+    行动：没有钱治下去了
+
+*/
 public class SimsDiary
 {
     private List<SimsDiaryItem> diaryList = new List<SimsDiaryItem>();
@@ -24,9 +38,9 @@ public class SimsDiary
         entries.Clear(); // Reuse the existing list, clear previous entries
         foreach (var item in diaryList)
         {
-            entries.Add($"[{item.timestamp.d}D {item.timestamp.h}H {item.timestamp.q}Q] {item.simBehaviorDetial}");
+            string formattedTime = $"[day {item.timestamp.d:D2}, {item.timestamp.h:D2}:{item.timestamp.q:D2}]";
+            entries.Add($"{formattedTime} {item.simBehaviorDetial}");
         }
-        // return entries;
     }
 }
 
@@ -52,79 +66,115 @@ public struct SimsDiaryItem{
     }
 }
 
-public static class SimBehaviorDetial{
+public static class SimBehaviorDetial
+{
     public static StringBuilder stringBuilder = new StringBuilder();
-    public static string InfectedBy(Sims infector){
+
+    public static string InfectedBy(Sims infector)
+    {
         stringBuilder.Clear();
-        stringBuilder.Append("Infected by");
+        stringBuilder.Append("Infected by ");
         stringBuilder.Append(infector.simsName);
         return stringBuilder.ToString();
     }
-    public static string GotoWorkEvent(OfficePlace office){
+
+    public static string GotoWorkEvent(OfficePlace office)
+    {
         stringBuilder.Clear();
-        stringBuilder.Append("Go to");
-        stringBuilder.Append(office.palaceName);
-        stringBuilder.Append("for work");
+        stringBuilder.Append("Go to ");
+        stringBuilder.Append(office.placeName);
+        stringBuilder.Append(" for work");
         return stringBuilder.ToString();
     }
 
-    public static string GoHomeEvent(ResidentialPlace residentialPlace){
+    public static string GoHomeEvent(ResidentialPlace residentialPlace)
+    {
         stringBuilder.Clear();
-        stringBuilder.Append("Back home at");
-        stringBuilder.Append(residentialPlace.palaceName);
+        stringBuilder.Append("Back home at ");
+        stringBuilder.Append(residentialPlace.placeName);
+        return stringBuilder.ToString();
+    }
+
+    public static string GoToMedEvent(MedicalPlace medPlace)
+    {
+        stringBuilder.Clear();
+        if (medPlace != null)
+        {
+            stringBuilder.Append("Way too sick, go to ");
+            stringBuilder.Append(medPlace.placeName);
+            stringBuilder.Append(" for medical treatment");
+        }
+        else
+        {
+            stringBuilder.Append("Failed to find an available medical place, staying at home instead");
+        }
+        return stringBuilder.ToString();
+    }
+
+    public static string BankruptEvent(string reason)
+    {
+        stringBuilder.Clear();
+        stringBuilder.Append($"Spent all of the balance, because {reason}");
+        return stringBuilder.ToString();
+    }
+
+    public static string GoOutForFunEvent(Place place){
+        stringBuilder.Clear();
+        stringBuilder.Append("Today off, Go out for fun in ");
+        stringBuilder.Append(place.placeName);
         return stringBuilder.ToString();
     }
     
-    public static string GoToMedEvent(MedicalPlace medPlace){
+    public static string SicknessAwarenessEvent(SicknessTag sicknessTag)
+    {
         stringBuilder.Clear();
-        if(medPlace != null){
-            stringBuilder.Append("way too sick, Go to");
-            stringBuilder.Append(medPlace.palaceName);
-            stringBuilder.Append("for medical trreatment");
-            return stringBuilder.ToString();
-        }else{
-            stringBuilder.Append("Faild to find a available medical place, Stay at home instead");
-            return stringBuilder.ToString();
-        }
-    }
-    public static string Bankrupt(){
-        stringBuilder.Clear();
-        stringBuilder.Append("spent all of the balance");
+        stringBuilder.Append(SicknessTagConverter.SicknessTagToDescription(sicknessTag));
         return stringBuilder.ToString();
     }
-    public static string InfectionProgressEvent(Infection infection){
-        // hide for player
+
+
+    public static string InfectionProgressEvent(Infection infection, SicknessTag sicknessTag)
+    {
+        // Hidden from the player
+
+
         stringBuilder.Clear();
-        stringBuilder.Append("Infection progressed, ");
+        stringBuilder.Append("<DEBUG ONLY>Infection progressed, ");
         stringBuilder.Append("Period: ");
         stringBuilder.Append(infection.currentInfectionPeriod);
-        stringBuilder.Append("Volume: ");
+        stringBuilder.Append(", Volume: ");
         stringBuilder.Append(infection);
         return stringBuilder.ToString();
     }
 
-    public static string SubsidiesEvent(int DSubsidiesCollected, int balance){
+    public static string SubsidiesEvent(int subsidiesCollected, int balance)
+    {
         stringBuilder.Clear();
-        stringBuilder.Append("Gov Subsidised ");
-        stringBuilder.Append(DSubsidiesCollected);
-        stringBuilder.Append("$ today, balance now:");
+        stringBuilder.Append("Gov subsidized ");
+        stringBuilder.Append(subsidiesCollected);
+        stringBuilder.Append("$ today, balance now: ");
         stringBuilder.Append(balance);
         return stringBuilder.ToString();
+    }
 
-    }
-    public static string PaycheckEvent(int DPaycheck, int balance){
+    public static string PaycheckEvent(int paycheck, int balance)
+    {
         stringBuilder.Clear();
-        if(DPaycheck > 0){
+        if (paycheck > 0)
+        {
             stringBuilder.Append("Paycheck: ");
-            stringBuilder.Append(DPaycheck);
-            stringBuilder.Append("$ today, balance now:");
+            stringBuilder.Append(paycheck);
+            stringBuilder.Append("$ today, balance now: ");
             stringBuilder.Append(balance);
-            return stringBuilder.ToString();
-        }else{
-            stringBuilder.Append("No Paycheck today ");
-            stringBuilder.Append("balance now:");
-            stringBuilder.Append(balance);
-            return stringBuilder.ToString();
         }
+        else
+        {
+            stringBuilder.Append("No paycheck today, ");
+            stringBuilder.Append("balance now: ");
+            stringBuilder.Append(balance);
+        }
+        return stringBuilder.ToString();
     }
+
+    
 }
