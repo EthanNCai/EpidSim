@@ -82,7 +82,7 @@ public static class SimBehaviorDetial
     {
         stringBuilder.Clear();
         stringBuilder.Append("Go to ");
-        stringBuilder.Append(office.palaceName);
+        stringBuilder.Append(office.placeName);
         stringBuilder.Append(" for work");
         return stringBuilder.ToString();
     }
@@ -91,7 +91,7 @@ public static class SimBehaviorDetial
     {
         stringBuilder.Clear();
         stringBuilder.Append("Back home at ");
-        stringBuilder.Append(residentialPlace.palaceName);
+        stringBuilder.Append(residentialPlace.placeName);
         return stringBuilder.ToString();
     }
 
@@ -101,7 +101,7 @@ public static class SimBehaviorDetial
         if (medPlace != null)
         {
             stringBuilder.Append("Way too sick, go to ");
-            stringBuilder.Append(medPlace.palaceName);
+            stringBuilder.Append(medPlace.placeName);
             stringBuilder.Append(" for medical treatment");
         }
         else
@@ -121,7 +121,7 @@ public static class SimBehaviorDetial
     public static string GoOutForFunEvent(Place place){
         stringBuilder.Clear();
         stringBuilder.Append("Today off, Go out for fun in ");
-        stringBuilder.Append(place.palaceName);
+        stringBuilder.Append(place.placeName);
         return stringBuilder.ToString();
     }
     

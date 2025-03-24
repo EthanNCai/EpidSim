@@ -4,7 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using System.Text;
 
-public class SimsInfoUIManager : MonoBehaviour
+public class SimsInfoUIManager : MonoBehaviour, IUIManager
 {
     public GameObject uiPanel; // UI 面板（包含 ScrollView）
     public Transform content; // ScrollView 的 Content
@@ -13,8 +13,8 @@ public class SimsInfoUIManager : MonoBehaviour
     public GameObject textPrefab; // 预制体
     public Button closeButton;
 
-    private List<string> diaryItemReprs = new List<string>();
-    private static StringBuilder stringBuilder = new StringBuilder();
+    private readonly List<string> diaryItemReprs = new List<string>();
+    private static readonly StringBuilder stringBuilder = new StringBuilder();
     private Sims currentSims;
     private readonly List<TextMeshProUGUI> textPool = new List<TextMeshProUGUI>(); // 复用的文本池
 
@@ -25,34 +25,36 @@ public class SimsInfoUIManager : MonoBehaviour
         TimeManager.AfterQuarterChanged += UpdateInfoQuarterly;
     }
 
-    public void ShowSimsInfo(Sims sims)
+    public void ShowUI()
+    {
+        UIManager.Instance.SetActiveUI(this); // 让 UIManager 关闭其他 UI
+        uiPanel.SetActive(true);
+    }
+
+    public void InitSimUI(Sims sims)
     {
         if (currentSims == sims)
             return; // 避免重复打开相同的 Sims
         
         currentSims = sims;
-        UpdateUI(sims);
-        uiPanel.SetActive(true);
-    }
-
-    private void UpdateUI(Sims sims)
-    {
+        if (currentSims == null) return;
+        
         // 更新名字和余额
-        UpdateBalance(sims.balance);
-        nameTag.text = $"名字：{sims.simsName}";
+        nameTag.text = $"名字：{currentSims.simsName}";
+        UpdateBalance(currentSims.balance);
 
         // 获取并显示日记项
-        sims.simDiary.GetDiaryEntries(diaryItemReprs);
-        SetTextList(diaryItemReprs.ToArray());
+        currentSims.simDiary.GetDiaryEntries(diaryItemReprs);
+        SetTextList(diaryItemReprs);
+        ShowUI();
     }
 
-    
 
-    private void SetTextList(string[] infos)
+    private void SetTextList(List<string> infos)
     {
         int i = 0;
         // 复用 textPool 中的 TextMeshProUGUI
-        for (; i < infos.Length; i++)
+        for (; i < infos.Count; i++)
         {
             if (i >= textPool.Count)
             {
@@ -77,12 +79,15 @@ public class SimsInfoUIManager : MonoBehaviour
         currentSims = null;
     }
 
+
+    // SECTION 3: UPDATE RELATED
+
     private void UpdateInfoQuarterly((int, int) timeNow)
     {
         if (currentSims != null)
         {
             UpdateBalance(currentSims.balance);
-            UpdateDiary(this.diaryItemReprs);
+            UpdateSimDiary();
         }
     }
 
@@ -90,8 +95,12 @@ public class SimsInfoUIManager : MonoBehaviour
     {
         balanceTag.text = $"存款：{balance} $";
     }
-    private void UpdateDiary(List<string> diaryItemReprs){
+
+    private void UpdateSimDiary()
+    {
+        if (currentSims == null) return;
+        
         currentSims.simDiary.GetDiaryEntries(diaryItemReprs);
-        SetTextList(diaryItemReprs.ToArray());
+        SetTextList(diaryItemReprs);
     }
 }

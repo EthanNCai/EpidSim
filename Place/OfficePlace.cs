@@ -1,10 +1,11 @@
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-public class OfficePlace : Place, IContributablePlace
+public class OfficePlace : Place, IContributablePlace, ITaxPayer
 {   
-    
+
     public CFECommonTax<OfficePlace> commonTaxCFE;
+    int accumulatedTaxLastD = 0;
     public void OfficePlaceInit(
         Vector2Int placeShape, 
         Vector2Int basePosition, 
@@ -28,6 +29,13 @@ public class OfficePlace : Place, IContributablePlace
             cfeManager);
         this.commonTaxCFE = cfeManager.CreateCommonTaxCFE<OfficePlace>(this);
         TimeManager.OnQuarterChanged += DistributePaycheck;
+        TimeManager.OnDayChanged += LogDiaryDaily;
+    }
+    public void LogDiaryDaily(int timeNow){
+        this.placeDiary.AppendDiaryItem(
+            new PlaceDiaryItem(
+                infoManager.timeManager.GetTime(),
+                PlaceBehaviorsDetails.ContributeTaxEvent(this)));
     }
     public void SayHi(){
         Debug.Log(base.ToString());
@@ -39,12 +47,20 @@ public class OfficePlace : Place, IContributablePlace
           return 0;  
         } 
         else{
-            return workingSims * PriceMenu.QOfficeTaxUnit;
+            int QTax = workingSims * PriceMenu.QOfficeTaxUnit;
+            accumulatedTaxLastD += QTax;
+            return QTax;
         }
     }
     public void DistributePaycheck((int , int ) _){
         foreach( Sims sim in inSiteSims){
             sim.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
         } 
+    }
+
+    public int GetAndResetTaxContributedLastD(){
+        int temp = this.accumulatedTaxLastD;
+        this.accumulatedTaxLastD = 0;
+        return temp;
     }
 }

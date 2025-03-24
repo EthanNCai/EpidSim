@@ -449,7 +449,7 @@ public class Sims : MonoBehaviour
     public void UpdateInSiteRepr(){
         stringBuilder.Clear();
         if ( this.inSite != null){
-            stringBuilder.Append(this.inSite.palaceName);
+            stringBuilder.Append(this.inSite.placeName);
         }else{
             stringBuilder.Append("Not in Site");
         }
