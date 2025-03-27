@@ -63,11 +63,11 @@ public class SimScheduler{
         int volume = infection.virusVolume;
 
         // 96
-        int qPerday = CommonConsts.qPerday;
+        int qPerday = CommonMetas.qPerday;
         
         if(!justRevocerd && !justDead){
 
-            Debug.Assert(volume >= 0 || justDead || justRevocerd, $"sims->{hostedSim.uid}-{hostedSim.infection.virusVolume}-belowzero");
+            Debug.Assert(volume >= 0 || justDead || justRevocerd, $"sims->{hostedSim.uid}-[{hostedSim.infection.virusVolume}]-belowzero");
             float willingnessToMedical = this.CalculateHospitalWillingness(acutalMedicalFee,balance,volume,qPerday);
             bool isGoToMedicalRightNow = RandomManager.FlipTheCoin(willingnessToMedical);
             // Debug.Log("willingness to Med" + willingnessToMedical);

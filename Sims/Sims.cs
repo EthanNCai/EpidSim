@@ -445,7 +445,7 @@ public class Sims : MonoBehaviour
             new SimsDiaryItem(
                 timeManager.GetTime(),
                 SimBehaviorDetial.SicknessAwarenessEvent(this.sicknessTag)));
-    }
+        }
     public void UpdateInSiteRepr(){
         stringBuilder.Clear();
         if ( this.inSite != null){

@@ -45,7 +45,7 @@ public class SelectionManager : MonoBehaviour
             else if (newHighlightedObject.GetComponent<Place>())
             {
                 Place place = newHighlightedObject.GetComponent<Place>();
-                Debug.Log(hoverText.text = place.placeName);
+                // Debug.Log(hoverText.text = place.placeName);
                 hoverText.text = place.placeName;  // 使用 Place 的名字
             }
         }

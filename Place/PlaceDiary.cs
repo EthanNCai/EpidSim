@@ -1,37 +1,37 @@
 using System.Collections.Generic;
+// using System.Diagnostics;
 using System.Text;
+using UnityEngine;
 public class PlaceDiary
 {
-    private List<PlaceDiaryItem> diaryList = new List<PlaceDiaryItem>();
+    private readonly Queue<PlaceDiaryItem> diaryQueue = new Queue<PlaceDiaryItem>();
+    private readonly Queue<string> diaryReprQueue = new Queue<string>(); // 可以理解为DiaryItem的数字孪生
 
     public void AppendDiaryItem(PlaceDiaryItem item)
     {
-        if (diaryList.Count >= 50) // check if the size is over 50, if so remove the oldest entries.
+        if (diaryQueue.Count >= CommonMetas.diaryMaxEntries)
         {
-            diaryList.RemoveAt(0); // remove the oldest entry
+            diaryQueue.Dequeue(); // 移除最旧的元素
+            diaryReprQueue.Dequeue();
         }
-        diaryList.Add(item); // add new entry
+        diaryQueue.Enqueue(item); // 添加新日志
+        diaryReprQueue.Enqueue($"[d{item.timestamp.d:D2}, {item.timestamp.h:D2}:{item.timestamp.q:D2}] {item.palceBehaviorDetial}");
     }
 
-    public void GetDiaryEntries(List<string> entries)
+    public Queue<string> GetDiaryReprQueue()
     {
-        entries.Clear(); // Reuse the existing list, clear previous entries
-        foreach (var item in diaryList)
-        {
-            string formattedTime = $"[day {item.timestamp.d:D2}, {item.timestamp.h:D2}:{item.timestamp.q:D2}]";
-            entries.Add($"{formattedTime} {item.simBehaviorDetial}");
-        }
+        return diaryReprQueue;
     }
 }
 
 public struct PlaceDiaryItem{
     public (int d, int h, int q) timestamp;
-    public string simBehaviorDetial;
+    public string palceBehaviorDetial;
 
     // public StringBuilder stringBuilder;
-    public PlaceDiaryItem( (int d, int h, int q) timestamp, string simBehaviorDetial){
+    public PlaceDiaryItem( (int d, int h, int q) timestamp, string placeBehaviorDetial){
         this.timestamp = timestamp;
-        this.simBehaviorDetial = simBehaviorDetial;
+        this.palceBehaviorDetial = placeBehaviorDetial;
         // this.stringBuilder = new StringBuilder();
     }
 }
