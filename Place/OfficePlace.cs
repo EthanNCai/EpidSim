@@ -32,7 +32,7 @@ public class OfficePlace : Place, IContributablePlace, ITaxPayer
         TimeManager.OnDayChanged += LogDiaryDaily;
     }
     public void LogDiaryDaily(int timeNow){
-        Debug.Log("contributed_tx_diary");
+        // Debug.Log("contributed_tx_diary");
         this.placeDiary.AppendDiaryItem(
             new PlaceDiaryItem(
                 infoManager.timeManager.GetTime(),

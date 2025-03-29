@@ -96,6 +96,20 @@ public static class SimBehaviorDetial
         return stringBuilder.ToString();
     }
 
+    public static string GoForMedEvent(Place place)
+    {
+        stringBuilder.Clear();
+        stringBuilder.Append($"Severely sick, gotta go to {place.placeName} for med");
+        return stringBuilder.ToString();
+    }
+
+    public static string FaildGoOutForMedEvent(Place place)
+    {
+        stringBuilder.Clear();
+        stringBuilder.Append($"Severely sick, but no medical place available");
+        return stringBuilder.ToString();
+    }
+
     public static string GoOutForFunEvent(Place place)
     {
         stringBuilder.Clear();

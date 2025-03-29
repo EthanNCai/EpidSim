@@ -9,9 +9,10 @@ public class CFEServiceBuildingMaintaining<TPlace> : CFEService where TPlace : P
     {
         this.relatedPlace = place;
     }
-    public override void QUpdateExpenseItem(){
+    public override int QUpdateExpenseItem(){
         int newQExpense = this.relatedPlace.CalculateQExpense();
         base.expenseItem.QUpdateExpense(newQExpense);
+        return newQExpense;
     }
 }
 

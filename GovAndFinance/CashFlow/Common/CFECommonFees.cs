@@ -9,9 +9,10 @@ public class CFECommonFees<TPlace> : CFECommon where TPlace : Place, IContributa
         base(place.placeFullName,new ContributeItem(ContributeSubTypes.Fees)){
         this.relatedPlace = place;
     }
-    public override void QUpdateContributeItem(){
+    public override int QUpdateContributeItem(){
         int newQcontribution = this.relatedPlace.CalculateQContribution();
         base.contributeItem.QUpdateContribution(newQcontribution);
+        return newQcontribution;
     }  
 
 }

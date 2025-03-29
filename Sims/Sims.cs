@@ -107,7 +107,7 @@ public class Sims : MonoBehaviour
             // kick off the hospital right now
             Debug.Log($"{this.simsName} has just bankrupt because of medical cost");
             this.simScheduler.UpdateScheduleOnFeeUnaffordable();
-            this.SetOutMoving(simScheduler.GetDestination());
+            this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
         }else{
             this.balance -= medicalCost;
             Debug.Log($"{this.simsName} has just paid {medicalCost} for medical care");
@@ -210,7 +210,7 @@ public class Sims : MonoBehaviour
             this.UpdateExposureFromTile();
             this.TryToInfect();
         }
-        this.SetOutMoving(simScheduler.GetDestination());
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Morning));
     }
 
     // 晚间KeyTime的更新
@@ -223,7 +223,7 @@ public class Sims : MonoBehaviour
         }else{
             UpdateExposureFromTile();
         }
-        this.SetOutMoving(simScheduler.GetDestination());
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Dusk));
         CommitPayCheckForToday(timeNow);
     }
 
@@ -440,9 +440,9 @@ public class Sims : MonoBehaviour
         if(this.infection != null){
             this.sicknessTag = SicknessTagConverter.GetSicknessTag(this.infection.virusVolume);
         }else{
-            this.sicknessTag = SicknessTagConverter.GetSicknessTag(RandomManager.Get0toN(0.15f));
+            this.sicknessTag = SicknessTagConverter.GetSicknessTag(RandomManager.Get0toN(0.115f));
         }
-        if(this.sicknessTag == SicknessTag.Normal){ return; }
+        if(this.sicknessTag == SicknessTag.Normal){ return;}
         this.simDiary.AppendDiaryItem(
             new SimsDiaryItem(
                 timeManager.GetTime(),

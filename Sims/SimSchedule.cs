@@ -29,10 +29,7 @@ public class SimScheduler{
         if(hostedSim.isTodayOff){
             Place commercialChoosed = RandomManager.Choice(hostedSim.placeManager.commercialPlaces);
             this.leisureRelatedDest = commercialChoosed;
-            this.hostedSim.simDiary.AppendDiaryItem(
-            new SimsDiaryItem(
-                this.hostedSim.timeManager.GetTime(),
-                SimBehaviorDetial.GoOutForFunEvent(leisureRelatedDest)));
+            
         }else{
             this.leisureRelatedDest = null;
             //this.pJobRelated = hostedSim.home;
@@ -121,16 +118,9 @@ public class SimScheduler{
         }
     }
 
-    private enum DestType{
-        GovQurantine,
-        ResidentialLockDown,
-        PersonalMedical,
-        LeisureRelated,
-        WorkRelated,
-        None
-    }
+    public Place GetDestination(KeyTime keyTime){
 
-    public Place GetDestination(){
+        // 为什么要传入一个keyTime？ 这是因为有一些东西只用Insert到Diary一次
 
         Place destination = null;
         // DestType destType = DestType.None;
@@ -138,24 +128,25 @@ public class SimScheduler{
         if(govQurantineDest != null){
             destination = govQurantineDest;
             // destType = DestType.GovQurantine;
-        }
-        
-        else if(residentialLockDownDest != null){
+        }else if(residentialLockDownDest != null){
             destination =  residentialLockDownDest;
             // destType = DestType.ResidentialLockDown;
-        }
-        
-        else if(personalMedicalDest != null){
+        }else if(personalMedicalDest != null){
             destination =  personalMedicalDest;
+            this.hostedSim.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                this.hostedSim.timeManager.GetTime(),
+                SimBehaviorDetial.GoOutForFunEvent(personalMedicalDest)));
             // destType = DestType.PersonalMedical;
-        }
-        
-        else if(leisureRelatedDest != null){
-            destination =  leisureRelatedDest;
-            // destType = DestType.LeisureRelated;
-        }
-        
-        else if(workRelatedDest != null){
+        }else if(leisureRelatedDest != null){
+            if(keyTime == KeyTime.Morning){
+                this.hostedSim.simDiary.AppendDiaryItem(
+                new SimsDiaryItem(
+                    this.hostedSim.timeManager.GetTime(),
+                    SimBehaviorDetial.GoOutForFunEvent(leisureRelatedDest)));
+                destination =  leisureRelatedDest;
+            }
+        }else if(workRelatedDest != null){
             destination =  workRelatedDest;
             // destType = DestType.WorkRelated;
         }else{

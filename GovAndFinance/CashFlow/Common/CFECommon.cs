@@ -14,6 +14,6 @@ public class CFECommon{
         this.contributeItem = contributeItem;
     }
     // 由你来Update ContibuteItem
-    public virtual void QUpdateContributeItem(){}
+    public virtual int QUpdateContributeItem(){ return -999999999; }
 }
 

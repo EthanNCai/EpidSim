@@ -1,17 +1,29 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using System;
+
+public enum KeyTime
+{
+    DayChanged,
+    Morning,
+    Noon,
+    Dusk,
+    Night,
+    Random
+}
 
 public class TimeManager : MonoBehaviour
 {
-    public static event Action<int> OnDayChanged;  // 事件：天数变化 (day)
-    public static event Action<(int, int)> OnQuarterChanged; // 事件：季度变化 (hour, quarter)
-    public static event Action<(int, int)> AfterQuarterChanged; // 事件：季度变化 (hour, quarter)
-    
+    public static event Action<int> OnDayChanged;
+    public static event Action<(int, int)> OnQuarterChanged;
+    public static event Action<(int, int)> AfterQuarterChanged;
+    public static event Action<KeyTime> OnKeyTimeChanged;
+
     public int day = 0;
     public int hour = 0;
-    public int quarter = 0; // 1 小时 = 4 个 quarter，每个 quarter = 15 分钟
-    private float speed = 4f; // 时间流逝速度，1.0f = 1秒推进1个quarter
-    private float timeAccumulator = 0f; // 记录时间
+    public int quarter = 0;
+    public float speed = 4f;
+    private float timeAccumulator = 0f;
     private float timeStep = 1.0f;
 
     private void Update()
@@ -28,11 +40,18 @@ public class TimeManager : MonoBehaviour
     {
         OnQuarterChanged?.Invoke((hour, quarter));
         AfterQuarterChanged?.Invoke((hour, quarter));
+        
         quarter++; 
         if (quarter >= 4)
         {
             quarter = 0;
             hour++;
+            
+            if (hour == 7) OnKeyTimeChanged?.Invoke(KeyTime.Morning);
+            else if (hour == 12) OnKeyTimeChanged?.Invoke(KeyTime.Noon);
+            else if (hour == 17) OnKeyTimeChanged?.Invoke(KeyTime.Dusk);
+            else if (hour == 18) OnKeyTimeChanged?.Invoke(KeyTime.Night);
+
             if (hour >= 24)
             {
                 hour = 0;
@@ -45,5 +64,9 @@ public class TimeManager : MonoBehaviour
     public (int, int, int) GetTime()
     {
         return (day, hour, quarter);
+    }
+    public float GetDayLen()
+    {
+        return (24 * 4) * timeStep / speed;
     }
 }

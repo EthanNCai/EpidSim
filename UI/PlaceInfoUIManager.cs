@@ -9,6 +9,7 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
     public TextMeshProUGUI nameTag;
     public TextMeshProUGUI pleceTypeTag;
     public Button closeButton;
+    public Button lockDownButton;
     public Transform scrollViewContent; // ScrollView 的 Content
     public GameObject textPrefab; // 预制体
     
@@ -43,6 +44,7 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
             return;
 
         currentPlace = place;
+        lockDownButton.interactable = currentPlace is ILockDownable;
         nameTag.text = $"Name: {place.placeName}";
         pleceTypeTag.text = $"Type: {Place.GetPlaceTypeDescription(currentPlace)}";
         ShowUI();

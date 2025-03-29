@@ -11,9 +11,10 @@ public class CFEPolicyMinSub<TPlace> : CFEPolicy where TPlace : Place, IExpensab
     {
         this.relatedPlace = place;
     }
-    public override void QUpdateExpenseItem(){
+    public override int QUpdateExpenseItem(){
         int newQExpense = this.relatedPlace.CalculateQExpense();
         base.expenseItem.QUpdateExpense(newQExpense);
+        return newQExpense;
     }
     
 }
