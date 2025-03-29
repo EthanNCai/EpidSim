@@ -1,9 +1,23 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class ResidentialPlace : Place, IExpensablePlace
+public interface ILockDownable
 {
+    bool isLockedDown { get; set; }  // 使用属性代替字段
+    void StartLockdown();          // 移除重复方法，修正语法
+    void StopLockdown();
+}
+
+
+public class ResidentialPlace : Place, IExpensablePlace, ILockDownable
+{
+
+    public event Action<bool> OnLockdownStatusUpdate;
+    public bool isLockedDown { get; set; } 
     public int populationCapacity;
     public CFEPolicyMinSub<ResidentialPlace> policyMinSub;
+    public List<Sims> residents;
     public void ResPlaceInit(
         Vector2Int placeShape, 
         Vector2Int basePosition, 
@@ -38,9 +52,18 @@ public class ResidentialPlace : Place, IExpensablePlace
     }
 
     public int CalculateQExpense(){
-        // get and clear acc subsidies
         int temp =  this.QAccumulatedSubsidies;
         this.QAccumulatedSubsidies = 0;
         return temp;
+    }
+    public void StartLockdown(){
+        Debug.Assert(isLockedDown == false);
+        this.isLockedDown = true;
+        OnLockdownStatusUpdate?.Invoke(true);
+    }
+    public void StopLockdown(){   
+        Debug.Assert(isLockedDown == true);
+        this.isLockedDown = false;
+        OnLockdownStatusUpdate?.Invoke(false);
     }
 }

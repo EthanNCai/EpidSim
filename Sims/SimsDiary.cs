@@ -25,6 +25,8 @@ public class SimsDiary
     private readonly Queue<SimsDiaryItem> diaryQueue = new Queue<SimsDiaryItem>();
     private readonly Queue<string> diaryReprQueue = new Queue<string>(); // 可以理解为DiaryItem的数字孪生
 
+    private readonly Sims hostedSim;
+    
     public void AppendDiaryItem(SimsDiaryItem item)
     {
         if (diaryQueue.Count >= CommonMetas.diaryMaxEntries)
@@ -39,6 +41,24 @@ public class SimsDiary
     public Queue<string> GetDiaryReprQueue()
     {
         return diaryReprQueue;
+    }
+
+    public SimsDiary(Sims hostedSim){
+        this.hostedSim = hostedSim;
+    }
+
+    public void DailyDuskDiaryItem(){
+        int paycheckToday = this.hostedSim.GetAndClearAccumulatedPaycheck();
+        if(paycheckToday != 0){
+            this.hostedSim.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                this.hostedSim.timeManager.GetTime(),
+                SimBehaviorDetial.WorkBackHomeEvent(paycheckToday, this.hostedSim.balance)
+            ));
+        }
+    }
+    public void DailyNoonDairyItem(){
+        
     }
 }
 
@@ -68,61 +88,7 @@ public static class SimBehaviorDetial
 {
     public static StringBuilder stringBuilder = new StringBuilder();
 
-    public static string InfectedBy(Sims infector)
-    {
-        stringBuilder.Clear();
-        stringBuilder.Append("Infected by ");
-        stringBuilder.Append(infector.simsName);
-        return stringBuilder.ToString();
-    }
 
-    public static string GotoWorkEvent(OfficePlace office)
-    {
-        stringBuilder.Clear();
-        stringBuilder.Append("Go to ");
-        stringBuilder.Append(office.placeName);
-        stringBuilder.Append(" for work");
-        return stringBuilder.ToString();
-    }
-
-    public static string GoHomeEvent(ResidentialPlace residentialPlace)
-    {
-        stringBuilder.Clear();
-        stringBuilder.Append("Back home at ");
-        stringBuilder.Append(residentialPlace.placeName);
-        return stringBuilder.ToString();
-    }
-
-    public static string GoToMedEvent(MedicalPlace medPlace)
-    {
-        stringBuilder.Clear();
-        if (medPlace != null)
-        {
-            stringBuilder.Append("Way too sick, go to ");
-            stringBuilder.Append(medPlace.placeName);
-            stringBuilder.Append(" for medical treatment");
-        }
-        else
-        {
-            stringBuilder.Append("Failed to find an available medical place, staying at home instead");
-        }
-        return stringBuilder.ToString();
-    }
-
-    public static string BankruptEvent(string reason)
-    {
-        stringBuilder.Clear();
-        stringBuilder.Append($"Spent all of the balance, because {reason}");
-        return stringBuilder.ToString();
-    }
-
-    public static string GoOutForFunEvent(Place place){
-        stringBuilder.Clear();
-        stringBuilder.Append("Today off, Go out for fun in ");
-        stringBuilder.Append(place.placeName);
-        return stringBuilder.ToString();
-    }
-    
     public static string SicknessAwarenessEvent(SicknessTag sicknessTag)
     {
         stringBuilder.Clear();
@@ -130,22 +96,22 @@ public static class SimBehaviorDetial
         return stringBuilder.ToString();
     }
 
-
-    public static string InfectionProgressEvent(Infection infection, SicknessTag sicknessTag)
+    public static string GoOutForFunEvent(Place place)
     {
-        // Hidden from the player
-
-
         stringBuilder.Clear();
-        stringBuilder.Append("<DEBUG ONLY>Infection progressed, ");
-        stringBuilder.Append("Period: ");
-        stringBuilder.Append(infection.currentInfectionPeriod);
-        stringBuilder.Append(", Volume: ");
-        stringBuilder.Append(infection);
+        stringBuilder.Append($"Today off, I'd like to go to {place.placeName} for fun");
         return stringBuilder.ToString();
     }
 
-    public static string SubsidiesEvent(int subsidiesCollected, int balance)
+    public static string FaildGoOutForFunEvent(string reason)
+    {
+        stringBuilder.Clear();
+        stringBuilder.Append("Today off, but I'd rather stay at home because ");
+        stringBuilder.Append(reason);
+        return stringBuilder.ToString();
+    }
+
+    public static string GetSubsidiesEvent(int subsidiesCollected, int balance)
     {
         stringBuilder.Clear();
         stringBuilder.Append("Gov subsidized ");
@@ -154,25 +120,12 @@ public static class SimBehaviorDetial
         stringBuilder.Append(balance);
         return stringBuilder.ToString();
     }
-
-    public static string PaycheckEvent(int paycheck, int balance)
-    {
+    public static string WorkBackHomeEvent(int paycheck, int balance){
         stringBuilder.Clear();
-        if (paycheck > 0)
-        {
-            stringBuilder.Append("Paycheck: ");
-            stringBuilder.Append(paycheck);
-            stringBuilder.Append("$ today, balance now: ");
-            stringBuilder.Append(balance);
-        }
-        else
-        {
-            stringBuilder.Append("No paycheck today, ");
-            stringBuilder.Append("balance now: ");
-            stringBuilder.Append(balance);
-        }
+        stringBuilder.Append("Work back home with");
+        stringBuilder.Append(paycheck);
+        stringBuilder.Append("$ today, balance now: ");
+        stringBuilder.Append(balance);
         return stringBuilder.ToString();
     }
-
-    
 }

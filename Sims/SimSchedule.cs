@@ -1,14 +1,21 @@
 using System.ComponentModel;
 using Unity.VisualScripting;
+using UnityEditor;
+using UnityEditor.TextCore.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Assertions.Must;
 
 public class SimScheduler{
-    // 这个脚本不仅是关系到模拟市民的本人意愿，更关系到政策的强制执行力
-    Place pInfectionRelated = null; // infection related
-    Place pLeisureRelated = null; // leisure related
-    Place pJobRelated = null; // work related
+
+    // Section Dests
+    Place residentialLockDownDest;
+    Place govQurantineDest;
+    Place personalMedicalDest;
+    Place workRelatedDest;
+    Place leisureRelatedDest;
+    // End 
+
     Sims hostedSim;
 
     public SimScheduler(Sims sim){
@@ -18,35 +25,30 @@ public class SimScheduler{
 
     // 早晨决定去哪里？
     public void UpdateScheduleOnMorning(){
-        // flush Leisure 
-        // Debug.Log(hostedSim.isTodayOff);
-        this.pLeisureRelated = null;
+        this.leisureRelatedDest = null;
         if(hostedSim.isTodayOff){
             Place commercialChoosed = RandomManager.Choice(hostedSim.placeManager.commercialPlaces);
-            this.pLeisureRelated = commercialChoosed;
-        }else{
-            this.pLeisureRelated = null;
-            //this.pJobRelated = hostedSim.home;
-        }
-        this.hostedSim.simDiary.AppendDiaryItem(
+            this.leisureRelatedDest = commercialChoosed;
+            this.hostedSim.simDiary.AppendDiaryItem(
             new SimsDiaryItem(
                 this.hostedSim.timeManager.GetTime(),
-                SimBehaviorDetial.GotoWorkEvent(hostedSim.office)
-            ));
-        this.pJobRelated = hostedSim.office;
+                SimBehaviorDetial.GoOutForFunEvent(leisureRelatedDest)));
+        }else{
+            this.leisureRelatedDest = null;
+            //this.pJobRelated = hostedSim.home;
+        }
+        this.workRelatedDest = hostedSim.office;
     }
 
     // 晚上去哪里？
     public void UpdateScheduleOnDusk(){
-        this.pJobRelated = hostedSim.home;
-        if(hostedSim.isTodayOff){
-            this.pLeisureRelated = null;
+        if(leisureRelatedDest){
+            this.leisureRelatedDest = this.hostedSim.home;
         }
-        this.hostedSim.simDiary.AppendDiaryItem(
-            new SimsDiaryItem(
-                this.hostedSim.timeManager.GetTime(),
-                SimBehaviorDetial.GoHomeEvent(hostedSim.home)
-        ));
+        if(workRelatedDest){
+            this.workRelatedDest = this.hostedSim.home;
+            
+        }
     }
     public void UpdateScheduleOnInfectionChanged(bool justRevocerd = false, bool justDead = false){
         // read infection
@@ -72,13 +74,13 @@ public class SimScheduler{
             bool isGoToMedicalRightNow = RandomManager.FlipTheCoin(willingnessToMedical);
             // Debug.Log("willingness to Med" + willingnessToMedical);
             if(isGoToMedicalRightNow){
-                if(this.pInfectionRelated == null){
+                if(this.personalMedicalDest == null){
                     // 还没在医院了
                     MedicalPlace medicalPlace = this.hostedSim.placeManager.GetAvailableMedicalPlace();
                     if(medicalPlace == null){
                         Debug.Log("A sim willing to go to hospital, but no seats left");
                     }else{
-                        pInfectionRelated = medicalPlace;
+                        personalMedicalDest = medicalPlace;
                     }
                 }else{
                     // 已经在一个medical facility了
@@ -86,11 +88,11 @@ public class SimScheduler{
                 }
             }else{
                 // 放弃治疗
-                this.pInfectionRelated = null;
+                this.personalMedicalDest = null;
             }
         }else{
             // 已经痊愈或者死亡
-            this.pInfectionRelated = null;
+            this.personalMedicalDest = null;
         }
     }
     public void UpdateScheduleOnPolicyChanged(){
@@ -104,19 +106,63 @@ public class SimScheduler{
         // 当Sims因为非生活费的原因而破产的时候，就会触发这个函数
         Debug.Assert(hostedSim.inSite is MedicalPlace,"Sims 破产了，但是它却不再医院里面（理论上只有医院才能导致破产）");
         if(this.hostedSim.inSite is MedicalPlace){
-            this.pInfectionRelated = null;
+            this.personalMedicalDest = null;
             return;
         }
     }
 
-    public Place GetDestination(){
-        if(pInfectionRelated != null){
-            return pInfectionRelated;
-        }else if(pLeisureRelated != null){
-            return pLeisureRelated;
-        }else{
-            return pJobRelated;
+    public void HandelLockDownStatusUpdate(bool isLockdown){
+        if (isLockdown && this.govQurantineDest == null){
+            // 发出到封锁指令，并且没有其他的GovInfectionPolicy
+            this.residentialLockDownDest = this.hostedSim.home;
+        }else if(!isLockdown && this.govQurantineDest == hostedSim.home){
+             // 收到关闭封锁的指令的同时，当前正在被封锁在家里
+            this.govQurantineDest = null;
         }
+    }
+
+    private enum DestType{
+        GovQurantine,
+        ResidentialLockDown,
+        PersonalMedical,
+        LeisureRelated,
+        WorkRelated,
+        None
+    }
+
+    public Place GetDestination(){
+
+        Place destination = null;
+        // DestType destType = DestType.None;
+
+        if(govQurantineDest != null){
+            destination = govQurantineDest;
+            // destType = DestType.GovQurantine;
+        }
+        
+        else if(residentialLockDownDest != null){
+            destination =  residentialLockDownDest;
+            // destType = DestType.ResidentialLockDown;
+        }
+        
+        else if(personalMedicalDest != null){
+            destination =  personalMedicalDest;
+            // destType = DestType.PersonalMedical;
+        }
+        
+        else if(leisureRelatedDest != null){
+            destination =  leisureRelatedDest;
+            // destType = DestType.LeisureRelated;
+        }
+        
+        else if(workRelatedDest != null){
+            destination =  workRelatedDest;
+            // destType = DestType.WorkRelated;
+        }else{
+            Debug.Assert(destination != null);
+            destination = hostedSim.home;
+        }
+        return destination;
     }
    
     public bool isTodayDayOff(int day){
@@ -140,9 +186,17 @@ public class SimScheduler{
         }
     }
 
-    private void FlushSchedule(){
-        pInfectionRelated = null; // infection related
-        pJobRelated = null;
-        pLeisureRelated = null;
+    // private void FlushSchedule(){
+    //     pGovInfectionPolicy = null; // government policy
+    //     pInfectionRelated = null; // infection related
+    //     pJobRelated = null;
+    //     pLeisureRelated = null;
+    // }
+
+    private void FlushDest(){
+        workRelatedDest = null;
+        leisureRelatedDest = null;
+        govQurantineDest = null;
+        residentialLockDownDest = null;
     }
 }
