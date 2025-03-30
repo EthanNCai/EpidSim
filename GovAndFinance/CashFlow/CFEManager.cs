@@ -72,19 +72,27 @@ public class CFEManager : MonoBehaviour{
         commonCFEs.Remove(target);
     }
 
-    public void QUpdateCFEs((int,int) timeNow)
+    public void QUpdateCFEs((int,int) _)
     {
+        int accumulatedExpense = 0;
+        int accumulatedContribute = 0;
+
         for( int i=0; i<commonCFEs.Count;i++){
-            commonCFEs[i].QUpdateContributeItem();
+            accumulatedContribute += commonCFEs[i].QUpdateContributeItem();
         }
         for( int i=0; i<serviceCFEs.Count;i++){
-            serviceCFEs[i].QUpdateExpenseItem();
+            accumulatedExpense += serviceCFEs[i].QUpdateExpenseItem();
         }
         for( int i=0; i<policyCFEs.Count;i++){
-            policyCFEs[i].QUpdateExpenseItem();
+            accumulatedExpense += policyCFEs[i].QUpdateExpenseItem();
         }
+
+        // commit change to cash flow
+        this.cashFlow += accumulatedContribute;
+        this.cashFlow -= accumulatedExpense;
     }
     
+
     public string GenerateCFEsRepr(){
         stringBuilder.Clear();
         // CashFlow

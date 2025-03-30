@@ -88,7 +88,7 @@ public class Sims : MonoBehaviour
         this.simScheduler = new SimScheduler(this);
         this.isTodayOff = GetIsTodayOff(0);
         this.gameObject.AddComponent<SelectableObject>();
-        this.simDiary = new SimsDiary();
+        this.simDiary = new SimsDiary(this);
     }
     /*
         模拟市民的全部功能有下面几点(这个类只能设计的部分)
@@ -107,21 +107,21 @@ public class Sims : MonoBehaviour
             // kick off the hospital right now
             Debug.Log($"{this.simsName} has just bankrupt because of medical cost");
             this.simScheduler.UpdateScheduleOnFeeUnaffordable();
-            this.SetOutMoving(simScheduler.GetDestination());
+            this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
         }else{
             this.balance -= medicalCost;
             Debug.Log($"{this.simsName} has just paid {medicalCost} for medical care");
         }
     }
+
+    // Section: Paycheck 
     private void CommitPayCheckForToday((int,int) timeNow){
-        // Debug.Log($"{this.simsName}获得了今天的工资：{accumulatedPaycheckToday}");
         this.balance += accumulatedPaycheckToday;
-        // SimBehaviorDetial.PaycheckEvent(accumulatedPaycheckToday,balance);
-        this.simDiary.AppendDiaryItem(
-            new SimsDiaryItem(
-                GetDetailedTime(timeNow),
-                SimBehaviorDetial.PaycheckEvent(accumulatedPaycheckToday,balance)));
+    }
+    public int GetAndClearAccumulatedPaycheck(){
+        int temp = this.accumulatedPaycheckToday;
         this.accumulatedPaycheckToday = 0;
+        return temp;
     }
     public void ReceivePaycheck(int paycheckIn){
         accumulatedPaycheckToday += paycheckIn;
@@ -137,7 +137,7 @@ public class Sims : MonoBehaviour
         this.simDiary.AppendDiaryItem(
             new SimsDiaryItem(
                 timeManager.GetTime(),
-                SimBehaviorDetial.SubsidiesEvent(accumulatedSubsidyToday,this.balance)));
+                SimBehaviorDetial.GetSubsidiesEvent(accumulatedSubsidyToday,this.balance)));
         this.accumulatedSubsidyToday = 0;
     }
 
@@ -149,7 +149,6 @@ public class Sims : MonoBehaviour
             this.balance -= PriceMenu.QSimLifeExpense;
         }
     }
-    
 
     public void ManuallyInfect(){
         // DO not call infection info debugget method here
@@ -211,19 +210,20 @@ public class Sims : MonoBehaviour
             this.UpdateExposureFromTile();
             this.TryToInfect();
         }
-        this.SetOutMoving(simScheduler.GetDestination());
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Morning));
     }
 
     // 晚间KeyTime的更新
     private void HandleDuskKeyTime((int,int) timeNow){
         
+        this.simDiary.DailyDuskDiaryItem();
         this.simScheduler.UpdateScheduleOnDusk();
         if (infection != null){
             PolluteThePosition();
         }else{
             UpdateExposureFromTile();
         }
-        this.SetOutMoving(simScheduler.GetDestination());
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Dusk));
         CommitPayCheckForToday(timeNow);
     }
 
@@ -296,6 +296,7 @@ public class Sims : MonoBehaviour
         this.home = home;
         this.office = office;
         this.destination = home;
+        this.home.OnLockdownStatusUpdate += simScheduler.HandelLockDownStatusUpdate;
     }
 
     public bool IsInDestination(Vector2 currentPosition)
@@ -439,13 +440,14 @@ public class Sims : MonoBehaviour
         if(this.infection != null){
             this.sicknessTag = SicknessTagConverter.GetSicknessTag(this.infection.virusVolume);
         }else{
-            this.sicknessTag = SicknessTagConverter.GetSicknessTag(RandomManager.Get0toN(0.4f));
+            this.sicknessTag = SicknessTagConverter.GetSicknessTag(RandomManager.Get0toN(0.115f));
         }
+        if(this.sicknessTag == SicknessTag.Normal){ return;}
         this.simDiary.AppendDiaryItem(
             new SimsDiaryItem(
                 timeManager.GetTime(),
                 SimBehaviorDetial.SicknessAwarenessEvent(this.sicknessTag)));
-    }
+        }
     public void UpdateInSiteRepr(){
         stringBuilder.Clear();
         if ( this.inSite != null){

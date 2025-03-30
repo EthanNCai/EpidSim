@@ -14,6 +14,6 @@ public class CFEService{
         this.expenseItem = expenseItem;
     }
     // 由你来Update ContibuteItem
-    public virtual void QUpdateExpenseItem(){}
+    public virtual int QUpdateExpenseItem(){ return -9999999;}
 }
 
