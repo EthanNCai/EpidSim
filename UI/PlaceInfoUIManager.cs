@@ -35,7 +35,7 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
     public void ShowUI()
     {
         uiPanel.SetActive(true);
-        UIManager.Instance.SetActiveUI(this);
+        UIRouter.Instance.SetActiveUI(this);
     }
 
     public void InitPlaceInfoUI(Place place)

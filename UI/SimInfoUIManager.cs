@@ -14,7 +14,7 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
     public Button closeButton;
 
     // private List<string> diaryItemReprs = new List<string>();
-    private static readonly StringBuilder stringBuilder = new StringBuilder();
+    // private static readonly StringBuilder stringBuilder = new StringBuilder();
     private Sims currentSims;
     private readonly List<TextMeshProUGUI> textPool = new List<TextMeshProUGUI>(); // 复用的文本池
 
@@ -25,11 +25,7 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
         TimeManager.AfterQuarterChanged += UpdateInfoQuarterly;
     }
 
-    public void ShowUI()
-    {
-        UIManager.Instance.SetActiveUI(this); // 让 UIManager 关闭其他 UI
-        uiPanel.SetActive(true);
-    }
+    
 
     public void InitSimUI(Sims sims)
     {
@@ -45,7 +41,11 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
         ShowUI();
     }
 
-
+    public void ShowUI()
+    {
+        UIRouter.Instance.SetActiveUI(this); // 让 UIManager 关闭其他 UI
+        uiPanel.SetActive(true);
+    }
     public void HideUI()
     {
         uiPanel.SetActive(false);

@@ -18,7 +18,6 @@ public class SimsManager: MonoBehaviour{
 
     public void Start()
     {
-
         Vector2Int mapSize = mapManager.mapsize;
         int numSims = 100;
         for(int i =0; i < numSims; i++)

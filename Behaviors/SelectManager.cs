@@ -27,36 +27,60 @@ public class SelectionManager : MonoBehaviour
     {
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         
-        // **检测 Sims 和 Place**
-        RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero, Mathf.Infinity, LayerMask.GetMask("Sims", "Place"));
-        SelectableObject newHighlightedObject = hit.collider != null ? hit.collider.GetComponent<SelectableObject>() : null;
+        // 获取所有碰撞的对象
+        RaycastHit2D[] hits = Physics2D.RaycastAll(mousePos, Vector2.zero, Mathf.Infinity, 
+                                                LayerMask.GetMask("Sims", "Place"));
+        
+        // 默认为 null
+        SelectableObject newHighlightedObject = null;
+        
+        // 优先查找 Sims 对象
+        foreach (RaycastHit2D hit in hits)
+        {
+            if (hit.collider != null && hit.collider.GetComponent<Sims>() != null)
+            {
+                newHighlightedObject = hit.collider.GetComponent<SelectableObject>();
+                break; // 找到 Sims 后立即退出循环
+            }
+        }
+        
+        // 如果没有找到 Sims 对象，再查找 Place 对象
+        if (newHighlightedObject == null)
+        {
+            foreach (RaycastHit2D hit in hits)
+            {
+                if (hit.collider != null && hit.collider.GetComponent<Place>() != null)
+                {
+                    newHighlightedObject = hit.collider.GetComponent<SelectableObject>();
+                    break;
+                }
+            }
+        }
 
-        // **初步检查是否有高亮对象**
+        // 设置悬浮文本的可见性
         hoverText.gameObject.SetActive(newHighlightedObject != null);
 
+        // 设置悬浮文本内容
         if (newHighlightedObject != null)
         {
-            // 先检查是否是 Sims 或 Place，决定如何设置名称
             if (newHighlightedObject.GetComponent<Sims>())
             {
                 Sims sims = newHighlightedObject.GetComponent<Sims>();
-                hoverText.text = sims.simsName;  // 使用 Sims 的名字
+                hoverText.text = sims.simsName;
             }
             else if (newHighlightedObject.GetComponent<Place>())
             {
                 Place place = newHighlightedObject.GetComponent<Place>();
-                // Debug.Log(hoverText.text = place.placeName);
-                hoverText.text = place.placeName;  // 使用 Place 的名字
+                hoverText.text = place.placeName;
             }
         }
 
-        // **更新高亮对象**
+        // 更新高亮对象
         highlightedObject = newHighlightedObject;
 
-        // **处理点击逻辑**
+        // 处理点击逻辑
         if (Input.GetMouseButtonDown(0) && highlightedObject != null)
         {
-            // 判断具体是 Sims 还是 Place
             if (highlightedObject.GetComponent<Sims>())
             {
                 Sims sims = highlightedObject.GetComponent<Sims>();
@@ -69,9 +93,6 @@ public class SelectionManager : MonoBehaviour
             }
         }
     }
-
-
-
 
     void UpdateHoverTextPosition()
     {
