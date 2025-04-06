@@ -4,7 +4,7 @@ using UnityEngine;
 public class DockPanalSelector: MonoBehaviour{
 
     public FinanceInfoUIManager financeInfoUIManager;
-    public BuildingUIBarManager buildingUIBarManager;
+    public BuildPanalUIManager buildingUIBarManager;
     public PolicyUIBarManager policyUIBarManager;
     public OBUIBoardManager obUIBoardManager;
     // other ui panals
@@ -13,6 +13,7 @@ public class DockPanalSelector: MonoBehaviour{
         financeInfoUIManager.InitUI();
     }
     public void HandleClickBuildButton(){
+        buildingUIBarManager.InitUI();
         
     }
     public void HandelClickPolicyButton(){

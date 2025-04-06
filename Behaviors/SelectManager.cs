@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.EventSystems;
 
 public class SelectionManager : MonoBehaviour
 {
@@ -25,6 +26,14 @@ public class SelectionManager : MonoBehaviour
 
     void DetectHoverAndSelect()
     {
+
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            hoverText.gameObject.SetActive(false);  // 隐藏文本
+            highlightedObject = null;               // 清除高亮
+            return;                                 // 不再继续检测
+        }
+
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         
         // 获取所有碰撞的对象
@@ -79,7 +88,7 @@ public class SelectionManager : MonoBehaviour
         highlightedObject = newHighlightedObject;
 
         // 处理点击逻辑
-        if (Input.GetMouseButtonDown(0) && highlightedObject != null)
+        if (Input.GetMouseButtonDown(0) && highlightedObject != null  && !EventSystem.current.IsPointerOverGameObject())
         {
             if (highlightedObject.GetComponent<Sims>())
             {
