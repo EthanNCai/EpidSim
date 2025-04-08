@@ -7,7 +7,7 @@ public class EnvironmentColorManager : MonoBehaviour
     public Light2D globalLight;
     
     // Colors for different times of day
-    private Color nightColor;      // #293144
+    private Color nightColor;      //rgb(15, 17, 20)
     private Color morningDuskColor; // #B5A68D
     private Color noonColor;       // #9ED2FF
     

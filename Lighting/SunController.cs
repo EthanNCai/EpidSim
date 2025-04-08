@@ -13,13 +13,18 @@ public class SunController : MonoBehaviour
     private float constantY;
     
     // Light intensity values
-    private float baseDayIntensity = 2.5f;
-    private float noonIntensity = 3.5f;
+    private float baseDayIntensity = 1.5f;
+    private float noonIntensity = 2.5f;
     private float nightIntensity = 0.0f;
+    
+    // Shadow strength values
+    private float noonShadowStrength = 0.5f;
+    private float midnightShadowStrength = 1.0f;
 
     // For smooth interpolation
     private Vector3 currentPosition;
     private float currentIntensity;
+    private float currentShadowStrength;
     
     // To track teleportation
     private bool isTeleporting = false;
@@ -62,6 +67,11 @@ public class SunController : MonoBehaviour
         var targetIntensity = CalculateIdealIntensity(lastTimeOfDay);
         currentIntensity = targetIntensity;
         sunLight.intensity = targetIntensity;
+        
+        // Initialize shadow strength
+        var targetShadowStrength = CalculateIdealShadowStrength(lastTimeOfDay);
+        currentShadowStrength = targetShadowStrength;
+        sunLight.shadowIntensity = targetShadowStrength;
     }
 
     void Update()
@@ -104,6 +114,7 @@ public class SunController : MonoBehaviour
         // Normal update (not teleporting)
         Vector3 targetPosition = CalculateIdealPosition(timeOfDay);
         float targetIntensity = CalculateIdealIntensity(timeOfDay);
+        float targetShadowStrength = CalculateIdealShadowStrength(timeOfDay);
         
         // Check if we need to teleport (if position changed dramatically)
         if (Vector3.Distance(targetPosition, currentPosition) > mapWidth)
@@ -114,13 +125,15 @@ public class SunController : MonoBehaviour
             return;
         }
         
-        // Smoothly interpolate current position and intensity toward target
+        // Smoothly interpolate current position, intensity and shadow strength toward target
         currentPosition = Vector3.Lerp(currentPosition, targetPosition, Time.deltaTime * smoothingSpeed);
         currentIntensity = Mathf.Lerp(currentIntensity, targetIntensity, Time.deltaTime * smoothingSpeed);
+        currentShadowStrength = Mathf.Lerp(currentShadowStrength, targetShadowStrength, Time.deltaTime * smoothingSpeed);
         
         // Apply the smoothed values
         sunLight.transform.position = currentPosition;
         sunLight.intensity = currentIntensity;
+        sunLight.shadowIntensity = currentShadowStrength;
         
         // Update time tracking
         lastTimeOfDay = timeOfDay;
@@ -215,6 +228,27 @@ public class SunController : MonoBehaviour
         {
             // Night: minimum intensity
             return nightIntensity;
+        }
+    }
+    
+    private float CalculateIdealShadowStrength(float timeOfDay)
+    {
+        // Calculate time-based progress through the day
+        // Midnight (0) to noon (12) - shadows go from strongest to weakest
+        // Noon (12) to midnight (24) - shadows go from weakest to strongest
+        float normalizedTime;
+        
+        if (timeOfDay >= 0 && timeOfDay <= 12)
+        {
+            // Morning to noon: shadows getting less harsh
+            normalizedTime = timeOfDay / 12f; // 0 to 1
+            return Mathf.Lerp(midnightShadowStrength, noonShadowStrength, normalizedTime);
+        }
+        else // timeOfDay > 12 && timeOfDay < 24
+        {
+            // Afternoon to midnight: shadows getting harsher
+            normalizedTime = (timeOfDay - 12) / 12f; // 0 to 1
+            return Mathf.Lerp(noonShadowStrength, midnightShadowStrength, normalizedTime);
         }
     }
 }
