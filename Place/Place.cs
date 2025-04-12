@@ -25,6 +25,8 @@ public class Place : MonoBehaviour
     public List<Sims> inSiteSims = new List<Sims>();
     public InfoManager infoManager;
     public CFEManager cfeManager;
+    public bool isLockedDown; 
+
     // public bool isIsolated;
     public int QAccumulatedSubsidies = 0;
 
@@ -100,6 +102,25 @@ public class Place : MonoBehaviour
                 // }
             }
         }
+    }
+
+    // // 是的，你没有看错，这里只需要有一个flag就可以了，市民会参考建筑有没有被lockdown 而Dynamic的决定自己的Schedule
+    // public void InitiateLockDown(){
+    //     isLockedDown = true;
+    // }
+    // public void ReleaseLockDown(){
+    //     isLockedDown = false;
+    // }
+
+    public void SetLockdown(bool lockdown){
+        if(this.isLockedDown==false && lockdown==true){
+            this.infoManager.lockdownManager.RegisterLockdown(this);
+        }else if(this.isLockedDown==true && lockdown==false){
+            this.infoManager.lockdownManager.UnregisterLockdown(this);
+        }else{
+            Debug.LogError("unsupposed branch");
+        }
+        this.isLockedDown =  lockdown;
     }
 
     public override string ToString()

@@ -12,6 +12,8 @@ public class InfoManager : MonoBehaviour{
     public VirusManager virusManager;
     public TimeManager timeManager;
     
+    public LockDownManager lockdownManager;
+
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();
     public void Awake(){

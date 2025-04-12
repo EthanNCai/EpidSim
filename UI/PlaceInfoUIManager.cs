@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.Assertions;
 
 public class PlaceInfoUIManager : MonoBehaviour, IUIManager
 {
@@ -10,6 +11,7 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
     public TextMeshProUGUI pleceTypeTag;
     public Button closeButton;
     public Button lockDownButton;
+    public TextMeshProUGUI lockDownButtionText;
     public Transform scrollViewContent; // ScrollView 的 Content
     public GameObject textPrefab; // 预制体
     
@@ -36,6 +38,7 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
     {
         uiPanel.SetActive(true);
         UIRouter.Instance.SetActiveUI(this);
+        UpdateLockDownText();
     }
 
     public void InitPlaceInfoUI(Place place)
@@ -44,7 +47,7 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
             return;
 
         currentPlace = place;
-        lockDownButton.interactable = currentPlace is ILockDownable;
+        lockDownButton.interactable = currentPlace is ResidentialPlace;
         nameTag.text = $"{place.placeName}";
         pleceTypeTag.text = $"{Place.GetPlaceTypeDescription(currentPlace)}";
         ShowUI();
@@ -55,6 +58,20 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
     {
         uiPanel.SetActive(false);
         currentPlace = null;
+    }
+
+    private void UpdateLockDownText(){
+        Debug.Assert(currentPlace != null);
+        if(currentPlace.isLockedDown){
+            lockDownButtionText.text = "Stop Lockdown";
+        }else{
+            lockDownButtionText.text = "Lockdown";
+        }
+    }
+    public void PressLockDownButton(){
+        Debug.Assert(currentPlace != null);
+        currentPlace.SetLockdown(!currentPlace.isLockedDown);
+        UpdateLockDownText();
     }
 
     private void UpdateCFEDiary()
