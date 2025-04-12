@@ -187,7 +187,6 @@ public class Sims : MonoBehaviour
     private void HandleDayChange(int day){
         // infection related
         this.dayRecord = day;
-        this.maxExposed = 0;
         this.isTodayOff = GetIsTodayOff(day);
     }
 
@@ -259,6 +258,7 @@ public class Sims : MonoBehaviour
             infoManager.infectionInfoManager.InfectionAddition(this,this.infectionStatus);
             this.infectionStatus = InfectionStatus.Infected;
         } 
+        this.maxExposed = 0; // 重置昨日接触
     }
     private void PolluteThePosition(){
         // Debug.Log("Polluting");  

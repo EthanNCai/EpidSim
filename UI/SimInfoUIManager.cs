@@ -36,7 +36,7 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
         if (currentSims == null) return;
         
         // 更新名字和余额
-        nameTag.text = $"名字：{currentSims.simsName}";
+        nameTag.text = $"Name: {currentSims.simsName}";
         UpdateBalance(currentSims.balance);
         ShowUI();
     }
@@ -66,7 +66,7 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
 
     private void UpdateBalance(float balance)
     {
-        balanceTag.text = $"存款：{balance} $";
+        balanceTag.text = $"Balance: {balance} $";
     }
 
     private void UpdateSimDiary()

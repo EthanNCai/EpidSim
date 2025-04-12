@@ -2,19 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ILockDownable
-{
-    bool isLockedDown { get; set; }  // 使用属性代替字段
-    void StartLockdown();          // 移除重复方法，修正语法
-    void StopLockdown();
-}
 
 
-public class ResidentialPlace : Place, IExpensablePlace, ILockDownable
+public class ResidentialPlace : Place, IExpensablePlace
 {
 
     public event Action<bool> OnLockdownStatusUpdate;
-    public bool isLockedDown { get; set; } 
     public int populationCapacity;
     public CFEPolicyMinSub<ResidentialPlace> policyMinSub;
     public List<Sims> residents;

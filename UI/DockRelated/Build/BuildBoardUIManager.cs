@@ -5,41 +5,44 @@ using System.Collections.Generic;
 
 public class BuildPanalUIManager : MonoBehaviour, IUIManager
 {
+
+    private bool isShowingDetial = false;
     public GameObject uiPanel;
     public Button closeButton;
-
-    // ✨ 将整个详情面板作为预制体拖进来
-    public GameObject buidableDetailTagObject;
-
-    // 🐾 内部缓存文本组件
-    private TextMeshProUGUI detailNameText;
-    private TextMeshProUGUI detailDescriptionText;
+    public GameObject detailCardObject;
+    private TextMeshProUGUI detailCardName;
+    private TextMeshProUGUI detailCardDescription;
     public GameObject buidableIconPrefab;
     public Transform buildableIconRootTransform;
+
+    public Canvas rootCanvas;
+
+    public TimeManager timeManager;
+    // public Canvas buidingPanalUI;
 
     void Start()
     {
         closeButton.onClick.AddListener(HideUI);
-        HideUI();
-        TimeManager.AfterQuarterChanged += UpdateInfoQuarterly;
-
-        if (buidableDetailTagObject != null)
+        // HideUI();
+        // TimeManager.AfterQuarterChanged += UpdateInfoQuarterly;
+        detailCardObject.SetActive(false);
+        if (detailCardObject != null)
         {
             // 在Start中获取子物体里的Text
-            detailNameText = buidableDetailTagObject.transform.Find("backgroundImg/name").GetComponent<TextMeshProUGUI>();
-            detailDescriptionText = buidableDetailTagObject.transform.Find("backgroundImg/detail").GetComponent<TextMeshProUGUI>();
-            buidableDetailTagObject.SetActive(false); // 默认隐藏
+            detailCardName = detailCardObject.transform.Find("backgroundImg/name").GetComponent<TextMeshProUGUI>();
+            detailCardDescription = detailCardObject.transform.Find("backgroundImg/detail").GetComponent<TextMeshProUGUI>();
+            detailCardObject.SetActive(false); // 默认隐藏
         }
         else
         {
             Debug.LogWarning("喵呜～你忘记给 detailPanelPrefab 赋值了喵！");
         }
+        InitBuildableIconsUI();
     }
 
     public void InitUI()
     {
         ShowUI();
-        PopulateBuildableUI();
 
     }
 
@@ -47,40 +50,59 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
     {
         UIRouter.Instance.SetActiveUI(this);
         uiPanel.SetActive(true);
+        timeManager?.SetPaused(true); // ⏸️暂停时间！
     }
 
     public void HideUI()
     {
         uiPanel.SetActive(false);
+        timeManager?.SetPaused(false); // ▶️恢复时间！
     }
 
-    // 🕓 更新逻辑留空
-    private void UpdateInfoQuarterly((int, int) timeNow)
-    {
+    // private void UpdateInfoQuarterly((int, int) timeNow)
+    // {
+        
+    // }
 
-    }
-
-    // ✨ 详细展示逻辑
-    public void ShowBuildableDetail(BuildableInfo data)
+    public void AttemptMakeDetialFollowMouse()
     {
-        if (buidableDetailTagObject != null)
+        if (isShowingDetial && detailCardObject != null)
         {
-            buidableDetailTagObject.SetActive(true);
-            detailNameText.text = data.name;
-            detailDescriptionText.text = data.description;
+            // Vector2 mousePosition = Input.mousePosition;
+
+            // // 将屏幕坐标转为UI世界坐标
+            // RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            //     rootCanvas.transform as RectTransform, 
+            //     mousePosition, 
+            //     rootCanvas.worldCamera, 
+            //     out Vector2 localPoint);
+
+            // // 设置 detailCard 的位置，稍微偏移防止遮挡鼠标
+            // detailCardObject.GetComponent<RectTransform>().anchoredPosition = localPoint + new Vector2(20f, -20f);
         }
     }
 
-    public void HideBuildableDetail()
+
+
+
+    public void MakeDetialCardShow(BuildableInfo buidableInfo)
     {
-        if (buidableDetailTagObject != null)
-        {
-            buidableDetailTagObject.SetActive(false);
-        }
+        isShowingDetial = true;
+        detailCardName.text = buidableInfo.name;
+        detailCardDescription.text = buidableInfo.description;
+        detailCardObject.SetActive(true);
     }
-    public void PopulateBuildableUI()
+
+    public void MakeDetialCardHide()
     {
-        List<BuildableInfo> buildableList = new List<BuildableInfo>{ new BuildableInfo("小房子", "可以收容市民的基础建筑喵～", null), new BuildableInfo("第二个小房子", "可以收容市民的基础建筑喵～", null)};
+        isShowingDetial = false;
+        detailCardObject.SetActive(false);
+    }
+    public void InitBuildableIconsUI()
+    {
+        List<BuildableInfo> buildableList = new List<BuildableInfo>{ 
+            new BuildableInfo("Clinic", "A place where sims can get medical treatment", null), 
+            new BuildableInfo("TestCentre", "A place where sims can get virus CPR test", null)};
         foreach (var buildable in buildableList)
         {
             Debug.Log("Initializing");
@@ -89,5 +111,10 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
             BuidableController item = go.GetComponent<BuidableController>();
             item.Init(buildable, this);
         }
+    }
+
+    public void Update()
+    {
+        AttemptMakeDetialFollowMouse();
     }
 }

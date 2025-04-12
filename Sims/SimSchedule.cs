@@ -25,8 +25,8 @@ public class SimScheduler{
 
     // 早晨决定去哪里？
     public void UpdateScheduleOnMorning(){
-        this.leisureRelatedDest = null;
-        if(hostedSim.isTodayOff){
+        // this.leisureRelatedDest = null;
+        if(hostedSim.isTodayOff && RandomManager.FlipTheCoin(0.5)){
             Place commercialChoosed = RandomManager.Choice(hostedSim.placeManager.commercialPlaces);
             this.leisureRelatedDest = commercialChoosed;
             
@@ -145,6 +145,9 @@ public class SimScheduler{
                     this.hostedSim.timeManager.GetTime(),
                     SimBehaviorDetial.GoOutForFunEvent(leisureRelatedDest)));
                 destination =  leisureRelatedDest;
+            }else{
+                // 该回家了
+                destination = leisureRelatedDest;
             }
         }else if(workRelatedDest != null){
             destination =  workRelatedDest;
@@ -156,8 +159,8 @@ public class SimScheduler{
         return destination;
     }
    
-    public bool isTodayDayOff(int day){
-        return hostedSim.dayOff.Contains(day);
+    public bool checkIsTodayReallyOff(){
+        return leisureRelatedDest != null;
     }
     float CalculateHospitalWillingness(int actualMedicalFee, int balance, int volume, int qPerday)
     {

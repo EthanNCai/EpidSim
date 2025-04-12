@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using System.Runtime.CompilerServices;
 
 public class BuidableController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
@@ -12,24 +13,29 @@ public class BuidableController : MonoBehaviour, IPointerEnterHandler, IPointerE
     private BuildableInfo buidableInfo;
     private BuildPanalUIManager buildPanalManager;
 
+    public TextMeshProUGUI name_;
+
+    // private bool isDetailShowing = false; 
+
     // private RectTransform detailRect;
 
     public void Init(BuildableInfo buidableInfo, BuildPanalUIManager buildPanalManager)
     {
         this.buidableInfo = buidableInfo;
         this.buildPanalManager = buildPanalManager;
+        name_.text = this.buidableInfo.name;
         // iconImage.sprite = this.buidableInfo.icon;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        makeDetialUITagShow();
+        MakeDetialCardShow();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         // detailPanelObject.SetActive(false);
-        makeDetialUITagHide();
+        MakeDetialCardHide();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -37,17 +43,21 @@ public class BuidableController : MonoBehaviour, IPointerEnterHandler, IPointerE
         Debug.Log($"喵呜！你点击了 {buidableInfo.name}！");
     }
 
-    private void makeDetialUITagShow(){
+    private void MakeDetialCardShow(){
         // call buildboard manager, don't do this logic yourself
         Debug.Log($"made {this.buidableInfo.name} show");
+        this.buildPanalManager.MakeDetialCardShow(this.buidableInfo);
+        // isDetailShowing = true;
     }
-    private void makeDetialUITagHide(){
+    private void MakeDetialCardHide(){
         // call buildboard manager, don't do this logic yourself
         Debug.Log($"made {this.buidableInfo.name} hide");
+        this.buildPanalManager.MakeDetialCardHide();
+        // isDetailShowing = false;
     }
-    private void makeDetialUITagFollowMouse(){
+    // private void makeDetialUITagFollowMouse(){
         
-    }
+    // }
 
     // private void UpdatePanelPosition()
     // {

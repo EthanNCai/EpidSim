@@ -56,46 +56,9 @@ public static class SicknessTagConverter{
     }
 }
 
-public static class InfectionParams{
 
-    public static float infectionProbSuscptible = 1f;
-    public static float infectionProbRecoverd = 0f;
-    public static int maxVirusVolume = 100;
-    public static int minVirusVolume = 0;
-    public static float deathProb = 0.01f;
-
-    public static (int,int) periodADurationRanges = (1, 5);
-    public static (int,int) periodBDurationRanges = (2, 3);
-    public static (int,int) periodCDurationRanges = (1, 3);
-
-    public static bool RollTheInfectionDice(int volumeExposed, InfectionStatus status)
-    {
-        Debug.Assert(status == InfectionStatus.Suscptible || status == InfectionStatus.Recovered, "Infection Dice Error");
-        float exposedRatio = volumeExposed / maxVirusVolume;
-
-        switch (status){
-            case InfectionStatus.Suscptible:
-                return UnityEngine.Random.Range(0f, 1f) < exposedRatio * infectionProbSuscptible;
-            case InfectionStatus.Recovered:
-                return UnityEngine.Random.Range(0f, 1f) < exposedRatio * infectionProbRecoverd; 
-            default:
-                return false;   
-        }
-    }
-
-    public static bool RollTheDeathDice(){
-        return UnityEngine.Random.Range(0f, 1f) < deathProb;
-    }
-
-    public static (int,int,int) GetInfectionPeriod(){
-        int periodA = UnityEngine.Random.Range(periodADurationRanges.Item1,periodADurationRanges.Item2);
-        int periodB = UnityEngine.Random.Range(periodBDurationRanges.Item1,periodBDurationRanges.Item2);
-        int periodC = UnityEngine.Random.Range(periodCDurationRanges.Item1,periodCDurationRanges.Item2);
-        return (periodA,periodB,periodC); 
-    }
-}
-
-public class Infection{
+public class Infection
+{
     public InfectionPeriod currentInfectionPeriod;
     public int periodADayLen;
     public int periodBDayLen;
@@ -107,10 +70,11 @@ public class Infection{
 
     Sims hostedSims;
 
-    public Infection((int,int,int) infectionPeriod, Sims hostedSims){
+    public Infection((int, int, int) infectionPeriod, Sims hostedSims)
+    {
         int periodA = infectionPeriod.Item1;
         int periodB = infectionPeriod.Item2;
-        int periodC =  infectionPeriod.Item3;
+        int periodC = infectionPeriod.Item3;
         periodADayLen = periodA;
         periodBDayLen = periodB;
         periodCDayLen = periodC;
@@ -118,12 +82,16 @@ public class Infection{
         this.hostedSims = hostedSims;
     }
 
-    public InfectionStatus Progress()
+    public InfectionStatus Progress(bool inHospital = false)
     {
+        float deathDiceMultiplier = inHospital ? 0.5f : 1f; // 50% death chance in hospital
+        float virusGrowthMultiplier = inHospital ? 1.5f : 1f; // 150% virus progression in hospital
+
         switch (currentInfectionPeriod)
         {
             case InfectionPeriod.PeriodA:
-                virusVolume = (int)Math.Round((100f / periodADayLen) * (periodADayLen - currentPeriodDaysLeft));
+                virusVolume = (int)Math.Round((100f / periodADayLen) * (periodADayLen - currentPeriodDaysLeft) * virusGrowthMultiplier);
+                virusVolume = Mathf.Max(virusVolume, 0); // Ensure virusVolume never goes below 0
                 if (currentPeriodDaysLeft <= 0)
                 {
                     // PeriodA结束，进入PeriodB
@@ -139,7 +107,7 @@ public class Infection{
                 if (currentPeriodDaysLeft <= 0)
                 {
                     // PeriodB结束，决定是否死亡或进入PeriodC
-                    if (InfectionParams.RollTheDeathDice())
+                    if (InfectionParams.RollTheDeathDice(InfectionParams.deathProb * deathDiceMultiplier))
                     {
                         return InfectionStatus.Dead;
                     }
@@ -155,7 +123,8 @@ public class Infection{
                 break;
 
             case InfectionPeriod.PeriodC:
-                virusVolume = (int)Math.Round((100f / periodCDayLen) * currentPeriodDaysLeft);
+                virusVolume = (int)Math.Round((100f / periodCDayLen) * currentPeriodDaysLeft * virusGrowthMultiplier);
+                virusVolume = Mathf.Max(virusVolume, 0); // Ensure virusVolume never goes below 0
 
                 if (currentPeriodDaysLeft < 0)
                 {
@@ -171,14 +140,18 @@ public class Infection{
         }
         return InfectionStatus.Infected;
     }
+
     public override string ToString()
     {
         stringBuilder.Clear();
         stringBuilder.Append("status ").Append(this.currentInfectionPeriod)
-            .Append(", days left: ").Append(this.currentPeriodDaysLeft).Append("vol: ").Append(this.virusVolume);
+            .Append(", days left: ").Append(this.currentPeriodDaysLeft)
+            .Append(" vol: ").Append(this.virusVolume);
         return stringBuilder.ToString();
     }
-    public void CalculateSeverity(){
+
+    public void CalculateSeverity()
+    {
         float sevirity = this.hostedSims.infoManager.virusManager.GetVirusSeverity();
         float sickness = sevirity * this.virusVolume * 0.01f;
     }
