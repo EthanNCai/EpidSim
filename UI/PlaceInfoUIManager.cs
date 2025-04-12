@@ -45,8 +45,8 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
 
         currentPlace = place;
         lockDownButton.interactable = currentPlace is ILockDownable;
-        nameTag.text = $"Name: {place.placeName}";
-        pleceTypeTag.text = $"Type: {Place.GetPlaceTypeDescription(currentPlace)}";
+        nameTag.text = $"{place.placeName}";
+        pleceTypeTag.text = $"{Place.GetPlaceTypeDescription(currentPlace)}";
         ShowUI();
         UpdateCFEDiary(); // 初始化时更新一次
     }

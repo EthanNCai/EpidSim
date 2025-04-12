@@ -16,12 +16,14 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
     public Transform buildableIconRootTransform;
 
     public Canvas rootCanvas;
+
+    public TimeManager timeManager;
     // public Canvas buidingPanalUI;
 
     void Start()
     {
         closeButton.onClick.AddListener(HideUI);
-        HideUI();
+        // HideUI();
         // TimeManager.AfterQuarterChanged += UpdateInfoQuarterly;
         detailCardObject.SetActive(false);
         if (detailCardObject != null)
@@ -48,11 +50,13 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
     {
         UIRouter.Instance.SetActiveUI(this);
         uiPanel.SetActive(true);
+        timeManager?.SetPaused(true); // ⏸️暂停时间！
     }
 
     public void HideUI()
     {
         uiPanel.SetActive(false);
+        timeManager?.SetPaused(false); // ▶️恢复时间！
     }
 
     // private void UpdateInfoQuarterly((int, int) timeNow)

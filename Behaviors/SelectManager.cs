@@ -75,7 +75,7 @@ public class SelectionManager : MonoBehaviour
             if (newHighlightedObject.GetComponent<Sims>())
             {
                 Sims sims = newHighlightedObject.GetComponent<Sims>();
-                hoverText.text = sims.simsName;
+                hoverText.text = $"{sims.simsName}";
             }
             else if (newHighlightedObject.GetComponent<Place>())
             {

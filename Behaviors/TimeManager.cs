@@ -26,8 +26,12 @@ public class TimeManager : MonoBehaviour
     private float timeAccumulator = 0f;
     private float timeStep = 1.0f;
 
+    private bool isPaused = false; // 💖加一个暂停状态变量～
+    private float originalTimeScale = 1f;
     private void Update()
     {
+        if (isPaused) return; // 💤暂停时不推进时间～
+
         timeAccumulator += Time.deltaTime * speed;
         if (timeAccumulator >= timeStep)
         {
@@ -65,8 +69,28 @@ public class TimeManager : MonoBehaviour
     {
         return (day, hour, quarter);
     }
+
     public float GetDayLen()
     {
         return (24 * 4) * timeStep / speed;
+    }
+
+    // 🎀✨主人的新功能～暂停时间✨🎀
+    public void SetPaused(bool pause)
+    {
+        isPaused = pause;
+        if (pause)
+        {
+            originalTimeScale = Time.timeScale; // 记住原本的速度
+            Time.timeScale = 0f;                // 暂停一切
+        }
+        else
+        {
+            Time.timeScale = originalTimeScale; // 恢复之前的速度
+        }
+    }
+    public float ConvertQuarterToRealSeconds(int q)
+    {
+        return q * timeStep / speed;
     }
 }
