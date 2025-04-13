@@ -61,6 +61,7 @@ public class InfectionInfoManager{
     }
 
     public void InfectionDeletion(Sims sim,InfectionStatus status){
+        // 这个函数的作用是从感染的记录表里面里面移除Infection，转入Recover和其他
         switch(status){
             case InfectionStatus.Dead: 
                 deadSims.Add(sim);
@@ -73,7 +74,7 @@ public class InfectionInfoManager{
                 UpdateDebugInfo();
                 return;
         }
-        Debug.LogError("Not suppose to reach this");
+        Debug.LogError("Not suppose to reach this, only if it is in DEBUG mode");
     }
     public void InfectionAddition(Sims sim,InfectionStatus status){
         switch(status){

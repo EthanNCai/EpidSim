@@ -13,7 +13,7 @@ public class SimsFactory: MonoBehaviour
 
     public Sims CreateSims(Vector2Int position){
         GameObject obj = Instantiate(simsPrefab, mapRoot.transform);
-        obj.transform.localPosition = new Vector3(position.x, position.y, 0);
+        obj.transform.localPosition = new Vector3(position.x, position.y, 2);
         obj.transform.SetParent(transform);
         Sims sims = obj.GetComponent<Sims>();
         sims.SimsInit(
