@@ -6,6 +6,15 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Assertions.Must;
 
+/*
+
+    一个隐含的假设： 所有模拟市民的日常规划都是再早上发生的（去工作、去娱乐）
+
+
+
+*/
+
+
 public class SimScheduler{
 
     // Section Dests
@@ -26,6 +35,14 @@ public class SimScheduler{
     // 早晨决定去哪里？
     public void UpdateScheduleOnMorning(){
         // this.leisureRelatedDest = null;
+
+        if (hostedSim.home.isLockedDown)
+        {
+            this.residentialLockDownDest = hostedSim.home;
+        }else{
+            this.residentialLockDownDest = null;        
+        }
+
         if(hostedSim.isTodayOff && RandomManager.FlipTheCoin(0.5)){
             Place commercialChoosed = RandomManager.Choice(hostedSim.placeManager.commercialPlaces);
             this.leisureRelatedDest = commercialChoosed;
@@ -130,6 +147,12 @@ public class SimScheduler{
             // destType = DestType.GovQurantine;
         }else if(residentialLockDownDest != null){
             destination =  residentialLockDownDest;
+            if(keyTime == KeyTime.Morning){ // 为什么只在morning做？因为通知只要一次就可以了
+             this.hostedSim.simDiary.AppendDiaryItem(
+            new SimsDiaryItem(
+                this.hostedSim.timeManager.GetTime(),
+                SimBehaviorDetial.LockedDownAtHomeEvent()));
+            }
             // destType = DestType.ResidentialLockDown;
         }else if(personalMedicalDest != null){
             destination =  personalMedicalDest;

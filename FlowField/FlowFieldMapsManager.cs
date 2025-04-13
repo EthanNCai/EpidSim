@@ -45,7 +45,7 @@ public class SingleFlowFieldMapManager : MonoBehaviour
 
     public void UpdateFlowField()
     {
-        Debug.Log("Flow field update started.");
+        // Debug.Log("Flow field update started.");
 
         // STEP1: BFS
         if (destination == null)
@@ -81,7 +81,7 @@ public class SingleFlowFieldMapManager : MonoBehaviour
         }
 
         // STEP2: Generate FlowField
-        Debug.Log("start generating flowField");
+        // Debug.Log("start generating flowField");
         foreach (FlowFieldNode node in this.flowFieldMap.nodeIterator())
         {
             FlowFieldNode currentNode = node;  

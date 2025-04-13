@@ -197,8 +197,6 @@ public class Sims : MonoBehaviour
 
     }
 
-    
-
     // 早晨KeyTime的更新
     private void HandleMorningKeyTime((int,int) timeNow){
         this.simScheduler.UpdateScheduleOnMorning();
@@ -296,6 +294,8 @@ public class Sims : MonoBehaviour
         this.home = home;
         this.office = office;
         this.destination = home;
+        this.home.registeredSims.Add(this);
+        this.office.registeredSims.Add(this);
         this.home.OnLockdownStatusUpdate += simScheduler.HandelLockDownStatusUpdate;
     }
 
