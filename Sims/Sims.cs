@@ -10,6 +10,7 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Analytics;
+using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 
 /*
@@ -54,7 +55,7 @@ public class Sims : MonoBehaviour
     public PlaceManager placeManager;
     public InfoManager infoManager;
     public Infection infection = null;
-    InfectionStatus infectionStatus = InfectionStatus.Suscptible;
+    public InfectionStatus infectionStatus = InfectionStatus.Suscptible;
     VirusVolumeGridMapManager virusVolumeMapManager;
 
     public TimeManager timeManager;
@@ -132,6 +133,7 @@ public class Sims : MonoBehaviour
             this.accumulatedSubsidyToday += PriceMenu.QSimLifeExpense;
         }
     }
+ 
     private void CommitSubsidyForToday((int,int) timeNow){
         this.balance += this.accumulatedSubsidyToday;
         this.simDiary.AppendDiaryItem(
@@ -159,9 +161,9 @@ public class Sims : MonoBehaviour
 
     // ============== Time Handlers ==============
 
-    private void HandleTimeChange((int,int) timeNow){
+    public void HandleTimeChange((int,int) timeNow){
         
-        HandleEveryQ(timeNow);
+        this.QDoLifeExpense();
         if(timeNow == keyTimeMorning){
             HandleMorningKeyTime(timeNow);
         }else if(timeNow == keyTimeDusk){
@@ -173,18 +175,8 @@ public class Sims : MonoBehaviour
         }
     }
     
-    private void HandleEveryQ((int,int) timeNow){
-        
-        // 这个逻辑用于处理每个Q的支出和Paycheck
-        if(inSite is OfficePlace){
-            // this.ReceivePaycheck(PriceMenu.QSimOfficeIncome);
-        }
-        if (inSite is MedicalPlace){
-            // this.PayMedicalFee();
-        }
-        this.QDoLifeExpense();
-    }
-    private void HandleDayChange(int day){
+
+    public void HandleDayChange(int day){
         // infection related
         this.dayRecord = day;
         this.isTodayOff = GetIsTodayOff(day);
@@ -196,8 +188,6 @@ public class Sims : MonoBehaviour
     public void HandleInfectionChange(){
 
     }
-
-    
 
     // 早晨KeyTime的更新
     private void HandleMorningKeyTime((int,int) timeNow){
@@ -245,7 +235,10 @@ public class Sims : MonoBehaviour
         }
     }
     
-    // ============== End of Time Handlers ==============
+    // ============== Infection & Health Related ==============
+
+
+    
     private void TryToInfect(){
         if(this.infectionStatus == InfectionStatus.Dead){
             Debug.LogWarning("<A dead sim tring to get infected> We currently don't handle dead logic");
@@ -296,6 +289,8 @@ public class Sims : MonoBehaviour
         this.home = home;
         this.office = office;
         this.destination = home;
+        this.home.registeredSims.Add(this);
+        this.office.registeredSims.Add(this);
         this.home.OnLockdownStatusUpdate += simScheduler.HandelLockDownStatusUpdate;
     }
 
@@ -312,14 +307,22 @@ public class Sims : MonoBehaviour
         this.infectionRepr = this.infection.ToString();
         PolluteThePosition();
         if(this.infectionStatus == InfectionStatus.Recovered){
-            this.infoManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
+            HandleRecovered();
+        }else if(this.infectionStatus == InfectionStatus.Dead){
+            HandleDead();
+        }
+    }
+    public void HandleDead()
+    {
+        this.infoManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
+        this.infection = null;
+        Debug.Log($"{this.simsName} has just dead!");
+        this.infoManager.simsDeadManager.HandleSimsDie(this);
+    }
+    public void HandleRecovered(){
+        this.infoManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
             this.infection = null;
             Debug.Log($"{this.simsName} has just recoverd!");
-        }else if(this.infectionStatus == InfectionStatus.Dead){
-            this.infoManager.infectionInfoManager.InfectionDeletion(this,this.infectionStatus);
-            this.infection = null;
-            Debug.Log($"{this.simsName} has just dead!");
-        }
     }
 
     public void Navigate()

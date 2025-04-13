@@ -23,6 +23,7 @@ public class Place : MonoBehaviour
     public Vector2Int basePosition;
     public SingleFlowFieldMapManager flowFieldMapsManager;
     public List<Sims> inSiteSims = new List<Sims>();
+    public List<Sims> registeredSims = new List<Sims>();
     public InfoManager infoManager;
     public CFEManager cfeManager;
     public bool isLockedDown; 
@@ -118,7 +119,7 @@ public class Place : MonoBehaviour
         }else if(this.isLockedDown==true && lockdown==false){
             this.infoManager.lockdownManager.UnregisterLockdown(this);
         }else{
-            Debug.LogError("unsupposed branch");
+            Debug.LogError($"unsupposed branch: old:{this.isLockedDown} new: {lockdown}");
         }
         this.isLockedDown =  lockdown;
     }

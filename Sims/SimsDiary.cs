@@ -116,6 +116,12 @@ public static class SimBehaviorDetial
         stringBuilder.Append($"Today off, I'd like to go to {place.placeName} for fun");
         return stringBuilder.ToString();
     }
+    public static string LockedDownAtHomeEvent()
+    {
+        stringBuilder.Clear();
+        stringBuilder.Append($"Locked down at home");
+        return stringBuilder.ToString();
+    }
 
     public static string FaildGoOutForFunEvent(string reason)
     {

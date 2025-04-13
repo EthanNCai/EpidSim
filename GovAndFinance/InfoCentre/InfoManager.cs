@@ -13,6 +13,7 @@ public class InfoManager : MonoBehaviour{
     public TimeManager timeManager;
     
     public LockDownManager lockdownManager;
+    public SimsDeadManager simsDeadManager;
 
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();

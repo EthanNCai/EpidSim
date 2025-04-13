@@ -16,7 +16,7 @@ public class OBUIBoardManager : MonoBehaviour, IUIManager
         TimeManager.AfterQuarterChanged += UpdateInfoQuarterly;
     }
     
-    public void InitSimUI()
+    public void InitUI()
     {
         ShowUI();
     }
