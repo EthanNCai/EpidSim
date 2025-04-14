@@ -23,12 +23,16 @@ public class Sims : MonoBehaviour
     // Daily Flushed INFOs
     public bool isTodayOff = false; 
     Sims maxExposedBy = null;
+
     int maxExposed = 0;
     int accumulatedPaycheckToday = 0;
     int accumulatedSubsidyToday = 0;
     int dayRecord = 0;
 
     SicknessTag sicknessTag = SicknessTag.Normal;
+
+    // dynamic 
+    public bool isUnfinishedPCRQuota = false;
 
     // Persistance INFOs
     public StringBuilder stringBuilder = new StringBuilder();
@@ -90,6 +94,7 @@ public class Sims : MonoBehaviour
         this.isTodayOff = GetIsTodayOff(0);
         this.gameObject.AddComponent<SelectableObject>();
         this.simDiary = new SimsDiary(this);
+        
     }
     /*
         模拟市民的全部功能有下面几点(这个类只能设计的部分)
@@ -174,12 +179,12 @@ public class Sims : MonoBehaviour
             HandleOnTheRoad(timeNow);
         }
     }
-    
 
     public void HandleDayChange(int day){
         // infection related
         this.dayRecord = day;
         this.isTodayOff = GetIsTodayOff(day);
+        this.simScheduler.FlushDest();
     }
 
     public void HandlePolicyChange(){
@@ -236,8 +241,6 @@ public class Sims : MonoBehaviour
     }
     
     // ============== Infection & Health Related ==============
-
-
     
     private void TryToInfect(){
         if(this.infectionStatus == InfectionStatus.Dead){
@@ -325,6 +328,16 @@ public class Sims : MonoBehaviour
             Debug.Log($"{this.simsName} has just recoverd!");
     }
 
+    // PCR Test Related
+    public void HandleNewTestEvent(){
+        this.isUnfinishedPCRQuota = true;
+    }
+    public void GetTested(){
+        Debug.Log($"{this.simsName}is getting tested");
+        this.isUnfinishedPCRQuota = false;
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
+    }
+
     public void Navigate()
     {
         if (destination == null)
@@ -386,6 +399,13 @@ public class Sims : MonoBehaviour
         finalApproachPosition = null; // 设为 null，表示无效
         destination = null;
         UpdateInSiteRepr();
+    }
+
+    public void FinishUpPCRTest(){
+        Debug.Assert(isUnfinishedPCRQuota == true, "bug here");
+        this.isUnfinishedPCRQuota = false;
+        this.simScheduler.UpdateScheduleAfterTest();
+
     }
 
     public bool GetIsTodayOff(int day){

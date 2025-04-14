@@ -17,6 +17,8 @@ public class InfoManager : MonoBehaviour{
 
     public NotificationManager notificationManager;
 
+    public TestManager testManager;
+
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();
     public void Awake(){

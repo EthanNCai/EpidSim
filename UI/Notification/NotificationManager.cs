@@ -25,7 +25,7 @@ public class NotificationManager : MonoBehaviour
     public void ShowNotification(string notificationTitle, string notificationDetail, NotificationType type, float delay = 0f)
     {
         CleanupOldNotifications(); // 加这一行喵！
-        string key = notificationTitle;
+        string key = notificationTitle + notificationDetail;
 
         if (recentNotifications.TryGetValue(key, out float lastTime))
         {
@@ -46,16 +46,12 @@ public class NotificationManager : MonoBehaviour
 
         GameObject newNotification = Instantiate(notificationPrefab, notificationParent);
         Color bgColor = GetColorByNotificationType(type);
-
         var item = newNotification.GetComponent<NotificationItem>();
-
         // 🧠 计算动态显示时间（基础3秒 + 每10字加0.5秒，最多10秒）
         // 🧠 计算动态显示时间（基础5秒 + 每10字加0.5秒，最多20秒）
         // 🧠 计算动态显示时间（基础5秒 + 每10字加0.5秒，最多20秒）
         int totalLength = (title?.Length ?? 0) + (detail?.Length ?? 0);
         float extraTime = Mathf.Min(20f, 5f + (totalLength / 10f) * 0.5f);
-
-
 
         item.Initialize(title, detail, extraTime, bgColor);
 
@@ -117,15 +113,10 @@ public class NotificationManager : MonoBehaviour
 
     // 医院满载消息
 
-    private static List<string> hospitalFullStatements = new List<string>(){
-        "Some citizens wish to go to the hospital, but there are no available beds in any hospitals.",
-        "Hospitals are overloaded and unable to accommodate new patients",
-        "Because the hospital was full, a sick citizen had to stay at home"
-    }; 
     public void SendHospitalFullNotification(){
         NotificationType type = NotificationType.MedicalRelated;
         string title = "Hospital Capacity Insufficient";
-        string content = RandomManager.Choice(hospitalFullStatements);
+        string content = "Some citizens wish to go to the hospital, but there are no available beds in any hospitals.";
         // Debug.Log($"[NotificationTest] Showing: [{type}] {title} - {content}");
         ShowNotification(title, content, type, 1f);
     }
@@ -147,13 +138,18 @@ public class NotificationManager : MonoBehaviour
         ShowNotification(title, content, type, 1f);
     }
 
-    private static List<string> globalLockdownStatements = new List<string>(){
-        "Some neighborhoods have been put into lockdown, and these citizens are unable to go to work, perhaps to reduce the spread of the plague? But who knows",
-    }; 
     public void SendGlobalLockdownNotification(){
         NotificationType type = NotificationType.GovernmentAction;
         string title = "Government Action";
-        string content = RandomManager.Choice(globalLockdownStatements);
+        string content = "Some neighborhoods have been put into lockdown, and these citizens are unable to go to work, perhaps to reduce the spread of the plague? But who knows";
+        // Debug.Log($"[NotificationTest] Showing: [{type}] {title} - {content}");
+        ShowNotification(title, content, type, 1f);
+    }
+
+    public void SendTestCenterFullNotification(){
+        NotificationType type = NotificationType.MedicalRelated;
+        string title = "Test Centre Capacity Insufficient";
+        string content = "Some citizens wish to go to the test centre for a pcr test, but there are no available seat in any of them.";
         // Debug.Log($"[NotificationTest] Showing: [{type}] {title} - {content}");
         ShowNotification(title, content, type, 1f);
     }

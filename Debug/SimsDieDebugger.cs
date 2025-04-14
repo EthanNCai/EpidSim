@@ -14,7 +14,7 @@ public class SimsDieDebugger: MonoBehaviour{
         SimsManager.OnSimsSpawned += Init;
     }
     public void Init(){
-        testedSim = simManager.simsList[0];
+        testedSim = simManager.activeSimsList[0];
     }
     public void LetTestedSimDie(){
         testedSim.HandleDead();

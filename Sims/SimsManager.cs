@@ -11,7 +11,7 @@ public class SimsManager: MonoBehaviour{
     public GameObject simsFacotryObj;
     private SimsFactory simsFactory;
     private Dictionary<int, Sims> simsDictionary = new Dictionary<int, Sims>();
-    public List<Sims> simsList = new List<Sims>();
+    public List<Sims> activeSimsList = new List<Sims>();
     public InfoManager infoDebuggerManager;
 
     // public PlaceManager placeManager();
@@ -26,11 +26,11 @@ public class SimsManager: MonoBehaviour{
             Sims newSims = this.simsFactory.CreateSims(new Vector2Int(7,1));
             int uid = newSims.uid;
             this.simsDictionary[uid] = newSims;
-            this.simsList.Add(newSims);
+            this.activeSimsList.Add(newSims);
         }
         // initial infect
-        simsList[0].ManuallyInfect();
-        infoDebuggerManager.infectionInfoManager.InitializeInfectionInfo(this.simsList);
+        activeSimsList[0].ManuallyInfect();
+        infoDebuggerManager.infectionInfoManager.InitializeInfectionInfo(this.activeSimsList);
         OnSimsSpawned?.Invoke();
     }
     public Sims GetSimsByUID(int uid)

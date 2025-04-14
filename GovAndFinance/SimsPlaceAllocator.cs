@@ -42,7 +42,7 @@ class SimsPlaceAllocator : MonoBehaviour
     private void AllocateSims()
     {
         Debug.Log("Allocating...");
-        List<Sims> homelessSims = simsManager.simsList;
+        List<Sims> homelessSims = simsManager.activeSimsList;
         foreach(Sims homelessSim in homelessSims){
             ResidentialPlace newHome =  placeManager.GetRandomResidential();
             OfficePlace newOffice =  placeManager.GetRandomOffice();

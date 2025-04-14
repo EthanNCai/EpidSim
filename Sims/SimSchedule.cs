@@ -18,14 +18,16 @@ using UnityEngine.Assertions.Must;
 public class SimScheduler{
 
     // Section Dests
-    Place residentialLockDownDest;
-    Place govQurantineDest;
+    Place lockDownDest;
+    Place qurantineDest;
     Place personalMedicalDest;
     Place workRelatedDest;
     Place leisureRelatedDest;
+    Place pcrTestRelatedDest;
     // End 
 
     Sims hostedSim;
+
 
     public SimScheduler(Sims sim){
         this.hostedSim = sim;
@@ -38,9 +40,9 @@ public class SimScheduler{
 
         if (hostedSim.home.isLockedDown)
         {
-            this.residentialLockDownDest = hostedSim.home;
+            this.lockDownDest = hostedSim.home;
         }else{
-            this.residentialLockDownDest = null;        
+            this.lockDownDest = null;        
         }
 
         if(hostedSim.isTodayOff && RandomManager.FlipTheCoin(0.5)){
@@ -52,7 +54,19 @@ public class SimScheduler{
             //this.pJobRelated = hostedSim.home;
         }
         this.workRelatedDest = hostedSim.office;
+        AttemptToPCRTest();
     }
+    // public void UpdateScheduleOnEveryQuarter(){
+    //     if(this.hostedSim.isUnfinishedPCRQuota==true){
+    //         // 如果有未完成的PCRQuota
+            
+
+
+    //     }
+    // }
+
+
+
 
     // 晚上去哪里？
     public void UpdateScheduleOnDusk(){
@@ -63,6 +77,7 @@ public class SimScheduler{
             this.workRelatedDest = this.hostedSim.home;
             
         }
+        AttemptToPCRTest();
     }
     public void UpdateScheduleOnInfectionChanged(bool justRevocerd = false, bool justDead = false){
         // read infection
@@ -116,6 +131,38 @@ public class SimScheduler{
     public void UpdateScheduleOnInfectionKowledgeChange(){
         // read policy
     }
+    public void AttemptToPCRTest(){
+        // 请确保调用这个方法之前，已经设计好了（原定目的地）
+        // 例如已经设置好了下班的去向
+        // 检查是不是有PCRTest的位置
+        // 如果有的话马上去，然后返回下一个级别的本来的目的地
+        TestManager testManager = this.hostedSim.infoManager.testManager;
+        if(testManager.currentTestEvent == null) return;
+        Debug.Assert(testManager.currentTestEvent != null, "bug here");
+        TestEvent testEvent =  testManager.currentTestEvent;
+        TestPolicy testPolicy = testManager.currentTestEvent.testPolicy;
+
+        // 试图获得一个testPosition, 成功或者失败根据Policy有不同的处理结果
+        PlaceManager placeManager = hostedSim.placeManager;
+        // placeManager.testCenrePlaces;
+        TestCenrePlace testCentrePlace = placeManager.GetAvailableTestPlace();
+
+        if(testCentrePlace == null){
+            // 全满
+            this.hostedSim.infoManager.notificationManager.SendTestCenterFullNotification();
+            if(testPolicy == TestPolicy.Hard){
+                pcrTestRelatedDest = hostedSim.home;
+            }else if(testPolicy == TestPolicy.Soft){
+                pcrTestRelatedDest = null;
+            }
+        }else{
+            pcrTestRelatedDest = testCentrePlace;
+        }
+        // this.hostedSim.infoManager.testManager
+    }
+    public void UpdateScheduleAfterTest(){
+        this.pcrTestRelatedDest = null;
+    }
 
     public void UpdateScheduleOnFeeUnaffordable(){
         // 当Sims因为非生活费的原因而破产的时候，就会触发这个函数
@@ -127,12 +174,12 @@ public class SimScheduler{
     }
 
     public void HandelLockDownStatusUpdate(bool isLockdown){
-        if (isLockdown && this.govQurantineDest == null){
+        if (isLockdown && this.qurantineDest == null){
             // 发出到封锁指令，并且没有其他的GovInfectionPolicy
-            this.residentialLockDownDest = this.hostedSim.home;
-        }else if(!isLockdown && this.govQurantineDest == hostedSim.home){
+            this.lockDownDest = this.hostedSim.home;
+        }else if(!isLockdown && this.qurantineDest == hostedSim.home){
              // 收到关闭封锁的指令的同时，当前正在被封锁在家里
-            this.govQurantineDest = null;
+            this.qurantineDest = null;
         }
     }
 
@@ -143,11 +190,14 @@ public class SimScheduler{
         Place destination = null;
         // DestType destType = DestType.None;
 
-        if(govQurantineDest != null){
-            destination = govQurantineDest;
+        if(qurantineDest != null){
+            destination = qurantineDest;
             // destType = DestType.GovQurantine;
-        }else if(residentialLockDownDest != null){
-            destination =  residentialLockDownDest;
+        }else if(pcrTestRelatedDest != null){
+            destination = pcrTestRelatedDest;
+        }
+        else if(lockDownDest != null){
+            destination =  lockDownDest;
             if(keyTime == KeyTime.Morning){ // 为什么只在morning做？因为通知只要一次就可以了
              this.hostedSim.simDiary.AppendDiaryItem(
             new SimsDiaryItem(
@@ -211,10 +261,14 @@ public class SimScheduler{
     //     pLeisureRelated = null;
     // }
 
-    private void FlushDest(){
+    public void FlushDest(){
+        // 今天去不成也不要把这个念想留着，明天再继续尝试！！！！
         workRelatedDest = null;
         leisureRelatedDest = null;
-        govQurantineDest = null;
-        residentialLockDownDest = null;
+        qurantineDest = null;
+        lockDownDest = null;
+        personalMedicalDest = null;
+        
     }
+
 }
