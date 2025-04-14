@@ -14,7 +14,7 @@ public class PlaceManager : MonoBehaviour
     public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
     public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
     public List<OfficePlace> officePlaces = new List<OfficePlace>();
-    public List<TestCenrePlace> testCenterPlaces = new List<TestCenrePlace>();
+    public List<TestCenterPlace> testCenterPlaces = new List<TestCenterPlace>();
     // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
 
     public InfoManager infoDebuggerManager;
@@ -96,7 +96,7 @@ public class PlaceManager : MonoBehaviour
         }
 
         foreach(var testCentrePos in testCentres){
-            TestCenrePlace newTestCentre = this.placeFactory.CreateTestCentre(
+            TestCenterPlace newTestCentre = this.placeFactory.CreateTestCentre(
                 new Vector2Int(1, 1),
                 testCentrePos,
                 mapManager,
@@ -129,17 +129,4 @@ public class PlaceManager : MonoBehaviour
         }
         return null;
     }
-    public TestCenrePlace GetAvailableTestPlace()
-    {
-        foreach (var testCenterPlace in testCenterPlaces)
-        {
-            if (testCenterPlace.CheckIsAvailable())
-            {
-                return testCenterPlace;
-            }
-        }
-        return null;
-    }
-
-
 }

@@ -54,19 +54,14 @@ public class SimScheduler{
             //this.pJobRelated = hostedSim.home;
         }
         this.workRelatedDest = hostedSim.office;
-        AttemptToPCRTest();
+        Debug.Assert(!(this.hostedSim.isUnfinishedPCRQuota == true && this.hostedSim.infoManager.testManager.isActivePCRTestEvent()==false), "bug here");
+        if(this.hostedSim.infoManager.testManager.isActivePCRTestEvent()){
+            if(this.hostedSim.isUnfinishedPCRQuota==true){
+                // 又active的测试event 并且自己还没有测试过的话，就试图拿号或者直接去测试
+                AttemptToPCRTest(); // 早上拿个号
+            }
+        }
     }
-    // public void UpdateScheduleOnEveryQuarter(){
-    //     if(this.hostedSim.isUnfinishedPCRQuota==true){
-    //         // 如果有未完成的PCRQuota
-            
-
-
-    //     }
-    // }
-
-
-
 
     // 晚上去哪里？
     public void UpdateScheduleOnDusk(){
@@ -77,8 +72,16 @@ public class SimScheduler{
             this.workRelatedDest = this.hostedSim.home;
             
         }
-        AttemptToPCRTest();
+        // 比如说这里已经确定了回家的路线，现在来看看有没有PCR的东西，如果有的话就做完PCR再回到原定路线
+        // AttemptToPCRTest();
     }
+    public void UpdateScheduleOnTestQueueCall(TestCenterPlace testPlace){
+        this.pcrTestRelatedDest = testPlace;
+    }
+    public void UpdateScheduleOnTestFinished(){
+        this.pcrTestRelatedDest = null;
+    }
+
     public void UpdateScheduleOnInfectionChanged(bool justRevocerd = false, bool justDead = false){
         // read infection
         
@@ -136,6 +139,9 @@ public class SimScheduler{
         // 例如已经设置好了下班的去向
         // 检查是不是有PCRTest的位置
         // 如果有的话马上去，然后返回下一个级别的本来的目的地
+
+
+        // 现在有一个严重的问题，就是PCRTest的预定的位置是取决于现在有没有人的，我们需要改成预定了多少个人。
         TestManager testManager = this.hostedSim.infoManager.testManager;
         if(testManager.currentTestEvent == null) return;
         Debug.Assert(testManager.currentTestEvent != null, "bug here");
@@ -145,10 +151,11 @@ public class SimScheduler{
         // 试图获得一个testPosition, 成功或者失败根据Policy有不同的处理结果
         PlaceManager placeManager = hostedSim.placeManager;
         // placeManager.testCenrePlaces;
-        TestCenrePlace testCentrePlace = placeManager.GetAvailableTestPlace();
+        // TestCenrePlace testCentrePlace = placeManager.GetAvailableOrQueueTestPlace();
+        TestCenterPlace testCentrePlace = testManager.GetOrQueueTestPlace(this.hostedSim);
 
         if(testCentrePlace == null){
-            // 全满
+            // 全满, 意味着自己现在已经在排队了
             this.hostedSim.infoManager.notificationManager.SendTestCenterFullNotification();
             if(testPolicy == TestPolicy.Hard){
                 pcrTestRelatedDest = hostedSim.home;
@@ -156,11 +163,18 @@ public class SimScheduler{
                 pcrTestRelatedDest = null;
             }
         }else{
+            // 不用排队，有直接的位置可以坐
+            testCentrePlace.Booking();
             pcrTestRelatedDest = testCentrePlace;
         }
         // this.hostedSim.infoManager.testManager
     }
-    public void UpdateScheduleAfterTest(){
+
+
+
+    public void UpdateSimScheduleAfterTest(){
+        TestCenterPlace testcentre = this.pcrTestRelatedDest as TestCenterPlace;
+        // testcentre.ReleaseBooking();
         this.pcrTestRelatedDest = null;
     }
 

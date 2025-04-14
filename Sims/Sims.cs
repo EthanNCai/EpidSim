@@ -94,6 +94,7 @@ public class Sims : MonoBehaviour
         this.isTodayOff = GetIsTodayOff(0);
         this.gameObject.AddComponent<SelectableObject>();
         this.simDiary = new SimsDiary(this);
+        TestManager.OnTestEventCreated += HandleNewTestEventStarted;
         
     }
     /*
@@ -229,6 +230,10 @@ public class Sims : MonoBehaviour
             UpdateExposureFromTile();
         }
         UpdateSickness();
+        // if(isUnfinishedPCRQuota){
+        //     // this.simScheduler.UpdateScheduleOnNoon();
+        //     // this.SetOutMoving(simScheduler.GetDestination(KeyTime.Noon));
+        // }
     }
 
     // On the road KeyTime的更新
@@ -238,6 +243,10 @@ public class Sims : MonoBehaviour
         }else{
             UpdateExposureFromTile();
         }
+    }
+
+    public void HandleTestCentreQueueCalling(){
+        
     }
     
     // ============== Infection & Health Related ==============
@@ -329,14 +338,23 @@ public class Sims : MonoBehaviour
     }
 
     // PCR Test Related
-    public void HandleNewTestEvent(){
+    public void HandleNewTestEventStarted(TestEvent testEvent){
         this.isUnfinishedPCRQuota = true;
     }
-    public void GetTested(){
-        Debug.Log($"{this.simsName}is getting tested");
-        this.isUnfinishedPCRQuota = false;
+    public void HandleTestQueueCall(TestCenterPlace testPlace){
+        this.simScheduler.UpdateScheduleOnTestQueueCall(testPlace);
         this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
     }
+    public void GetPCRTested(){
+        // 这个函数只负责PCRtest result的生成
+        Debug.Log($"{this.simsName}is tested PCR, recording info...");
+    }
+
+    public void HandleTestFinished(){
+        this.simScheduler.UpdateScheduleOnTestFinished();
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
+    }
+
 
     public void Navigate()
     {
@@ -404,7 +422,8 @@ public class Sims : MonoBehaviour
     public void FinishUpPCRTest(){
         Debug.Assert(isUnfinishedPCRQuota == true, "bug here");
         this.isUnfinishedPCRQuota = false;
-        this.simScheduler.UpdateScheduleAfterTest();
+        // this.simScheduler.
+        this.simScheduler.UpdateSimScheduleAfterTest();
 
     }
 

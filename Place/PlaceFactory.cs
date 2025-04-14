@@ -100,7 +100,7 @@ public class PlaceFactory : MonoBehaviour
         return medicalPlace;
     }
 
-    public TestCenrePlace CreateTestCentre(
+    public TestCenterPlace CreateTestCentre(
         Vector2Int placeShape, Vector2Int position,
         MapManager mapManager,
         GameObject flowFieldRootObject,
@@ -109,7 +109,7 @@ public class PlaceFactory : MonoBehaviour
         InfoManager infoDebuggerManager,
         CFEManager cfeManager)
     {
-        TestCenrePlace testCentrePlace = CreatePlaceInstance<TestCenrePlace>(testCentrePrefab, placeShape, position);
+        TestCenterPlace testCentrePlace = CreatePlaceInstance<TestCenterPlace>(testCentrePrefab, placeShape, position);
         testCentrePlace.TestCentrePlaceInit(
             placeShape,
             position,

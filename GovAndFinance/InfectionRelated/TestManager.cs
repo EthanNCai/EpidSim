@@ -42,6 +42,7 @@ public class TestEvent{
         this.eventTimePoint = timePoint;
         this.testPolicy = testPolicy;
     }
+
     // 模拟市民死亡将会影响着一个candidateSims
 }
 
@@ -52,6 +53,9 @@ public class TestManager : MonoBehaviour
     public TimeManager timeManager;
     // public TestPolicy testPolicy;
     public SimsManager simsManager;
+    private Queue<Sims> testQueue = new Queue<Sims>();
+
+    public PlaceManager placeManager;
 
     // ✨ 定义一个静态事件，通知大家有测试事件开始了喵！
     public static event Action<TestEvent> OnTestEventCreated;
@@ -59,6 +63,8 @@ public class TestManager : MonoBehaviour
     public void Start() 
     {
         SimsDeadManager.OnSimsDied += HandleSimsDead;
+        TestCenterPlace.OnBookingReleased += HandleBookingReleased;
+        TimeManager.OnDayChanged += FlushQueue;
     }
 
     public void Update()
@@ -85,4 +91,29 @@ public class TestManager : MonoBehaviour
         currentTestEvent.testedSims.Remove(deadSim);
         currentTestEvent.candidateSims.Remove(deadSim);
     }
+
+    public TestCenterPlace GetOrQueueTestPlace(Sims sim){
+        foreach (var testCenterPlace in this.placeManager.testCenterPlaces)
+        {
+            if (testCenterPlace.CheckIsBookAvailable()){ return testCenterPlace; }
+        }
+        this.testQueue.Enqueue(sim);
+        return null;
+    } 
+    public void HandleBookingReleased(TestCenterPlace testPlace){
+        // 被通知有一个空位了
+
+        // 从队列里面找一个
+        if(this.testQueue.Count == 0) {return;};
+        Sims sim = this.testQueue.Dequeue();
+        sim.HandleTestQueueCall(testPlace);
+    }
+    public void FlushQueue(int day){
+        // 每天都会重新flush一下queue， 也就是说所有的模拟市民早上就要重新拿号
+        this.testQueue.Clear();
+    }
+    public bool isActivePCRTestEvent(){
+        return currentTestEvent != null;
+    }
+
 }
