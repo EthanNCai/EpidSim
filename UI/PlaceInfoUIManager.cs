@@ -14,7 +14,7 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
     public TextMeshProUGUI lockDownButtionText;
     public Transform scrollViewContent; // ScrollView 的 Content
     public GameObject textPrefab; // 预制体
-    
+    public InfoManager infoManager;
     private List<string> diaryItemReprs = new List<string>();
     private Place currentPlace;
     private readonly List<TextMeshProUGUI> textPool = new List<TextMeshProUGUI>(); // 复用的文本池
@@ -71,6 +71,11 @@ public class PlaceInfoUIManager : MonoBehaviour, IUIManager
     public void PressLockDownButton(){
         Debug.Assert(currentPlace != null);
         currentPlace.SetLockdown(!currentPlace.isLockedDown);
+        if (currentPlace.isLockedDown == true){
+            infoManager.notificationManager.SendPartialLockdownNotification(currentPlace);
+        }else{
+            infoManager.notificationManager.SendCancelPartialLockdownNotification(currentPlace);
+        }
         UpdateLockDownText();
     }
 

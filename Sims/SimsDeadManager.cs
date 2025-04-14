@@ -5,6 +5,7 @@ using UnityEngine;
 public class SimsDeadManager:MonoBehaviour{
 
     public GameObject deadReprPrefab;
+    public InfoManager infoManager;
 
     public void HandleSimsDie(Sims targetSim)
     {
@@ -12,6 +13,7 @@ public class SimsDeadManager:MonoBehaviour{
 
         Debug.Assert(targetSim.infectionStatus == InfectionStatus.Dead, "bug here, this person not die yet");
 
+        infoManager.notificationManager.SendFirstDeadCaseNotification(targetSim);
         // 1. 从Building里面注销
         if (targetSim.home != null) targetSim.home.registeredSims.Remove(targetSim);
         if (targetSim.office != null) targetSim.office.registeredSims.Remove(targetSim);

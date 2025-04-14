@@ -8,11 +8,14 @@ public class NotificationItem : MonoBehaviour
     public TextMeshProUGUI notificationTitle;
     public TextMeshProUGUI notificationDetial;
     public CanvasGroup canvasGroup;
+    public Image backgroundImage;
 
-    public void Initialize(string notificationTitleIn, string notificationDetailIn, float displayTime)
+    public void Initialize(string notificationTitleIn, string notificationDetailIn, float displayTime, Color bgColor)
     {
         notificationTitle.text = notificationTitleIn;
         notificationDetial.text = notificationDetailIn;
+        if (backgroundImage != null)
+            backgroundImage.color = bgColor;
         StartCoroutine(FadeRoutine(displayTime));
         Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());

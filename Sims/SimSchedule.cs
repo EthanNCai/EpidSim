@@ -92,6 +92,7 @@ public class SimScheduler{
                     // 还没在医院了
                     MedicalPlace medicalPlace = this.hostedSim.placeManager.GetAvailableMedicalPlace();
                     if(medicalPlace == null){
+                        this.hostedSim.infoManager.notificationManager.SendHospitalFullNotification();
                         Debug.Log("A sim willing to go to hospital, but no seats left");
                     }else{
                         personalMedicalDest = medicalPlace;
