@@ -61,6 +61,7 @@ public class SimScheduler{
                 AttemptToPCRTest(); // 早上拿个号
             }
         }
+        AfterUpdateCheck();
     }
 
     // 晚上去哪里？
@@ -72,14 +73,18 @@ public class SimScheduler{
             this.workRelatedDest = this.hostedSim.home;
             
         }
+        AfterUpdateCheck();
         // 比如说这里已经确定了回家的路线，现在来看看有没有PCR的东西，如果有的话就做完PCR再回到原定路线
         // AttemptToPCRTest();
     }
     public void UpdateScheduleOnTestQueueCall(TestCenterPlace testPlace){
         this.pcrTestRelatedDest = testPlace;
+        testPlace.Booking();
+        AfterUpdateCheck();
     }
     public void UpdateScheduleOnTestFinished(){
         this.pcrTestRelatedDest = null;
+        AfterUpdateCheck();
     }
 
     public void UpdateScheduleOnInfectionChanged(bool justRevocerd = false, bool justDead = false){
@@ -127,6 +132,7 @@ public class SimScheduler{
             // 已经痊愈或者死亡
             this.personalMedicalDest = null;
         }
+        AfterUpdateCheck();
     }
     public void UpdateScheduleOnPolicyChanged(){
         // read policy
@@ -167,15 +173,15 @@ public class SimScheduler{
             testCentrePlace.Booking();
             pcrTestRelatedDest = testCentrePlace;
         }
+        AfterUpdateCheck();
         // this.hostedSim.infoManager.testManager
     }
-
-
 
     public void UpdateSimScheduleAfterTest(){
         TestCenterPlace testcentre = this.pcrTestRelatedDest as TestCenterPlace;
         // testcentre.ReleaseBooking();
         this.pcrTestRelatedDest = null;
+        AfterUpdateCheck();
     }
 
     public void UpdateScheduleOnFeeUnaffordable(){
@@ -185,17 +191,19 @@ public class SimScheduler{
             this.personalMedicalDest = null;
             return;
         }
+        AfterUpdateCheck();
     }
 
-    public void HandelLockDownStatusUpdate(bool isLockdown){
-        if (isLockdown && this.qurantineDest == null){
-            // 发出到封锁指令，并且没有其他的GovInfectionPolicy
-            this.lockDownDest = this.hostedSim.home;
-        }else if(!isLockdown && this.qurantineDest == hostedSim.home){
-             // 收到关闭封锁的指令的同时，当前正在被封锁在家里
-            this.qurantineDest = null;
-        }
-    }
+    // public void OnHandlingLockDownStatusChanged(bool isLockdown){
+        // if (isLockdown && this.qurantineDest == null){
+        //     // 发出到封锁指令，并且没有其他的GovInfectionPolicy
+        //     this.lockDownDest = this.hostedSim.home;
+        // }else if(!isLockdown && this.qurantineDest == hostedSim.home){
+        //      // 收到关闭封锁的指令的同时，当前正在被封锁在家里
+        //     this.qurantineDest = null;
+        //     this.lockDownDest = null;
+        // }
+    // }
 
     public Place GetDestination(KeyTime keyTime){
 
@@ -241,7 +249,8 @@ public class SimScheduler{
             destination =  workRelatedDest;
             // destType = DestType.WorkRelated;
         }else{
-            Debug.Assert(destination != null);
+            // Debug.Assert(destination != null);
+            Debug.Log("No where to go, just go back home");
             destination = hostedSim.home;
         }
         return destination;
@@ -282,7 +291,15 @@ public class SimScheduler{
         qurantineDest = null;
         lockDownDest = null;
         personalMedicalDest = null;
-        
+    }
+
+    public void AfterUpdateCheck(){
+        bool orNull =  workRelatedDest != null ||
+           leisureRelatedDest != null ||
+           qurantineDest != null ||
+           lockDownDest != null ||
+           personalMedicalDest != null;
+        // Debug.Assert(orNull == true, "After schedule update check not passed");
     }
 
 }

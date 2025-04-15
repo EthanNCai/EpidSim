@@ -10,16 +10,17 @@ public class Utils
         Debug.Assert(parent != null, "Parent object cannot be null");
         return UtilsClass.CreateWorldText(text, parent.transform, relativePosition, 150, Color.white, TextAnchor.MiddleCenter);
     }
-    public static bool IsPointInsideArea(Vector2 point, Vector2Int bottomLeft, Vector2Int topRight)
+    public static bool IsPointInsideArea(Vector2 point, Vector2 bottomLeft, Vector2 topRight, float tolerance = 0f)
     {
-        int minX = Mathf.Min(bottomLeft.x, topRight.x);
-        int maxX = Mathf.Max(bottomLeft.x, topRight.x);
-        int minY = Mathf.Min(bottomLeft.y, topRight.y);
-        int maxY = Mathf.Max(bottomLeft.y, topRight.y);
+        float minX = Mathf.Min(bottomLeft.x, topRight.x) - tolerance;
+        float maxX = Mathf.Max(bottomLeft.x, topRight.x) + tolerance;
+        float minY = Mathf.Min(bottomLeft.y, topRight.y) - tolerance;
+        float maxY = Mathf.Max(bottomLeft.y, topRight.y) + tolerance;
 
         return point.x >= minX && point.x <= maxX &&
             point.y >= minY && point.y <= maxY;
     }
+
 
     public static Vector2 GetRandomizedDirection(Vector2Int originalDirection, float temperature)
     {

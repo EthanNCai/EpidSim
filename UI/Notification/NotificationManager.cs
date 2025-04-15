@@ -31,7 +31,7 @@ public class NotificationManager : MonoBehaviour
         {
             if (Time.time - lastTime < duplicateCooldown)
             {
-                Debug.Log($"[NotificationManager] Skipped duplicate notification: {key}");
+                // Debug.Log($"[NotificationManager] Skipped duplicate notification: {key}");
                 return; // 冷却中，不显示
             }
         }

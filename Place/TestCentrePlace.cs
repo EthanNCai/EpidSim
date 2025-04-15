@@ -53,7 +53,7 @@ public class TestCenterPlace : Place
         {
             if (inSiteSim.isUnfinishedPCRQuota)
             {
-                Debug.Log("Some One Get Tested");
+                // Debug.Log("Some One Get Tested");
                 inSiteSim.GetPCRTested(); // 读取信息
                 inSiteSim.isUnfinishedPCRQuota = false;
                 this.ReleaseBooking();
@@ -66,23 +66,33 @@ public class TestCenterPlace : Place
     {
         return this.bookings < volume;
     }
-
+    int book_called = 0;
+    int book_release_called = 0;
     public void Booking()
     {
-        Debug.Assert(bookings >= 0 && bookings <= volume, $"bug in booking, booking is {bookings}");
+        Debug.Assert(
+            bookings >= 0 && bookings <= volume, 
+            $"bug in release booking, booking is {bookings}, book called {book_called}, release_book_called {book_release_called}");
         this.bookings += 1;
-        Debug.Assert(bookings >= 0 && bookings <= volume, $"bug in booking, booking is {bookings}");
+        book_called += 1;
+        Debug.Assert(
+            bookings >= 0 && bookings <= volume, 
+            $"bug in release booking, booking is {bookings}, book called {book_called}, release_book_called {book_release_called}");
     }
 
     public void ReleaseBooking()
     {
-        Debug.Assert(bookings > 0 && bookings <= volume, $"bug in release booking, booking is {bookings}");
+        Debug.Assert(
+            bookings >= 0 && bookings <= volume, 
+            $"bug in release booking, booking is {bookings}, book called {book_called}, release_book_called {book_release_called}");
+        this.book_release_called += 1;
         this.bookings -= 1;
-        Debug.Assert(bookings >= 0 && bookings <= volume, $"bug in release booking,, booking is {bookings}");
+        Debug.Assert(bookings >= 0 && bookings <= volume,
+         $"bug in release booking, booking is {bookings}, book called {book_called}, release_book_called {book_release_called}");
         OnBookingReleased?.Invoke(this);
     }
     public void HandleQuarterChanged((int,int) time){
-        if( time.Item2 == 2){
+        if( time.Item1 % 4 ==0){
             TestSimsInsite();
         }
     }

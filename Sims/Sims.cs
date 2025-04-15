@@ -47,7 +47,8 @@ public class Sims : MonoBehaviour
     private float speed = 0f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
-    private Vector2? finalApproachPosition = null; // 使用 nullable 变量
+    public Vector2 finalApproachPositionForDebug;
+    public Vector2? finalApproachPosition = null; // 使用 nullable 变量
     private static float temperature = 0.4f;
     public static (int,int) keyTimeMorningRanges = (0,16);
     public static int minWorkHours = 7; 
@@ -303,14 +304,22 @@ public class Sims : MonoBehaviour
         this.destination = home;
         this.home.registeredSims.Add(this);
         this.office.registeredSims.Add(this);
-        this.home.OnLockdownStatusUpdate += simScheduler.HandelLockDownStatusUpdate;
+        // this.home.OnLockdownStatusUpdate += simScheduler.OnHandlingLockDownStatusChanged;
     }
 
     public bool IsInDestination(Vector2 currentPosition)
     {
         if (destination == null) return false;
-        return Utils.IsPointInsideArea(currentPosition, destination.placeLLAnchor, destination.placeURAnchor);
+
+        float tolerance = 0.5f;
+
+        // 扩大判定区域
+        Vector2 expandedLL = destination.placeLLAnchor;
+        Vector2 expandedUR = destination.placeURAnchor;
+
+        return Utils.IsPointInsideArea(currentPosition, expandedLL, expandedUR,tolerance);
     }
+
 
     public void DailyInteractWithInfection(){
         // 离开这个函数的时候是不存在脏状态的，也就是说，不存在：这个人已经痊愈了，但是infection仍然不是null
@@ -347,7 +356,7 @@ public class Sims : MonoBehaviour
     }
     public void GetPCRTested(){
         // 这个函数只负责PCRtest result的生成
-        Debug.Log($"{this.simsName}is tested PCR, recording info...");
+        // Debug.Log($"{this.simsName}is tested PCR, recording info...");
     }
 
     public void HandleTestFinished(){
@@ -370,8 +379,14 @@ public class Sims : MonoBehaviour
             if (finalApproachPosition == null){
                 finalApproachPosition = destination.GetRandomPositionInside();
             }
+            if (finalApproachPosition == null){
+                finalApproachPositionForDebug = new Vector2(-233,-233);
+            }else{
+                finalApproachPositionForDebug = finalApproachPosition.Value;
+            }
 
-            if (Vector2.Distance(finalApproachPosition.Value, currentPosition) < 0.1f){
+
+            if (Vector2.Distance(finalApproachPosition.Value, currentPosition) < 0.2f){
                 FinishUpMoving();
             }else{
                 NaturallyFinalApproach();
@@ -407,7 +422,7 @@ public class Sims : MonoBehaviour
     {
         if (finalApproachPosition == null) return;
 
-        transform.position = Vector2.Lerp(transform.position, finalApproachPosition.Value, speed * 0.5f * Time.deltaTime);
+        transform.position = Vector2.Lerp(transform.position, finalApproachPosition.Value, speed * 0.6f * Time.deltaTime);
     }
 
     public void FinishUpMoving()
@@ -445,6 +460,7 @@ public class Sims : MonoBehaviour
             this.inSite.RemoveInsiteSims(this);
         }
         this.destination = destination;
+        this.finalApproachPosition = null;
         this.inSite = null; // 设为 null，表示无效
         UpdateInSiteRepr();
     }
