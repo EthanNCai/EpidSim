@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -43,6 +45,16 @@ public class TestEvent{
         this.testPolicy = testPolicy;
     }
 
+    public void SubmitTestResult(Sims sim, bool isPositive){
+        if(isPositive){ 
+            postiveSims.Add(sim);
+        }else{
+            negativeSims.Add(sim);
+        }
+        testedSims.Add(sim);
+        // Debug.Log($"testedSims: {testedSims.Count},negativeSims:{negativeSims.Count},postiveSims:{postiveSims.Count}");
+    }
+
     // 模拟市民死亡将会影响着一个candidateSims
 }
 
@@ -59,17 +71,31 @@ public class TestManager : MonoBehaviour
 
     // ✨ 定义一个静态事件，通知大家有测试事件开始了喵！
     public static event Action<TestEvent> OnTestEventCreated;
+    public static event Action OnTestEventEnd;
 
     public void Start() 
     {
         SimsDeadManager.OnSimsDied += HandleSimsDead;
         TestCenterPlace.OnBookingReleased += HandleBookingReleased;
         TimeManager.OnDayChanged += FlushQueue;
+        TimeManager.OnQuarterChanged += UpdateEventStatus;
     }
 
-    public void Update()
-    {
-        // TODO: 你可以在这里检测 currentTestEvent 是否结束然后清理喵～
+    // public void Update()
+    // {
+    //     // UpdateEventStatus();
+    // }
+    public void UpdateEventStatus((int h,int q) time){
+        if(time.q == 0 && currentTestEvent != null){
+            if (currentTestEvent.testedSims.Count >= currentTestEvent.candidateSims.Count){
+                // Event 已经结束
+                currentTestEvent = null;
+                OnTestEventEnd?.Invoke();
+            }
+            
+            //  
+
+        }
     }
 
     public void CreateTestEvent()
@@ -77,10 +103,11 @@ public class TestManager : MonoBehaviour
         currentTestEvent = new TestEvent(
             simsManager.activeSimsList,
             timeManager.GetTime(),
-            TestPolicy.Hard);
+            TestPolicy.Soft);
 
         // 🎉 发出事件，告诉全世界测试开始啦喵！
         OnTestEventCreated?.Invoke(currentTestEvent);
+
     }
 
     public void HandleSimsDead(Sims deadSim)

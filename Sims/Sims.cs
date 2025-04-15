@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,7 +24,6 @@ public class Sims : MonoBehaviour
     // Daily Flushed INFOs
     public bool isTodayOff = false; 
     Sims maxExposedBy = null;
-
     int maxExposed = 0;
     int accumulatedPaycheckToday = 0;
     int accumulatedSubsidyToday = 0;
@@ -33,6 +33,11 @@ public class Sims : MonoBehaviour
 
     // dynamic 
     public bool isUnfinishedPCRQuota = false;
+    SpriteRenderer spriteRenderer;
+    public float pcrFreshness = 0f;  // 0-100
+    private float QpcrFreshnessStaleStep = 1.5f;
+    private bool recentPcrResult = false;
+    private Color pcrColor;
 
     // Persistance INFOs
     public StringBuilder stringBuilder = new StringBuilder();
@@ -69,6 +74,12 @@ public class Sims : MonoBehaviour
     public string infectionRepr = "";
     public string inSiteRepr = "";
 
+    // meta 
+    public Color negativeColor = Color.green;
+    public Color positiveColor = Color.red;
+
+    public Color normalColor = Color.white;
+
     public void SimsInit(
         VirusVolumeGridMapManager virusVolumeMapManager,
         InfoManager infoManager,
@@ -96,7 +107,8 @@ public class Sims : MonoBehaviour
         this.gameObject.AddComponent<SelectableObject>();
         this.simDiary = new SimsDiary(this);
         TestManager.OnTestEventCreated += HandleNewTestEventStarted;
-        
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.color = normalColor;
     }
     /*
         模拟市民的全部功能有下面几点(这个类只能设计的部分)
@@ -171,6 +183,7 @@ public class Sims : MonoBehaviour
     public void HandleTimeChange((int,int) timeNow){
         
         this.QDoLifeExpense();
+        this.QMaintainPCRFreshness();
         if(timeNow == keyTimeMorning){
             HandleMorningKeyTime(timeNow);
         }else if(timeNow == keyTimeDusk){
@@ -357,6 +370,33 @@ public class Sims : MonoBehaviour
     public void GetPCRTested(){
         // 这个函数只负责PCRtest result的生成
         // Debug.Log($"{this.simsName}is tested PCR, recording info...");
+
+        // 生成一个test result
+        bool isPositive = false;
+        if(this.infection != null && infection.virusVolume >= 50){
+            isPositive = true;
+        }
+        if(isPositive){
+            pcrColor = positiveColor;
+        }else{
+            pcrColor = negativeColor;
+        }
+        // 把这个result 提交
+        Debug.Assert(this.infoManager.testManager.currentTestEvent != null, "Bug here");
+        this.infoManager.testManager.currentTestEvent.SubmitTestResult(this, isPositive);
+        this.pcrFreshness = 100;
+    }
+    // PCR feshness 我们会有一个CPR Freshness的机制，freshness的这个数值应该是Sims自己管理，以及减淡的逻辑也是Sims自己管理
+    public void QMaintainPCRFreshness(){
+        if(pcrFreshness > 1){
+            Debug.Assert(this.pcrColor != null,"bug here");
+            pcrFreshness -= this.QpcrFreshnessStaleStep;
+            float t = Mathf.Clamp01(pcrFreshness / 100f); // 转成 0~1
+            Color pcrColor = Color.Lerp(normalColor, this.pcrColor, t);
+            spriteRenderer.color = pcrColor;
+            if(pcrFreshness <= 1){
+            }
+        }
     }
 
     public void HandleTestFinished(){
@@ -371,7 +411,6 @@ public class Sims : MonoBehaviour
         {
             return; // 没有目标地，直接返回. Standby 状态
         }
-
         Vector2 currentPosition = transform.position;
         if (IsInDestination(currentPosition))
         {

@@ -8,15 +8,19 @@ public class SimsDeadManager : MonoBehaviour
     public InfoManager infoManager;
     public SimsManager simsManager;
 
+    public bool isAnySimDeadBefore = false;
+
     // ✨ 添加一个静态事件喵，参数是死掉的 Sim 本体
     public static event Action<Sims> OnSimsDied;
 
     public void HandleSimsDie(Sims targetSim)
     {
-        Debug.Log("Someone just died (｡•́︿•̀｡)");
+        // Debug.Log("Someone just died (｡•́︿•̀｡)");
         // Debug.Assert(targetSim.infectionStatus == InfectionStatus.Dead, "Bug here! This person not dead yet!");
-
-        infoManager.notificationManager.SendFirstDeadCaseNotification(targetSim);
+        if(isAnySimDeadBefore == false){
+            infoManager.notificationManager.SendFirstDeadCaseNotification(targetSim);
+            isAnySimDeadBefore = true;
+        }
 
         // 1. 从Building里面注销
         if (targetSim.home != null) targetSim.home.registeredSims.Remove(targetSim);
