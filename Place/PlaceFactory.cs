@@ -8,6 +8,7 @@ public class PlaceFactory : MonoBehaviour
     public GameObject commercialPrefab;
     public GameObject officePrefab;
     public GameObject medicalPrefab;
+    public GameObject testCentrePrefab;
 
     public ResidentialPlace CreateResidentialPlace(
         Vector2Int placeShape, Vector2Int position,
@@ -97,6 +98,28 @@ public class PlaceFactory : MonoBehaviour
             infoDebuggerManager,
             cfeManager);
         return medicalPlace;
+    }
+
+    public TestCenterPlace CreateTestCentre(
+        Vector2Int placeShape, Vector2Int position,
+        MapManager mapManager,
+        GameObject flowFieldRootObject,
+        GameObject geoMapManagerObj,
+        GridInfoManager gridDebugManager,
+        InfoManager infoDebuggerManager,
+        CFEManager cfeManager)
+    {
+        TestCenterPlace testCentrePlace = CreatePlaceInstance<TestCenterPlace>(testCentrePrefab, placeShape, position);
+        testCentrePlace.TestCentrePlaceInit(
+            placeShape,
+            position,
+            mapManager,
+            flowFieldRootObject,
+            geoMapManagerObj,
+            gridDebugManager,
+            infoDebuggerManager,
+            cfeManager);
+        return testCentrePlace;
     }
 
     private T CreatePlaceInstance<T>(GameObject prefab, Vector2Int placeShape, Vector2Int position) where T : Place

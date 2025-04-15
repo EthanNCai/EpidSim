@@ -22,10 +22,9 @@ public class TimeManager : MonoBehaviour
     public int day = 0;
     public int hour = 0;
     public int quarter = 0;
-    public float speed = 4f;
+    private float speed = 2.5f;
     private float timeAccumulator = 0f;
     private float timeStep = 1.0f;
-
     private bool isPaused = false; // 💖加一个暂停状态变量～
     private float originalTimeScale = 1f;
     private void Update()

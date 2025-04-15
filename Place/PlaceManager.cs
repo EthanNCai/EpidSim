@@ -14,6 +14,7 @@ public class PlaceManager : MonoBehaviour
     public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
     public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
     public List<OfficePlace> officePlaces = new List<OfficePlace>();
+    public List<TestCenterPlace> testCenterPlaces = new List<TestCenterPlace>();
     // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
 
     public InfoManager infoDebuggerManager;
@@ -26,6 +27,7 @@ public class PlaceManager : MonoBehaviour
     {
         //temporary use
         // this.gridDebuggerManager =  gridDebuggerObj.GetComponent<GridDebugManager>();
+        List<Vector2Int> testCentres = new List<Vector2Int>{new Vector2Int(19,5),new Vector2Int(19,1)};
         List<Vector2Int> medicals = new List<Vector2Int>{new Vector2Int(19,3)};
         List<Vector2Int> commercials = new List<Vector2Int>{new Vector2Int(17,3), new Vector2Int(12,7)};
         List<Vector2Int> homes = new List<Vector2Int>{new Vector2Int(1,3),new Vector2Int(1,1),new Vector2Int(7,2), new Vector2Int(11,3),new Vector2Int(5,4) };
@@ -92,6 +94,20 @@ public class PlaceManager : MonoBehaviour
                 );
             this.medicalPlaces.Add(newMedicalPlace);
         }
+
+        foreach(var testCentrePos in testCentres){
+            TestCenterPlace newTestCentre = this.placeFactory.CreateTestCentre(
+                new Vector2Int(1, 1),
+                testCentrePos,
+                mapManager,
+                flowFieldRootObject,
+                geoMapManagerObj,
+                gridDebuggerManager,
+                infoDebuggerManager,
+                cfeManager
+                );
+            this.testCenterPlaces.Add(newTestCentre);
+        }
         OnPlaceSpwaned?.Invoke();
     }
     public OfficePlace GetRandomOffice(){
@@ -113,5 +129,4 @@ public class PlaceManager : MonoBehaviour
         }
         return null;
     }
-
 }

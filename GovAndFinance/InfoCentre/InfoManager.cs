@@ -15,6 +15,10 @@ public class InfoManager : MonoBehaviour{
     public LockDownManager lockdownManager;
     public SimsDeadManager simsDeadManager;
 
+    public NotificationManager notificationManager;
+
+    public TestManager testManager;
+
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();
     public void Awake(){

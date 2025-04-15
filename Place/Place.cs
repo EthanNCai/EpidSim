@@ -140,6 +140,8 @@ public class Place : MonoBehaviour
             return "Commercial Building";
         }else if(place is OfficePlace){
             return "Office";
+        }else if(place is TestCenterPlace){
+            return "Test Centre";
         }else{
             return "Unidentified Building";
         }

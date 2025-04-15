@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,6 +31,14 @@ public class Sims : MonoBehaviour
 
     SicknessTag sicknessTag = SicknessTag.Normal;
 
+    // dynamic 
+    public bool isUnfinishedPCRQuota = false;
+    SpriteRenderer spriteRenderer;
+    public float pcrFreshness = 0f;  // 0-100
+    private float QpcrFreshnessStaleStep = 1.5f;
+    private bool recentPcrResult = false;
+    private Color pcrColor;
+
     // Persistance INFOs
     public StringBuilder stringBuilder = new StringBuilder();
     public int uid;
@@ -43,7 +52,8 @@ public class Sims : MonoBehaviour
     private float speed = 0f;
     public int counter = 0;
     public Rigidbody2D simsRigidbody;
-    private Vector2? finalApproachPosition = null; // 使用 nullable 变量
+    public Vector2 finalApproachPositionForDebug;
+    public Vector2? finalApproachPosition = null; // 使用 nullable 变量
     private static float temperature = 0.4f;
     public static (int,int) keyTimeMorningRanges = (0,16);
     public static int minWorkHours = 7; 
@@ -63,6 +73,12 @@ public class Sims : MonoBehaviour
     // debug only
     public string infectionRepr = "";
     public string inSiteRepr = "";
+
+    // meta 
+    public Color negativeColor = Color.green;
+    public Color positiveColor = Color.red;
+
+    public Color normalColor = Color.white;
 
     public void SimsInit(
         VirusVolumeGridMapManager virusVolumeMapManager,
@@ -90,6 +106,9 @@ public class Sims : MonoBehaviour
         this.isTodayOff = GetIsTodayOff(0);
         this.gameObject.AddComponent<SelectableObject>();
         this.simDiary = new SimsDiary(this);
+        TestManager.OnTestEventCreated += HandleNewTestEventStarted;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.color = normalColor;
     }
     /*
         模拟市民的全部功能有下面几点(这个类只能设计的部分)
@@ -164,6 +183,7 @@ public class Sims : MonoBehaviour
     public void HandleTimeChange((int,int) timeNow){
         
         this.QDoLifeExpense();
+        this.QMaintainPCRFreshness();
         if(timeNow == keyTimeMorning){
             HandleMorningKeyTime(timeNow);
         }else if(timeNow == keyTimeDusk){
@@ -174,12 +194,12 @@ public class Sims : MonoBehaviour
             HandleOnTheRoad(timeNow);
         }
     }
-    
 
     public void HandleDayChange(int day){
         // infection related
         this.dayRecord = day;
         this.isTodayOff = GetIsTodayOff(day);
+        this.simScheduler.FlushDest();
     }
 
     public void HandlePolicyChange(){
@@ -224,6 +244,10 @@ public class Sims : MonoBehaviour
             UpdateExposureFromTile();
         }
         UpdateSickness();
+        // if(isUnfinishedPCRQuota){
+        //     // this.simScheduler.UpdateScheduleOnNoon();
+        //     // this.SetOutMoving(simScheduler.GetDestination(KeyTime.Noon));
+        // }
     }
 
     // On the road KeyTime的更新
@@ -234,10 +258,12 @@ public class Sims : MonoBehaviour
             UpdateExposureFromTile();
         }
     }
+
+    public void HandleTestCentreQueueCalling(){
+        
+    }
     
     // ============== Infection & Health Related ==============
-
-
     
     private void TryToInfect(){
         if(this.infectionStatus == InfectionStatus.Dead){
@@ -291,14 +317,22 @@ public class Sims : MonoBehaviour
         this.destination = home;
         this.home.registeredSims.Add(this);
         this.office.registeredSims.Add(this);
-        this.home.OnLockdownStatusUpdate += simScheduler.HandelLockDownStatusUpdate;
+        // this.home.OnLockdownStatusUpdate += simScheduler.OnHandlingLockDownStatusChanged;
     }
 
     public bool IsInDestination(Vector2 currentPosition)
     {
         if (destination == null) return false;
-        return Utils.IsPointInsideArea(currentPosition, destination.placeLLAnchor, destination.placeURAnchor);
+
+        float tolerance = 0.5f;
+
+        // 扩大判定区域
+        Vector2 expandedLL = destination.placeLLAnchor;
+        Vector2 expandedUR = destination.placeURAnchor;
+
+        return Utils.IsPointInsideArea(currentPosition, expandedLL, expandedUR,tolerance);
     }
+
 
     public void DailyInteractWithInfection(){
         // 离开这个函数的时候是不存在脏状态的，也就是说，不存在：这个人已经痊愈了，但是infection仍然不是null
@@ -325,13 +359,58 @@ public class Sims : MonoBehaviour
             Debug.Log($"{this.simsName} has just recoverd!");
     }
 
+    // PCR Test Related
+    public void HandleNewTestEventStarted(TestEvent testEvent){
+        this.isUnfinishedPCRQuota = true;
+    }
+    public void HandleTestQueueCall(TestCenterPlace testPlace){
+        this.simScheduler.UpdateScheduleOnTestQueueCall(testPlace);
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
+    }
+    public void GetPCRTested(){
+        // 这个函数只负责PCRtest result的生成
+        // Debug.Log($"{this.simsName}is tested PCR, recording info...");
+
+        // 生成一个test result
+        bool isPositive = false;
+        if(this.infection != null && infection.virusVolume >= 50){
+            isPositive = true;
+        }
+        if(isPositive){
+            pcrColor = positiveColor;
+        }else{
+            pcrColor = negativeColor;
+        }
+        // 把这个result 提交
+        Debug.Assert(this.infoManager.testManager.currentTestEvent != null, "Bug here");
+        this.infoManager.testManager.currentTestEvent.SubmitTestResult(this, isPositive);
+        this.pcrFreshness = 100;
+    }
+    // PCR feshness 我们会有一个CPR Freshness的机制，freshness的这个数值应该是Sims自己管理，以及减淡的逻辑也是Sims自己管理
+    public void QMaintainPCRFreshness(){
+        if(pcrFreshness > 1){
+            Debug.Assert(this.pcrColor != null,"bug here");
+            pcrFreshness -= this.QpcrFreshnessStaleStep;
+            float t = Mathf.Clamp01(pcrFreshness / 100f); // 转成 0~1
+            Color pcrColor = Color.Lerp(normalColor, this.pcrColor, t);
+            spriteRenderer.color = pcrColor;
+            if(pcrFreshness <= 1){
+            }
+        }
+    }
+
+    public void HandleTestFinished(){
+        this.simScheduler.UpdateScheduleOnTestFinished();
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
+    }
+
+
     public void Navigate()
     {
         if (destination == null)
         {
             return; // 没有目标地，直接返回. Standby 状态
         }
-
         Vector2 currentPosition = transform.position;
         if (IsInDestination(currentPosition))
         {
@@ -339,8 +418,14 @@ public class Sims : MonoBehaviour
             if (finalApproachPosition == null){
                 finalApproachPosition = destination.GetRandomPositionInside();
             }
+            if (finalApproachPosition == null){
+                finalApproachPositionForDebug = new Vector2(-233,-233);
+            }else{
+                finalApproachPositionForDebug = finalApproachPosition.Value;
+            }
 
-            if (Vector2.Distance(finalApproachPosition.Value, currentPosition) < 0.1f){
+
+            if (Vector2.Distance(finalApproachPosition.Value, currentPosition) < 0.2f){
                 FinishUpMoving();
             }else{
                 NaturallyFinalApproach();
@@ -376,7 +461,7 @@ public class Sims : MonoBehaviour
     {
         if (finalApproachPosition == null) return;
 
-        transform.position = Vector2.Lerp(transform.position, finalApproachPosition.Value, speed * 0.5f * Time.deltaTime);
+        transform.position = Vector2.Lerp(transform.position, finalApproachPosition.Value, speed * 0.6f * Time.deltaTime);
     }
 
     public void FinishUpMoving()
@@ -386,6 +471,14 @@ public class Sims : MonoBehaviour
         finalApproachPosition = null; // 设为 null，表示无效
         destination = null;
         UpdateInSiteRepr();
+    }
+
+    public void FinishUpPCRTest(){
+        Debug.Assert(isUnfinishedPCRQuota == true, "bug here");
+        this.isUnfinishedPCRQuota = false;
+        // this.simScheduler.
+        this.simScheduler.UpdateSimScheduleAfterTest();
+
     }
 
     public bool GetIsTodayOff(int day){
@@ -406,6 +499,7 @@ public class Sims : MonoBehaviour
             this.inSite.RemoveInsiteSims(this);
         }
         this.destination = destination;
+        this.finalApproachPosition = null;
         this.inSite = null; // 设为 null，表示无效
         UpdateInSiteRepr();
     }

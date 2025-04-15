@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class ResidentialPlace : Place, IExpensablePlace
 {
-
     public event Action<bool> OnLockdownStatusUpdate;
     public int populationCapacity;
     public CFEPolicyMinSub<ResidentialPlace> policyMinSub;
