@@ -3,7 +3,7 @@ using UnityEngine;
 public class MapManager : MonoBehaviour
 {
     public GameObject gridMaproot;
-    private Vector2Int _mapsize = new Vector2Int(20, 10);
+    private Vector2Int _mapsize = new Vector2Int(40, 20);
     public Vector2Int mapsize // lazy loaded
     {
         get { return _mapsize; }

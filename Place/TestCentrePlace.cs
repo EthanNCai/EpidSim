@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 
 public class TestCenterPlace : Place
 {
-    public int volumePerTile = 10;
+    public int volumePerTile = 5;
     public int volume;
     public int bookings;
     public int populationCapacity;

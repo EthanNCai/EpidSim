@@ -27,6 +27,7 @@ public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
 
     // Sub UI Manager references
     public LockdownUIManager lockdownUIManager;
+    public CPRTestUIManager cprTestUIManager;
 
     void Start() {
         closeButton.onClick.AddListener(HideUI);
@@ -60,12 +61,14 @@ public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
                 activeButton = lockdownButton;
                 activeUI.SetActive(true);
                 activeButton.interactable = false;
-                lockdownUIManager.UpdateLockdownInfos();
+                lockdownUIManager.UpdateUIInfos();
                 break;
             case PolicyTabs.CPRTest:
                 activeUI = cprTestUI;
-                activeButton = cprTestButton;activeUI.SetActive(true);
+                activeButton = cprTestButton;
+                activeUI.SetActive(true);
                 activeButton.interactable = false;
+                cprTestUIManager.UpdateUIInfos();
                 break;
             default:
                 Debug.LogWarning("喵喵喵？未知 tab 被选中！");

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 using System.Runtime.CompilerServices;
+using System;
 
 public class BuidableController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
@@ -10,20 +11,24 @@ public class BuidableController : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     // ✨ 主人拖过来的！包含 name/detail 的 UI 面板预制体实例
     // public GameObject detailPanelObject;
+
+
     private BuildableInfo buidableInfo;
     private BuildPanalUIManager buildPanalManager;
-
+    public BuildManager buildManager;
     public TextMeshProUGUI name_;
 
     // private bool isDetailShowing = false; 
 
     // private RectTransform detailRect;
+    public static event Action<BuildableInfo> OnBuildClicked;
 
-    public void Init(BuildableInfo buidableInfo, BuildPanalUIManager buildPanalManager)
+    public void Init(BuildableInfo buidableInfo, BuildPanalUIManager buildPanalManager, BuildManager buildManager)
     {
         this.buidableInfo = buidableInfo;
         this.buildPanalManager = buildPanalManager;
         name_.text = this.buidableInfo.name;
+        this.buildManager = buildManager;
         // iconImage.sprite = this.buidableInfo.icon;
     }
 
@@ -34,13 +39,12 @@ public class BuidableController : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        // detailPanelObject.SetActive(false);
         MakeDetialCardHide();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log($"喵呜！你点击了 {buidableInfo.name}！");
+        OnBuildClicked?.Invoke(this.buidableInfo);
     }
 
     private void MakeDetialCardShow(){

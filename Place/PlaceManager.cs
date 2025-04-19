@@ -1,6 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
+using Unity.VisualScripting;
 using UnityEngine;
+
+
+
 public class PlaceManager : MonoBehaviour
 {
     public GameObject placeFactoryObj;
@@ -29,9 +34,20 @@ public class PlaceManager : MonoBehaviour
         // this.gridDebuggerManager =  gridDebuggerObj.GetComponent<GridDebugManager>();
         List<Vector2Int> testCentres = new List<Vector2Int>{new Vector2Int(19,5),new Vector2Int(19,1)};
         List<Vector2Int> medicals = new List<Vector2Int>{new Vector2Int(19,3)};
-        List<Vector2Int> commercials = new List<Vector2Int>{new Vector2Int(17,3), new Vector2Int(12,7)};
-        List<Vector2Int> homes = new List<Vector2Int>{new Vector2Int(1,3),new Vector2Int(1,1),new Vector2Int(7,2), new Vector2Int(11,3),new Vector2Int(5,4) };
-        List<Vector2Int> offices = new List<Vector2Int>{new Vector2Int(2,7), new Vector2Int(5,7), new Vector2Int(8,7), new Vector2Int(4,1) , new Vector2Int(14,7), new Vector2Int(17,7)};
+        List<Vector2Int> commercials = new List<Vector2Int>{new Vector2Int(27,3), new Vector2Int(12,3)};
+        List<Vector2Int> homes = new List<Vector2Int>{
+            new Vector2Int(3,3),new Vector2Int(3,5),new Vector2Int(3,7), new Vector2Int(3,9),new Vector2Int(3,11),
+            new Vector2Int(3,13),new Vector2Int(3,15),new Vector2Int(3,17),
+            new Vector2Int(7,3),new Vector2Int(7,5),new Vector2Int(7,7), new Vector2Int(7,9),new Vector2Int(7,11),
+            new Vector2Int(7,13),new Vector2Int(7,15),new Vector2Int(7,17),
+            new Vector2Int(35,3),new Vector2Int(35,5),new Vector2Int(35,7), new Vector2Int(35,9),new Vector2Int(35,11),
+            new Vector2Int(35,13),new Vector2Int(35,15),new Vector2Int(35,17),
+            new Vector2Int(31,3),new Vector2Int(31,5),new Vector2Int(31,7), new Vector2Int(31,9),new Vector2Int(31,11),
+            new Vector2Int(31,13),new Vector2Int(31,15),new Vector2Int(31,17),
+             };
+        List<Vector2Int> offices = new List<Vector2Int>{
+            new Vector2Int(12,6),new Vector2Int(12,10),new Vector2Int(12,14),
+            new Vector2Int(27,6),new Vector2Int(27,10),new Vector2Int(27,14)};
         this.placeFactory = placeFactoryObj.GetComponent<PlaceFactory>();
 
         foreach (var homePosition in homes){
@@ -113,11 +129,9 @@ public class PlaceManager : MonoBehaviour
     public OfficePlace GetRandomOffice(){
         return officePlaces[UnityEngine.Random.Range(0,officePlaces.Count)];
     }
-    public ResidentialPlace GetRandomResidential()
-    {
+    public ResidentialPlace GetRandomResidential(){
         return residentialPlaces[UnityEngine.Random.Range(0,residentialPlaces.Count)];
     }
-
     public MedicalPlace GetAvailableMedicalPlace()
     {
         foreach (var medicalPlace in medicalPlaces)
@@ -128,5 +142,43 @@ public class PlaceManager : MonoBehaviour
             }
         }
         return null;
+    }
+    public int GetAvailableTestCentreSeats(){
+        int ret = 0;
+        foreach(TestCenterPlace testCentre in testCenterPlaces){
+            ret += testCentre.volume;
+        }
+        return ret;
+    }
+    public void GeneratePlaceOnCell(BuildableInfo buidableInfo, Vector2Int cellPosition){
+        switch(buidableInfo.placeType){
+            case PlaceMeta.PlaceType.TestCentrePlace:{
+                TestCenterPlace newTestCentre = this.placeFactory.CreateTestCentre(
+                    buidableInfo.placeSize,
+                    cellPosition,
+                    mapManager,
+                    flowFieldRootObject,
+                    geoMapManagerObj,
+                    gridDebuggerManager,
+                    infoDebuggerManager,
+                    cfeManager
+                    );
+                this.testCenterPlaces.Add(newTestCentre);
+                break;
+            }case PlaceMeta.PlaceType.MedicalPlace:{
+                MedicalPlace newMedicalPlace = this.placeFactory.CreateMedicalPlace(
+                    buidableInfo.placeSize,
+                    cellPosition,
+                    mapManager,
+                    flowFieldRootObject,
+                    geoMapManagerObj,
+                    gridDebuggerManager,
+                    infoDebuggerManager,
+                    cfeManager
+                    );
+                this.medicalPlaces.Add(newMedicalPlace);
+                break;
+            }
+        }
     }
 }

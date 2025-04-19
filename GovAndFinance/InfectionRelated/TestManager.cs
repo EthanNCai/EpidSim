@@ -66,7 +66,6 @@ public class TestManager : MonoBehaviour
     // public TestPolicy testPolicy;
     public SimsManager simsManager;
     private Queue<Sims> testQueue = new Queue<Sims>();
-
     public PlaceManager placeManager;
 
     // ✨ 定义一个静态事件，通知大家有测试事件开始了喵！
@@ -92,9 +91,6 @@ public class TestManager : MonoBehaviour
                 currentTestEvent = null;
                 OnTestEventEnd?.Invoke();
             }
-            
-            //  
-
         }
     }
 
@@ -106,6 +102,16 @@ public class TestManager : MonoBehaviour
             TestPolicy.Soft);
 
         // 🎉 发出事件，告诉全世界测试开始啦喵！
+        OnTestEventCreated?.Invoke(currentTestEvent);
+
+    }
+    public void CreateTestEvent(TestPolicy testPolicy)
+    {
+        currentTestEvent = new TestEvent(
+            simsManager.activeSimsList,
+            timeManager.GetTime(),
+            testPolicy);
+
         OnTestEventCreated?.Invoke(currentTestEvent);
 
     }
@@ -141,6 +147,15 @@ public class TestManager : MonoBehaviour
     }
     public bool isActivePCRTestEvent(){
         return currentTestEvent != null;
+    }
+    public void SwitchTestPolicy(TestPolicy newPolicy) {
+        Debug.Assert(this.currentTestEvent != null);
+        if (newPolicy == currentTestEvent.testPolicy) {
+            return;
+        }else{
+            currentTestEvent.testPolicy = newPolicy;
+            Debug.Log($"喵！已切换 lockdown level 为：{newPolicy}");
+        }
     }
 
 }

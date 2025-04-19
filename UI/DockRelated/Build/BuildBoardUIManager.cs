@@ -10,11 +10,12 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
     public GameObject uiPanel;
     public Button closeButton;
     public GameObject detailCardObject;
+    public GameObject onBuildingUI;
     private TextMeshProUGUI detailCardName;
     private TextMeshProUGUI detailCardDescription;
     public GameObject buidableIconPrefab;
     public Transform buildableIconRootTransform;
-
+    public BuildManager buildManager;
     public Canvas rootCanvas;
 
     public TimeManager timeManager;
@@ -38,6 +39,8 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
             Debug.LogWarning("喵呜～你忘记给 detailPanelPrefab 赋值了喵！");
         }
         InitBuildableIconsUI();
+        BuidableController.OnBuildClicked += SwitchToBuildMode;
+        BuildManager.OnBuildCanceled += SwitchBackFromBuildMode;
     }
 
     public void InitUI()
@@ -82,7 +85,15 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
         }
     }
 
-
+    public void SwitchToBuildMode(BuildableInfo buildableInfo){
+        uiPanel.SetActive(false);
+        detailCardObject.SetActive(false);
+        onBuildingUI.SetActive(true);
+    }
+    public void SwitchBackFromBuildMode(){
+        uiPanel.SetActive(true);
+        onBuildingUI.SetActive(false);
+    }
 
 
     public void MakeDetialCardShow(BuildableInfo buidableInfo)
@@ -100,16 +111,14 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
     }
     public void InitBuildableIconsUI()
     {
-        List<BuildableInfo> buildableList = new List<BuildableInfo>{ 
-            new BuildableInfo("Clinic", "A place where sims can get medical treatment", null), 
-            new BuildableInfo("TestCentre", "A place where sims can get virus CPR test", null)};
+        List<BuildableInfo> buildableList = PlaceMeta.GetBuidableInfoList();
         foreach (var buildable in buildableList)
         {
             Debug.Log("Initializing");
             // 一个 Buidable 图标需要知道其的基本信息 ： name\detail\ + buidableManager（需要通过它来管理detail）
             GameObject go = Instantiate(buidableIconPrefab, buildableIconRootTransform);
             BuidableController item = go.GetComponent<BuidableController>();
-            item.Init(buildable, this);
+            item.Init(buildable, this,buildManager);
         }
     }
 

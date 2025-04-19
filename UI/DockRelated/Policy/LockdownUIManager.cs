@@ -41,7 +41,7 @@ public class LockdownUIManager : MonoBehaviour
         {
             string selectedLevel = levelNames[index];
             lockDownManager.SwitchLockdownLevel(selectedLevel);
-            UpdateLockdownInfos();
+            UpdateUIInfos();
         }
         else
         {
@@ -49,7 +49,7 @@ public class LockdownUIManager : MonoBehaviour
         }
     }
 
-    public void UpdateLockdownInfos()
+    public void UpdateUIInfos()
     {
         // Debug.Log("Updating Lockdown Info");
         // get 文字描述
@@ -112,7 +112,7 @@ public class LockdownUIManager : MonoBehaviour
         }else{
             this.lockDownManager.GlobalLockDown();
         }
-        UpdateLockdownInfos();
+        UpdateUIInfos();
     }
     
 }

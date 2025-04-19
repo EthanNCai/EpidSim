@@ -34,6 +34,7 @@ public class MedicalPlace : Place, IContributablePlace, IExpensablePlace
         this.serviceBuildingMaintainingCFE = cfeManager.CreateServiceBuildingMaintainingCFE<MedicalPlace>(this);
         this.commonFeesCFE = cfeManager.CreateCommonFeesCFE<MedicalPlace>(this);
     }
+    
     public void SayHi(){
         Debug.Log(base.ToString());
     }

@@ -7,13 +7,8 @@ using UnityEngine.Assertions;
 using UnityEngine.Assertions.Must;
 
 /*
-
     一个隐含的假设： 所有模拟市民的日常规划都是再早上发生的（去工作、去娱乐）
-
-
-
 */
-
 
 public class SimScheduler{
 
@@ -38,8 +33,7 @@ public class SimScheduler{
     public void UpdateScheduleOnMorning(){
         // this.leisureRelatedDest = null;
 
-        if (hostedSim.home.isLockedDown)
-        {
+        if (hostedSim.home.isLockedDown){
             this.lockDownDest = hostedSim.home;
         }else{
             this.lockDownDest = null;        
@@ -71,7 +65,6 @@ public class SimScheduler{
         }
         if(workRelatedDest){
             this.workRelatedDest = this.hostedSim.home;
-            
         }
         AfterUpdateCheck();
         // 比如说这里已经确定了回家的路线，现在来看看有没有PCR的东西，如果有的话就做完PCR再回到原定路线
@@ -193,17 +186,6 @@ public class SimScheduler{
         }
         AfterUpdateCheck();
     }
-
-    // public void OnHandlingLockDownStatusChanged(bool isLockdown){
-        // if (isLockdown && this.qurantineDest == null){
-        //     // 发出到封锁指令，并且没有其他的GovInfectionPolicy
-        //     this.lockDownDest = this.hostedSim.home;
-        // }else if(!isLockdown && this.qurantineDest == hostedSim.home){
-        //      // 收到关闭封锁的指令的同时，当前正在被封锁在家里
-        //     this.qurantineDest = null;
-        //     this.lockDownDest = null;
-        // }
-    // }
 
     public Place GetDestination(KeyTime keyTime){
 

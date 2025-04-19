@@ -15,15 +15,14 @@ public class SimsManager: MonoBehaviour{
     public InfoManager infoDebuggerManager;
 
     // public PlaceManager placeManager();
-
     public void Start()
     {
         Vector2Int mapSize = mapManager.mapsize;
-        int numSims = 100;
+        int numSims = 200;
         for(int i =0; i < numSims; i++)
         {
             this.simsFactory = this.simsFacotryObj.GetComponent<SimsFactory>();
-            Sims newSims = this.simsFactory.CreateSims(new Vector2Int(7,1));
+            Sims newSims = this.simsFactory.CreateSims(new Vector2Int((int)mapManager.mapCenter.x,(int)mapManager.mapCenter.y));
             int uid = newSims.uid;
             this.simsDictionary[uid] = newSims;
             this.activeSimsList.Add(newSims);
