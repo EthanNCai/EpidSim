@@ -16,7 +16,6 @@ public class InfoManager : MonoBehaviour{
     public SimsDeadManager simsDeadManager;
 
     public NotificationManager notificationManager;
-
     public TestManager testManager;
 
     int uidCounter = 0;
