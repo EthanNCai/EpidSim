@@ -17,6 +17,7 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
     public Transform buildableIconRootTransform;
     public BuildManager buildManager;
     public Canvas rootCanvas;
+    public CameraShake cameraShake;
 
     public TimeManager timeManager;
     // public Canvas buidingPanalUI;
@@ -41,8 +42,15 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
         InitBuildableIconsUI();
         BuidableController.OnBuildClicked += SwitchToBuildMode;
         BuildManager.OnBuildCanceled += SwitchBackFromBuildMode;
+        BuildManager.OnBuildCompleted += HandleBuildComplete;
     }
 
+    public void HandleBuildComplete(){
+        HideUI();
+        onBuildingUI.SetActive(false);
+        cameraShake.TriggerShake();
+        // CameraShake.TriggerShake();
+    }
     public void InitUI()
     {
         ShowUI();
