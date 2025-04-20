@@ -40,8 +40,8 @@ public class CameraManager : MonoBehaviour
         float marginX = mapSize.x * moveMarginRatio;
         float marginY = mapSize.y * moveMarginRatio;
 
-        mapMinBound = new Vector2(-marginX, -marginY) + (Vector2)mapManager.gridMaproot.transform.position;
-        mapMaxBound = new Vector2(mapSize.x + marginX, mapSize.y + marginY) + (Vector2)mapManager.gridMaproot.transform.position;
+        mapMinBound = new Vector2(-marginX, -marginY) + (Vector2)mapManager.mapRoot.transform.position;
+        mapMaxBound = new Vector2(mapSize.x + marginX, mapSize.y + marginY) + (Vector2)mapManager.mapRoot.transform.position;
     }
 
     void Update()

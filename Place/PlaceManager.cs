@@ -156,6 +156,13 @@ public class PlaceManager : MonoBehaviour
         }
         return ret;
     }
+    public int GetAvailableQuarantieCentreSeats(){
+        int ret = 0;
+        foreach(QRTCentrePlace qtrCentre in qrtCentrePlaces){
+            ret += qtrCentre.volume;
+        }
+        return ret;
+    }
     public void GeneratePlaceOnCell(BuildableInfo buidableInfo, Vector2Int cellPosition){
         switch(buidableInfo.placeType){
             case PlaceMeta.PlaceType.TestCentrePlace:{

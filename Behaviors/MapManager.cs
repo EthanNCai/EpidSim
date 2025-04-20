@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MapManager : MonoBehaviour
 {
-    public GameObject gridMaproot;
+    public GameObject mapRoot;
     private Vector2Int _mapsize = new Vector2Int(40, 20);
     public Vector2Int mapsize // lazy loaded
     {
@@ -17,7 +17,7 @@ public class MapManager : MonoBehaviour
         {
             if (!_mapCenter.HasValue)
             {
-                _mapCenter = gridMaproot.transform.position + new Vector3(mapsize.x / 2f, mapsize.y / 2f, -1);
+                _mapCenter = mapRoot.transform.position + new Vector3(mapsize.x / 2f, mapsize.y / 2f, -1);
             }
             return _mapCenter.Value;
         }
@@ -25,7 +25,7 @@ public class MapManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Assert(gridMaproot != null, "GridMapRoot is not set, Abort");
+        Debug.Assert(mapRoot != null, "GridMapRoot is not set, Abort");
     }
 
     void Update()

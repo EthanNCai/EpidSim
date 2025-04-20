@@ -11,21 +11,39 @@ public class VirusVolumeGridMapManager : MonoBehaviour
 {
     public MapManager mapManager;
     public GridNodeMap<VirusVolumeNode> virusVolumeMap = null;
-    public static float selfSanitizeIndex = 0.01f;
+    public static float selfSanitizeIndex = 0.1f;
     public GridInfoManager gridInfoManager;
     public GameObject geoMapManagerObj;
     private GeoMapsManager geoMapManager;
+    public GameObject virusVolumeVisualizerPrefab;
 
     public void Awake(){
-        // Debug.LogError("Start called on instance ID: " + GetInstanceID());
         this.virusVolumeMap = new GridNodeMap<VirusVolumeNode>(
             "",
             1, 
             this.mapManager.mapsize,
             gridInfoManager.GetListedRoot("virusVolumeMap"), 
             (int v, GridNodeMap<VirusVolumeNode> gnm ,Vector2Int c) => new VirusVolumeNode(v,gnm,c));
+            
         TimeManager.OnQuarterChanged += SelfSanitize;
+        TimeManager.OnKeyTimeChanged += HandleKeyTimeChanged;
+
+        // 生成病毒体积可视化器
+        Vector2Int mapSize = mapManager.mapsize;
+        Transform parentTransform = mapManager.mapRoot.transform;
+
+        for (int x = 0; x < mapSize.x; x++) {
+            for (int y = 0; y < mapSize.y; y++) {
+                VirusVolumeNode node = this.virusVolumeMap.GetNodeByCellPosition(new Vector2Int(x,y));
+                Vector3 cellPos = new Vector3(x, y,0);
+                // Vector3 worldPos = mapManager.CellToWorld(cellPos);
+                GameObject instance = Instantiate(virusVolumeVisualizerPrefab, cellPos, Quaternion.identity, parentTransform);
+                node.visualizer = instance;
+                instance.name = $"VirusVisualizer_{x}_{y}";
+            }
+        }
     }
+
 
     public void PolluteTheTile(Vector2Int cellPosition, Sims sims, int incomingVolume){
         VirusVolumeNode virusVolumeNode = this.virusVolumeMap.GetNodeByCellPosition(cellPosition);
@@ -45,6 +63,21 @@ public class VirusVolumeGridMapManager : MonoBehaviour
                     node.virusVolumeAndSims = (virusVolume, sims);
                 }
                 // node.virusVolumeAndSims = (virusVolume, sims);
+            }
+        }
+    }
+    public void HandleKeyTimeChanged(KeyTime keytime){
+        if(keytime == KeyTime.Noon || keytime == KeyTime.Dusk){
+            ScanTheVisualizerMap();
+        }
+    }
+
+    public void ScanTheVisualizerMap(){
+        // 获取一份时点环境报告
+        foreach (VirusVolumeNode node in this.virusVolumeMap.nodeIterator()) {
+            var (virusVolume, sims) = node.virusVolumeAndSims; 
+            if(sims != null){
+                node.visualizer.GetComponent<VirusVolumnVisualizerController>().SetVolume(virusVolume);
             }
         }
     }

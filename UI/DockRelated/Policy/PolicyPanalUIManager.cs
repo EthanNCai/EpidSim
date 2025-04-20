@@ -6,18 +6,25 @@ using TMPro;
 public enum PolicyTabs {
     None,
     Lockdown,
-    CPRTest
+    CPRTest,
+    QRT
 }
 
 public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
     public Button closeButton;
     public GameObject lockdownUI;
     public GameObject cprTestUI;
+    public GameObject qrtUI;
+    
     private GameObject activeUI;
 
 
     public Button lockdownButton;
     public Button cprTestButton;
+
+    public Button qrtButton;
+
+
     private Button activeButton;
     public GameObject uiPanal;
 
@@ -28,6 +35,7 @@ public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
     // Sub UI Manager references
     public LockdownUIManager lockdownUIManager;
     public CPRTestUIManager cprTestUIManager;
+    public QRTUIManager qrtUIManager;
 
     void Start() {
         closeButton.onClick.AddListener(HideUI);
@@ -69,6 +77,13 @@ public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
                 activeUI.SetActive(true);
                 activeButton.interactable = false;
                 cprTestUIManager.UpdateUIInfos();
+                break;
+            case PolicyTabs.QRT:
+                activeUI = qrtUI;
+                activeButton = qrtButton;
+                activeUI.SetActive(true);
+                activeButton.interactable = false;
+                qrtUIManager.UpdateUIInfos();
                 break;
             default:
                 Debug.LogWarning("喵喵喵？未知 tab 被选中！");

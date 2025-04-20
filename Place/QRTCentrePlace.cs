@@ -10,7 +10,6 @@ public class QRTCentrePlace : Place, IExpensablePlace
     public int volume;
     public static event Action<QRTCentrePlace> OnBookingReleased;
     public CFEServiceBuildingMaintaining<QRTCentrePlace> serviceBuildingMaintainingCFE;
-
     public Dictionary<int,int> qrtRegisteries = new Dictionary<int, int>();
 
 
@@ -126,7 +125,7 @@ public class QRTCentrePlace : Place, IExpensablePlace
                 qrtRegisteries[sim.uid] += 1;
                 continue;
             }else{
-                if(qrtRegisteries[sim.uid] <= QRTManager.qrtDuration){
+                if(qrtRegisteries[sim.uid] <= QRTMeta.GetQrtLen(this.infoManager.qrtManager.qrtDurationType)){
                     qrtRegisteries[sim.uid] += 1;
                 }else{
                     // 出院
