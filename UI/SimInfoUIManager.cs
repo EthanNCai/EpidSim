@@ -10,8 +10,11 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
     public Transform scrollViewContent; // ScrollView 的 Content
     public TextMeshProUGUI nameTag;
     public TextMeshProUGUI balanceTag;
+    public Button QRTButton;
+    public TextMeshProUGUI qrtButtonText;
     public GameObject textPrefab; // 预制体
     public Button closeButton;
+    public InfoManager infoManager;
 
     // private List<string> diaryItemReprs = new List<string>();
     // private static readonly StringBuilder stringBuilder = new StringBuilder();
@@ -24,9 +27,6 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
         HideUI();
         TimeManager.AfterQuarterChanged += UpdateInfoQuarterly;
     }
-
-    
-
     public void InitSimUI(Sims sims)
     {
         if (currentSims == sims)
@@ -38,6 +38,7 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
         // 更新名字和余额
         nameTag.text = $"Name: {currentSims.simsName}";
         UpdateBalance(currentSims.balance);
+        UpdateQRT();
         ShowUI();
     }
 
@@ -52,7 +53,16 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
         currentSims = null;
     }
 
-
+    private void UpdateQRT(){
+        
+        if(!this.currentSims.CheckIsOnQRT() &&
+        !this.infoManager.qrtManager.CheckIsQRTQueued(this.currentSims)){
+            // not qrt registered
+            QRTButton.interactable = true;
+        }else{
+            QRTButton.interactable = false;
+        }
+    }
     // SECTION 3: UPDATE RELATED
 
     private void UpdateInfoQuarterly((int, int) timeNow)
@@ -67,6 +77,10 @@ public class SimsInfoUIManager : MonoBehaviour, IUIManager
     private void UpdateBalance(float balance)
     {
         balanceTag.text = $"Balance: {balance} $";
+    }
+    public void HandelQRTButtonPressed(){
+        Debug.Assert(this.currentSims != null);
+        this.currentSims.AskToQuarantine();
     }
 
     private void UpdateSimDiary()

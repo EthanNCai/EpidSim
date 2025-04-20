@@ -9,6 +9,7 @@ public class PlaceFactory : MonoBehaviour
     public GameObject officePrefab;
     public GameObject medicalPrefab;
     public GameObject testCentrePrefab;
+    public GameObject qrtCentrePrefab;
 
     public ResidentialPlace CreateResidentialPlace(
         Vector2Int placeShape, Vector2Int position,
@@ -17,7 +18,7 @@ public class PlaceFactory : MonoBehaviour
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
-        InfoManager infoDebuggerManager,
+        InfoManager infoManager,
         CFEManager cfeManager)
     {
         ResidentialPlace residentialPlace = CreatePlaceInstance<ResidentialPlace>(residentialPrefab, placeShape, position);
@@ -29,7 +30,7 @@ public class PlaceFactory : MonoBehaviour
             flowFieldRootObject,
             geoMapManagerObj,
             gridDebugManager,
-            infoDebuggerManager,
+            infoManager,
             cfeManager);
         return residentialPlace;
     }
@@ -40,7 +41,7 @@ public class PlaceFactory : MonoBehaviour
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
-        InfoManager infoDebuggerManager,
+        InfoManager infoManager,
         CFEManager cfeManager)
     {
         OfficePlace officePlace = CreatePlaceInstance<OfficePlace>(officePrefab, placeShape, position);
@@ -51,7 +52,7 @@ public class PlaceFactory : MonoBehaviour
             flowFieldRootObject,
             geoMapManagerObj,
             gridDebugManager,
-            infoDebuggerManager,
+            infoManager,
             cfeManager);
         return officePlace;
     }
@@ -62,7 +63,7 @@ public class PlaceFactory : MonoBehaviour
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
-        InfoManager infoDebuggerManager,
+        InfoManager infoManager,
         CFEManager cfeManager)
     {
         CommercialPlace commercialPlace = CreatePlaceInstance<CommercialPlace>(commercialPrefab, placeShape, position);
@@ -73,7 +74,7 @@ public class PlaceFactory : MonoBehaviour
             flowFieldRootObject,
             geoMapManagerObj,
             gridDebugManager,
-            infoDebuggerManager,
+            infoManager,
             cfeManager);
         return commercialPlace;
     }
@@ -84,7 +85,7 @@ public class PlaceFactory : MonoBehaviour
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
-        InfoManager infoDebuggerManager,
+        InfoManager infoManager,
         CFEManager cfeManager)
     {
         MedicalPlace medicalPlace = CreatePlaceInstance<MedicalPlace>(medicalPrefab, placeShape, position);
@@ -95,7 +96,7 @@ public class PlaceFactory : MonoBehaviour
             flowFieldRootObject,
             geoMapManagerObj,
             gridDebugManager,
-            infoDebuggerManager,
+            infoManager,
             cfeManager);
         return medicalPlace;
     }
@@ -106,7 +107,7 @@ public class PlaceFactory : MonoBehaviour
         GameObject flowFieldRootObject,
         GameObject geoMapManagerObj,
         GridInfoManager gridDebugManager,
-        InfoManager infoDebuggerManager,
+        InfoManager infoManager,
         CFEManager cfeManager)
     {
         TestCenterPlace testCentrePlace = CreatePlaceInstance<TestCenterPlace>(testCentrePrefab, placeShape, position);
@@ -117,7 +118,28 @@ public class PlaceFactory : MonoBehaviour
             flowFieldRootObject,
             geoMapManagerObj,
             gridDebugManager,
-            infoDebuggerManager,
+            infoManager,
+            cfeManager);
+        return testCentrePlace;
+    }
+    public QRTCentrePlace CreateQRTCentre(
+        Vector2Int placeShape, Vector2Int position,
+        MapManager mapManager,
+        GameObject flowFieldRootObject,
+        GameObject geoMapManagerObj,
+        GridInfoManager gridDebugManager,
+        InfoManager infoManager,
+        CFEManager cfeManager)
+    {
+        QRTCentrePlace testCentrePlace = CreatePlaceInstance<QRTCentrePlace>(qrtCentrePrefab, placeShape, position);
+        testCentrePlace.QRTCenterInit(
+            placeShape,
+            position,
+            mapManager,
+            flowFieldRootObject,
+            geoMapManagerObj,
+            gridDebugManager,
+            infoManager,
             cfeManager);
         return testCentrePlace;
     }

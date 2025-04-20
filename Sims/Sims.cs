@@ -32,11 +32,12 @@ public class Sims : MonoBehaviour
     SicknessTag sicknessTag = SicknessTag.Normal;
 
     // dynamic 
+    // public bool isUnfinishedQTRQuota = false;
     public bool isUnfinishedPCRQuota = false;
     SpriteRenderer spriteRenderer;
     public float pcrFreshness = 0f;  // 0-100
     private float QpcrFreshnessStaleStep = 1.5f;
-    private bool recentPcrResult = false;
+    public bool recentPcrResult = false;
     private Color pcrColor;
 
     // Persistance INFOs
@@ -244,10 +245,6 @@ public class Sims : MonoBehaviour
             UpdateExposureFromTile();
         }
         UpdateSickness();
-        // if(isUnfinishedPCRQuota){
-        //     // this.simScheduler.UpdateScheduleOnNoon();
-        //     // this.SetOutMoving(simScheduler.GetDestination(KeyTime.Noon));
-        // }
     }
 
     // On the road KeyTime的更新
@@ -259,9 +256,6 @@ public class Sims : MonoBehaviour
         }
     }
 
-    public void HandleTestCentreQueueCalling(){
-        
-    }
     
     // ============== Infection & Health Related ==============
     
@@ -367,6 +361,10 @@ public class Sims : MonoBehaviour
         this.simScheduler.UpdateScheduleOnTestQueueCall(testPlace);
         this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
     }
+    public void HandleQRTQueueCall(QRTCentrePlace qRTCentrePlace){
+        this.simScheduler.UpdateScheduleOnQRTQueueCall(qRTCentrePlace);
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
+    }
     public void GetPCRTested(){
         // 这个函数只负责PCRtest result的生成
         // Debug.Log($"{this.simsName}is tested PCR, recording info...");
@@ -376,15 +374,24 @@ public class Sims : MonoBehaviour
         if(this.infection != null && infection.virusVolume >= 50){
             isPositive = true;
         }
+        // Debug.Log("here2");
         if(isPositive){
             pcrColor = positiveColor;
+            recentPcrResult = true;
         }else{
             pcrColor = negativeColor;
+            recentPcrResult = false;
         }
-        // 把这个result 提交
-        Debug.Assert(this.infoManager.testManager.currentTestEvent != null, "Bug here");
-        this.infoManager.testManager.currentTestEvent.SubmitTestResult(this, isPositive);
-        this.pcrFreshness = 100;
+        // 如果有TestEvent的话把这个result 提交，如果没有的话就自己把报告揣自己兜里
+        if(this.infoManager.testManager.currentTestEvent != null){
+            this.infoManager.testManager.currentTestEvent.SubmitTestResult(this, isPositive);
+            this.pcrFreshness = 100;
+            return;
+        }else{
+            this.pcrFreshness = 100;
+            return;
+        }
+        
     }
     // PCR feshness 我们会有一个CPR Freshness的机制，freshness的这个数值应该是Sims自己管理，以及减淡的逻辑也是Sims自己管理
     public void QMaintainPCRFreshness(){
@@ -401,6 +408,11 @@ public class Sims : MonoBehaviour
 
     public void HandleTestFinished(){
         this.simScheduler.UpdateScheduleOnTestFinished();
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
+    }
+
+    public void HandleQRTFinished(){
+        this.simScheduler.UpdateScheduleOnQRTFinished();
         this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
     }
 
@@ -556,6 +568,14 @@ public class Sims : MonoBehaviour
     }
     private (int,int,int) GetDetailedTime((int h,int q) timeNow){
         return (this.dayRecord,timeNow.h,timeNow.q);
+    }
+    public void AskToQuarantine(){
+        // this.isUnfinishedQTRQuota = true;
+        this.simScheduler.AttemptToQuarantine();
+        this.SetOutMoving(simScheduler.GetDestination(KeyTime.Random));
+    }
+    public bool CheckIsOnQRT(){
+        return this.simScheduler.qrtDest != null;
     }
 
     public void Update()

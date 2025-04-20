@@ -5,7 +5,7 @@ public static class PriceMenu{
      
     public static int QOfficeTaxUnit = 10;
     public static int QCommercialTaxUnit = 40;
-    public static int QMedicalPlaceMaintaingExpense = 100;
+    public static int QMedicalPlaceMaintaingExpense = 10;
     public static int QSimLifeExpense = 5;
     public static int QSimOfficeIncome = 10;
 

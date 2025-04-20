@@ -8,11 +8,8 @@ using UnityEngine.UI;
 public class CPRTestUIManager : MonoBehaviour
 {
     public TestManager cprTestManager;
-
     public Button PCRTestButton;
-
     public TextMeshProUGUI promptStatement;
-
     public TextMeshProUGUI testCentreStatement;
     public TextMeshProUGUI testSeatsStatement;
     // private LockdownStatus currentLockdownStatus;
@@ -59,6 +56,7 @@ public class CPRTestUIManager : MonoBehaviour
             promptStatement.text = "A Test is unfinished, you cannot start a new one";
             testPolicy = cprTestManager.currentTestEvent.testPolicy;
         }else{
+            PCRTestButton.interactable = true;
             promptStatement.text = "Start a new PCR test?";
         }
         // 计算一下当前的

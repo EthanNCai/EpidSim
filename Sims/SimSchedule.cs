@@ -14,7 +14,7 @@ public class SimScheduler{
 
     // Section Dests
     Place lockDownDest;
-    Place qurantineDest;
+    public Place qrtDest;
     Place personalMedicalDest;
     Place workRelatedDest;
     Place leisureRelatedDest;
@@ -50,8 +50,9 @@ public class SimScheduler{
         this.workRelatedDest = hostedSim.office;
         Debug.Assert(!(this.hostedSim.isUnfinishedPCRQuota == true && this.hostedSim.infoManager.testManager.isActivePCRTestEvent()==false), "bug here");
         if(this.hostedSim.infoManager.testManager.isActivePCRTestEvent()){
-            if(this.hostedSim.isUnfinishedPCRQuota==true){
+            if(this.hostedSim.isUnfinishedPCRQuota==true && qrtDest == null){
                 // 又active的测试event 并且自己还没有测试过的话，就试图拿号或者直接去测试
+                // 如果已经被政府隔离了就不需要做这些, 因为隔离自带Daily检测
                 AttemptToPCRTest(); // 早上拿个号
             }
         }
@@ -75,8 +76,18 @@ public class SimScheduler{
         testPlace.Booking();
         AfterUpdateCheck();
     }
+    public void UpdateScheduleOnQRTQueueCall(QRTCentrePlace qrtplace){
+        this.qrtDest = qrtplace;
+        qrtplace.Booking();
+        AfterUpdateCheck();
+    }
     public void UpdateScheduleOnTestFinished(){
         this.pcrTestRelatedDest = null;
+        AfterUpdateCheck();
+    }
+
+    public void UpdateScheduleOnQRTFinished(){
+        this.qrtDest = null;
         AfterUpdateCheck();
     }
 
@@ -133,6 +144,17 @@ public class SimScheduler{
     public void UpdateScheduleOnInfectionKowledgeChange(){
         // read policy
     }
+    public void AttemptToQuarantine(){
+        QRTCentrePlace qRTCentrePlace = this.hostedSim.infoManager.qrtManager.GetOrQueueTestCandidate(hostedSim); 
+        if(qRTCentrePlace == null){
+            this.qrtDest=hostedSim.home;
+            // 如果隔离所满了，就回到家里
+        }else{
+            this.qrtDest = qRTCentrePlace;
+            qRTCentrePlace.Booking();
+            // 如果找到了空闲的隔离所，就去隔离所
+        }
+    }
     public void AttemptToPCRTest(){
         // 请确保调用这个方法之前，已经设计好了（原定目的地）
         // 例如已经设置好了下班的去向
@@ -151,7 +173,7 @@ public class SimScheduler{
         PlaceManager placeManager = hostedSim.placeManager;
         // placeManager.testCenrePlaces;
         // TestCenrePlace testCentrePlace = placeManager.GetAvailableOrQueueTestPlace();
-        TestCenterPlace testCentrePlace = testManager.GetOrQueueTestPlace(this.hostedSim);
+        TestCenterPlace testCentrePlace = testManager.GetOrQueueTestCandidate(this.hostedSim);
 
         if(testCentrePlace == null){
             // 全满, 意味着自己现在已经在排队了
@@ -194,8 +216,8 @@ public class SimScheduler{
         Place destination = null;
         // DestType destType = DestType.None;
 
-        if(qurantineDest != null){
-            destination = qurantineDest;
+        if(qrtDest != null){
+            destination = qrtDest;
             // destType = DestType.GovQurantine;
         }else if(pcrTestRelatedDest != null){
             destination = pcrTestRelatedDest;
@@ -270,7 +292,7 @@ public class SimScheduler{
         // 今天去不成也不要把这个念想留着，明天再继续尝试！！！！
         workRelatedDest = null;
         leisureRelatedDest = null;
-        qurantineDest = null;
+        // qrtDest = null;
         lockDownDest = null;
         personalMedicalDest = null;
     }
@@ -278,7 +300,7 @@ public class SimScheduler{
     public void AfterUpdateCheck(){
         bool orNull =  workRelatedDest != null ||
            leisureRelatedDest != null ||
-           qurantineDest != null ||
+           qrtDest != null ||
            lockDownDest != null ||
            personalMedicalDest != null;
         // Debug.Assert(orNull == true, "After schedule update check not passed");

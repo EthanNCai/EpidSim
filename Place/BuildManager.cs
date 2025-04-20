@@ -21,53 +21,93 @@ public struct BuildableInfo
         this.placeType = placeType;
     }
 }
-public static class PlaceMeta{
-    public enum PlaceType{
+public static class PlaceMeta
+{
+    public enum PlaceType
+    {
         ResidentialPlace,
         OfficePlace,
         MedicalPlace,
         TestCentrePlace,
         CommercialPlace,
+        QRTPlace,
     }
 
     static public List<PlaceType> buidableTypes = new List<PlaceType>{
-        PlaceType.MedicalPlace, PlaceType.TestCentrePlace};
-    static public List<BuildableInfo> buidableInfos = new List<BuildableInfo>{};
-    static public BuildableInfo GetBuildableInfo(PlaceType placeType){
-        BuildableInfo medicalBuidableInfo = new BuildableInfo(
-            "Clinic",
-            "A place where sims can get medical treatment",
-             null,
-             new Vector2Int(1,1),
-             PlaceType.MedicalPlace);
-        BuildableInfo testCentreBuidableInfo = new BuildableInfo(
-            "Test Centre",
-            "A place where sims can get virus CPR test",
-             null,
-             new Vector2Int(2,2),
-             PlaceType.TestCentrePlace);
-        
-        switch(placeType){
-            case PlaceType.MedicalPlace:{
-                return medicalBuidableInfo;
-            }case PlaceType.TestCentrePlace:{
-                return testCentreBuidableInfo;
-            }
+        PlaceType.MedicalPlace, 
+        PlaceType.TestCentrePlace,
+        PlaceType.QRTPlace
+    };
 
+    static public List<BuildableInfo> buidableInfos = new List<BuildableInfo>();
+
+    static private List<Vector2Int> GetSizesForType(PlaceType placeType)
+    {
+        switch (placeType)
+        {
+            case PlaceType.MedicalPlace:
+                return new List<Vector2Int> { new Vector2Int(1, 1), new Vector2Int(2, 2) };
+            case PlaceType.TestCentrePlace:
+                return new List<Vector2Int> { new Vector2Int(1, 1),new Vector2Int(2, 2), new Vector2Int(3, 3) };
+            case PlaceType.QRTPlace:
+                return new List<Vector2Int> { new Vector2Int(1, 1),new Vector2Int(2, 2), new Vector2Int(3, 3) };
+            default:
+                return new List<Vector2Int> { new Vector2Int(1, 1) };
         }
-        throw new NotImplementedException();
     }
-    static public List<BuildableInfo> GetBuidableInfoList(){
-        if(buidableInfos.Count == 0){
-            foreach ( var buidableType in buidableTypes){
-                buidableInfos.Add(GetBuildableInfo(buidableType));
-            }
-            return buidableInfos;
-        }else{
-            return buidableInfos;
+
+    static private BuildableInfo CreateBuildableInfo(PlaceType placeType, Vector2Int size)
+    {
+        string sizeSuffix = $" ({size.x}x{size.y})";
+        switch (placeType)
+        {
+            case PlaceType.MedicalPlace:
+                return new BuildableInfo(
+                    "Clinic" + sizeSuffix,
+                    "A place where sims can get medical treatment",
+                    null,
+                    size,
+                    PlaceType.MedicalPlace
+                );
+            case PlaceType.TestCentrePlace:
+                return new BuildableInfo(
+                    "Test Centre" + sizeSuffix,
+                    "A place where sims can get virus CPR test",
+                    null,
+                    size,
+                    PlaceType.TestCentrePlace
+                );
+            case PlaceType.QRTPlace:
+                return new BuildableInfo(
+                    "Quarantine Centre" + sizeSuffix,
+                    "A place where sims can get quarantined",
+                    null,
+                    size,
+                    PlaceType.QRTPlace
+                );
+            default:
+                throw new NotImplementedException();
         }
+    }
+
+    static public List<BuildableInfo> GetBuidableInfoList()
+    {
+        if (buidableInfos.Count == 0)
+        {
+            foreach (var buidableType in buidableTypes)
+            {
+                var sizes = GetSizesForType(buidableType);
+                foreach (var size in sizes)
+                {
+                    buidableInfos.Add(CreateBuildableInfo(buidableType, size));
+                }
+            }
+        }
+        return buidableInfos;
     }
 }
+
+
 // using UnityEngine;
 
 public class BuildManager : MonoBehaviour
