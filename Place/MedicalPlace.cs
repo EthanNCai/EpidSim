@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MedicalPlace : Place, IContributablePlace, IExpensablePlace
 {   
-    public int volumePerTile = 10;
+    public int volumePerTile = 4;
     public int volume;
     public CFEServiceBuildingMaintaining<MedicalPlace> serviceBuildingMaintainingCFE;
     public CFECommonFees<MedicalPlace> commonFeesCFE;
@@ -34,7 +34,7 @@ public class MedicalPlace : Place, IContributablePlace, IExpensablePlace
         this.serviceBuildingMaintainingCFE = cfeManager.CreateServiceBuildingMaintainingCFE<MedicalPlace>(this);
         this.commonFeesCFE = cfeManager.CreateCommonFeesCFE<MedicalPlace>(this);
     }
-    
+
     public void SayHi(){
         Debug.Log(base.ToString());
     }
@@ -53,7 +53,7 @@ public class MedicalPlace : Place, IContributablePlace, IExpensablePlace
     }
 
     public int CalculateQExpense(){
-        return PriceMenu.QMedicalPlaceMaintaingExpense;
+        return PriceMenu.QMedicalPlaceMaintaingExpense * volume;
     }
     public int CalculateQContribution(){
         return inSiteSims.Count * infoManager.policyManager.GetSubsidisedMedicalFee();

@@ -3,15 +3,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
 
-public class TestCenterPlace : Place
+public class TestCenterPlace : Place, IExpensablePlace
 {
-    public int volumePerTile = 5;
+    public int volumePerTile = 3;
     public int volume;
     public int bookings;
     public int populationCapacity;
     public List<Sims> residents;
 
     // ✨ 新增：静态事件！当有空位时通知所有人！
+    public CFEServiceBuildingMaintaining<TestCenterPlace> serviceBuildingMaintainingCFE;
     public static event Action<TestCenterPlace> OnBookingReleased;
 
     public void TestCentrePlaceInit(
@@ -95,5 +96,8 @@ public class TestCenterPlace : Place
         if( time.Item1 % 4 ==0){
             TestSimsInsite();
         }
+    }
+    public int CalculateQExpense(){
+        return PriceMenu.QMedicalPlaceMaintaingExpense * volume;
     }
 }

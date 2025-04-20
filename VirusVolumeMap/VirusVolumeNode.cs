@@ -9,6 +9,7 @@ public class VirusVolumeNode : IGridNode<VirusVolumeNode>
 
     private Vector2Int _cellPosition;
     private int _raw_value;
+    public GameObject visualizer;
     private (int,Sims) _virusVolumeAndSims = (0,null);
     public (int,Sims) virusVolumeAndSims
     {

@@ -20,6 +20,7 @@ public class PlaceManager : MonoBehaviour
     public List<ResidentialPlace> residentialPlaces = new List<ResidentialPlace>();
     public List<OfficePlace> officePlaces = new List<OfficePlace>();
     public List<TestCenterPlace> testCenterPlaces = new List<TestCenterPlace>();
+    public List<QRTCentrePlace> qrtCentrePlaces = new List<QRTCentrePlace>();
     // public List<CommercialPlace> commercialPlaces = new List<CommercialPlace>();
 
     public InfoManager infoDebuggerManager;
@@ -48,6 +49,10 @@ public class PlaceManager : MonoBehaviour
         List<Vector2Int> offices = new List<Vector2Int>{
             new Vector2Int(12,6),new Vector2Int(12,10),new Vector2Int(12,14),
             new Vector2Int(27,6),new Vector2Int(27,10),new Vector2Int(27,14)};
+        
+        // List<Vector2Int> offices = new List<Vector2Int>{
+        //     new Vector2Int(12,6),new Vector2Int(12,10),new Vector2Int(12,14),
+        //     new Vector2Int(27,6),new Vector2Int(27,10),new Vector2Int(27,14)};
         this.placeFactory = placeFactoryObj.GetComponent<PlaceFactory>();
 
         foreach (var homePosition in homes){
@@ -124,6 +129,7 @@ public class PlaceManager : MonoBehaviour
                 );
             this.testCenterPlaces.Add(newTestCentre);
         }
+        
         OnPlaceSpwaned?.Invoke();
     }
     public OfficePlace GetRandomOffice(){
@@ -147,6 +153,13 @@ public class PlaceManager : MonoBehaviour
         int ret = 0;
         foreach(TestCenterPlace testCentre in testCenterPlaces){
             ret += testCentre.volume;
+        }
+        return ret;
+    }
+    public int GetAvailableQuarantieCentreSeats(){
+        int ret = 0;
+        foreach(QRTCentrePlace qtrCentre in qrtCentrePlaces){
+            ret += qtrCentre.volume;
         }
         return ret;
     }
@@ -177,6 +190,19 @@ public class PlaceManager : MonoBehaviour
                     cfeManager
                     );
                 this.medicalPlaces.Add(newMedicalPlace);
+                break;
+            }case PlaceMeta.PlaceType.QRTPlace:{
+                QRTCentrePlace newQRTCentre = this.placeFactory.CreateQRTCentre(
+                    buidableInfo.placeSize,
+                    cellPosition,
+                    mapManager,
+                    flowFieldRootObject,
+                    geoMapManagerObj,
+                    gridDebuggerManager,
+                    infoDebuggerManager,
+                    cfeManager
+                    );
+                this.qrtCentrePlaces.Add(newQRTCentre);
                 break;
             }
         }

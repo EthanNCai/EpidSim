@@ -48,7 +48,7 @@ public class BuildPanalUIManager : MonoBehaviour, IUIManager
     public void HandleBuildComplete(){
         HideUI();
         onBuildingUI.SetActive(false);
-        cameraShake.TriggerShake();
+        // cameraShake.TriggerShake();
         // CameraShake.TriggerShake();
     }
     public void InitUI()

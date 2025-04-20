@@ -17,6 +17,7 @@ public class InfoManager : MonoBehaviour{
 
     public NotificationManager notificationManager;
     public TestManager testManager;
+    public QRTManager qrtManager;
 
     int uidCounter = 0;
     List<GameObject> infoDebuggerRoots = new List<GameObject>();

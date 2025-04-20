@@ -125,14 +125,14 @@ public class TestManager : MonoBehaviour
         currentTestEvent.candidateSims.Remove(deadSim);
     }
 
-    public TestCenterPlace GetOrQueueTestPlace(Sims sim){
+    public TestCenterPlace GetOrQueueTestCandidate(Sims sim){
         foreach (var testCenterPlace in this.placeManager.testCenterPlaces)
         {
             if (testCenterPlace.CheckIsBookAvailable()){ return testCenterPlace; }
         }
         this.testQueue.Enqueue(sim);
         return null;
-    } 
+    }  
     public void HandleBookingReleased(TestCenterPlace testPlace){
         // 被通知有一个空位了
 
