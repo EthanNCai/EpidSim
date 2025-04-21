@@ -7,13 +7,15 @@ public enum PolicyTabs {
     None,
     Lockdown,
     CPRTest,
-    QRT
+    QRT,
+    EnvOB
 }
 
 public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
     public Button closeButton;
     public GameObject lockdownUI;
     public GameObject cprTestUI;
+    public GameObject envObUI;
     public GameObject qrtUI;
     
     private GameObject activeUI;
@@ -21,7 +23,7 @@ public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
 
     public Button lockdownButton;
     public Button cprTestButton;
-
+    public Button envObButton;
     public Button qrtButton;
 
 
@@ -36,6 +38,7 @@ public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
     public LockdownUIManager lockdownUIManager;
     public CPRTestUIManager cprTestUIManager;
     public QRTUIManager qrtUIManager;
+    public EnvOBUIManager envOBUIManager;
 
     void Start() {
         closeButton.onClick.AddListener(HideUI);
@@ -84,6 +87,13 @@ public class PolicyPanalUIManager : MonoBehaviour, IUIManager {
                 activeUI.SetActive(true);
                 activeButton.interactable = false;
                 qrtUIManager.UpdateUIInfos();
+                break;
+            case PolicyTabs.EnvOB:
+                activeUI = envObUI;
+                activeButton = envObButton;
+                activeUI.SetActive(true);
+                activeButton.interactable = false;
+                envOBUIManager.UpdateUIInfos();
                 break;
             default:
                 Debug.LogWarning("喵喵喵？未知 tab 被选中！");

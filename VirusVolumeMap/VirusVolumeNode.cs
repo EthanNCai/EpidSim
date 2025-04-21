@@ -39,6 +39,7 @@ public class VirusVolumeNode : IGridNode<VirusVolumeNode>
     public void HandelClicked()
     {
         // throw new System.NotImplementedException();
+        
     }
     public override string ToString()
     {
