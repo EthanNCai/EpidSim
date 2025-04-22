@@ -7,14 +7,15 @@ public class SimsDeadManager : MonoBehaviour
     public GameObject deadReprPrefab;
     public InfoManager infoManager;
     public SimsManager simsManager;
-
+    public int n_dead = 0;
     public bool isAnySimDeadBefore = false;
 
     // ✨ 添加一个静态事件喵，参数是死掉的 Sim 本体
     public static event Action<Sims> OnSimsDied;
 
     public void HandleSimsDie(Sims targetSim)
-    {
+    {   
+        n_dead += 1;
         // Debug.Log("Someone just died (｡•́︿•̀｡)");
         // Debug.Assert(targetSim.infectionStatus == InfectionStatus.Dead, "Bug here! This person not dead yet!");
         if(isAnySimDeadBefore == false){
@@ -38,7 +39,9 @@ public class SimsDeadManager : MonoBehaviour
         // 4. 开始淡出+生成纪念物+摧毁 GameObject
         StartCoroutine(FadeAndDestroy(targetSim));
     }
-
+    public int GetCurrentDeadCount(){
+        return n_dead;
+    }
     private IEnumerator FadeAndDestroy(Sims targetSim)
     {
         float duration = 1.5f;

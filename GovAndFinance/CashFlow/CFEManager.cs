@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -139,4 +140,39 @@ public class CFEManager : MonoBehaviour{
         }
         return stringBuilder.ToString();
     }   
+
+    public List<string> GetExpenseStringList()
+    {
+        List<string> expenseStrings = new List<string>();
+
+        foreach (var service in serviceCFEs)
+        {
+            string name = service.CFEName;
+            var (quart, day) = service.expenseItem.QGetExpense();
+            expenseStrings.Add($"{name} -{quart}/quart -{day}/day");
+        }
+
+        foreach (var policy in policyCFEs)
+        {
+            string name = policy.CFEName;
+            var (quart, day) = policy.expenseItem.QGetExpense();
+            expenseStrings.Add($"{name} -{quart}/quart -{day}/day");
+        }
+
+        return expenseStrings;
+    }
+
+    public List<string> GetContributeStringList()
+    {
+        List<string> contributeStrings = new List<string>();
+
+        foreach (var common in commonCFEs)
+        {
+            string name = common.CFEName;
+            var (quart, day) = common.contributeItem.QGetContribution();
+            contributeStrings.Add($"{name} +{quart}/quart +{day}/day");
+        }
+
+        return contributeStrings;
+    }
 }

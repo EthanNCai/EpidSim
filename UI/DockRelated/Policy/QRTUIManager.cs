@@ -42,7 +42,6 @@ public class QRTUIManager : MonoBehaviour
     // public TestPolicy testPolicy;
 
     void Start(){
-        
         qrtDurationType.ClearOptions();
         qrtDurationType.AddOptions(new System.Collections.Generic.List<string>(qrtLen));
         // 设置初始选项对应当前状态
@@ -64,7 +63,7 @@ public class QRTUIManager : MonoBehaviour
             Debug.LogWarning("喵？Dropdown 的 index 越界了，主人是不是点太快啦~");
         }
     }
-   public void UpdateUIInfos()
+    public void UpdateUIInfos()
     {
         // 更新文字状态信息
         int qrtQueueLen = this.qrtManager.qrtQueue.Count;
@@ -81,14 +80,11 @@ public class QRTUIManager : MonoBehaviour
         QRTMeta.QrtLenthType currentQrtType = this.qrtManager.GetQrtDurationType(); // 你要保证这个函数返回的是枚举类型
         int dropdownIndex = System.Array.IndexOf(qrtLen, currentQrtType.ToString());
 
-        if (dropdownIndex >= 0 && dropdownIndex < qrtDurationType.options.Count)
-        {
+        if (dropdownIndex >= 0 && dropdownIndex < qrtDurationType.options.Count){
             qrtDurationType.SetValueWithoutNotify(dropdownIndex); // 不触发回调
         }
-        else
-        {
+        else{
             Debug.LogWarning("呜呜，当前隔离时长状态居然不在 dropdown 里，哥哥是不是把配置弄坏啦！");
         }
     }
-
 }
