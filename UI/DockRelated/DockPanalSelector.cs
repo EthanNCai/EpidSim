@@ -6,7 +6,8 @@ public class DockPanalSelector: MonoBehaviour{
     public FinanceInfoUIManager financeInfoUIManager;
     public BuildPanalUIManager buildingUIBarManager;
     public PolicyPanalUIManager policyUIBarManager;
-    public OBUIBoardManager obUIBoardManager;
+    // public OBUIBoardManager obUIBoardManager;
+    public InfoBoardUIManager infoBoardUIManager;
     // other ui panals
 
     public void HandleClickFinanceButton(){
@@ -18,7 +19,7 @@ public class DockPanalSelector: MonoBehaviour{
     public void HandelClickPolicyButton(){
         policyUIBarManager.InitUI();
     }
-    public void HandleOBPolicyButton(){
-
+    public void HandleClickInfoButton(){
+        infoBoardUIManager.InitUI();
     }
 }

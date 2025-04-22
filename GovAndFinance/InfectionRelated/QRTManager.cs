@@ -57,4 +57,7 @@ public class QRTManager:MonoBehaviour{
         }
         return ret;
     }
+    public QRTMeta.QrtLenthType GetQrtDurationType(){
+        return this.qrtDurationType;
+    }
 }

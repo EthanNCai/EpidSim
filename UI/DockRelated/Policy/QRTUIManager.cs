@@ -36,18 +36,17 @@ public class QRTUIManager : MonoBehaviour
 
     // GameObjects
     
-    public TMP_Dropdown  qrtDurationTypeDropdown;
+    public TMP_Dropdown  qrtDurationType;
     public PlaceManager placeManager;
     private readonly string[] qrtLen = { "Short", "Long" };
     // public TestPolicy testPolicy;
 
     void Start(){
-        
-        qrtDurationTypeDropdown.ClearOptions();
-        qrtDurationTypeDropdown.AddOptions(new System.Collections.Generic.List<string>(qrtLen));
+        qrtDurationType.ClearOptions();
+        qrtDurationType.AddOptions(new System.Collections.Generic.List<string>(qrtLen));
         // 设置初始选项对应当前状态
         // lockdownLevelSelection.value = (int)lockDownManager.lockdownLevel;
-        qrtDurationTypeDropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+        qrtDurationType.onValueChanged.AddListener(OnDropdownValueChanged);
 
     }
 
@@ -66,11 +65,8 @@ public class QRTUIManager : MonoBehaviour
     }
     public void UpdateUIInfos()
     {
-        // 首先确定是否有正在进行的test
+        // 更新文字状态信息
         int qrtQueueLen = this.qrtManager.qrtQueue.Count;
-        
-        // 计算一下当前的
-        // testInstitutionStatement.text
         int qrtSeats = placeManager.GetAvailableQuarantieCentreSeats();
         int qtrCenters = placeManager.qrtCentrePlaces.Count;
         int citizenUnderQrts = this.qrtManager.GetCitizenUnderQuarantine();
@@ -80,5 +76,15 @@ public class QRTUIManager : MonoBehaviour
         this.availableQrtStatemnt.text = $"Available Quarantine Centres: {qtrCenters}";
         this.availableQrtSeatsStatement.text = $"Available Quarantine Seats: {qrtSeats}";
 
+        // 更新 Dropdown 的显示状态
+        QRTMeta.QrtLenthType currentQrtType = this.qrtManager.GetQrtDurationType(); // 你要保证这个函数返回的是枚举类型
+        int dropdownIndex = System.Array.IndexOf(qrtLen, currentQrtType.ToString());
+
+        if (dropdownIndex >= 0 && dropdownIndex < qrtDurationType.options.Count){
+            qrtDurationType.SetValueWithoutNotify(dropdownIndex); // 不触发回调
+        }
+        else{
+            Debug.LogWarning("呜呜，当前隔离时长状态居然不在 dropdown 里，哥哥是不是把配置弄坏啦！");
+        }
     }
 }

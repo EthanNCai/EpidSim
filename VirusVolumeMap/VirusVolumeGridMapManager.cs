@@ -16,6 +16,7 @@ public class VirusVolumeGridMapManager : MonoBehaviour
     public GameObject geoMapManagerObj;
     private GeoMapsManager geoMapManager;
     public GameObject virusVolumeVisualizerPrefab;
+    public EnvOBMeta.EnvOBStatus envObStatus = EnvOBMeta.EnvOBStatus.No;
 
     public void Awake(){
         this.virusVolumeMap = new GridNodeMap<VirusVolumeNode>(
@@ -43,7 +44,6 @@ public class VirusVolumeGridMapManager : MonoBehaviour
             }
         }
     }
-
 
     public void PolluteTheTile(Vector2Int cellPosition, Sims sims, int incomingVolume){
         VirusVolumeNode virusVolumeNode = this.virusVolumeMap.GetNodeByCellPosition(cellPosition);
@@ -80,5 +80,11 @@ public class VirusVolumeGridMapManager : MonoBehaviour
                 node.visualizer.GetComponent<VirusVolumnVisualizerController>().SetVolume(virusVolume);
             }
         }
+    }
+    public void SwitchEnvOb(EnvOBMeta.EnvOBStatus newStatus){
+        this.envObStatus = newStatus;
+    }
+    public EnvOBMeta.EnvOBStatus GetsEnvObStatus(){
+        return this.envObStatus;
     }
 }

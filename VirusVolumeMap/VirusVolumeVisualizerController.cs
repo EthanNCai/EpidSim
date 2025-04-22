@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 class VirusVolumnVisualizerController:MonoBehaviour{
 
     public SpriteRenderer spriteRenderer;
-    private int volume = 100;
+    private int volume = 0;
     private float fadeRatioPerQ = 0.05f;
 
     private float maxVol = 100f;
